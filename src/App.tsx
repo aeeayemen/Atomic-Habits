@@ -41,7 +41,10 @@ import { HabitModal } from './components/HabitModal';
 import { HabitDetailDrawer } from './components/HabitDetailDrawer';
 import { NotificationSettingsModal } from './components/NotificationSettingsModal';
 import { OnboardingTour } from './components/OnboardingTour';
-import { checkIsUserSubscribed } from './lib/pushService';
+import {
+  isLocalNotificationEnabled,
+  checkAndSendHabitReminder,
+} from './lib/localNotificationService';
 
 export function App() {
   // 1. حالة شاشة التحميل الترحيبية والمصادقة
@@ -144,11 +147,11 @@ export function App() {
           setSession(initialSession);
           setCurrentUser(initialSession.user);
           await loadUserData(initialSession.user.id);
-          checkIsUserSubscribed().then(setIsPushActive);
+          setIsPushActive(isLocalNotificationEnabled());
         } else {
           setSession(null);
           setCurrentUser(null);
-          setIsPushActive(false);
+          setIsPushActive(isLocalNotificationEnabled());
         }
       } catch (err) {
         console.error('Error checking initial auth session:', err);
@@ -168,12 +171,12 @@ export function App() {
       if (newUser) {
         setIsGuestMode(false);
         await loadUserData(newUser.id);
-        checkIsUserSubscribed().then(setIsPushActive);
+        setIsPushActive(isLocalNotificationEnabled());
       } else {
         // تم تسجيل الخروج
         setHabits([]);
         setAllLogs({});
-        setIsPushActive(false);
+        setIsPushActive(isLocalNotificationEnabled());
       }
     });
 
@@ -201,6 +204,26 @@ export function App() {
     soundManager.enabled = soundEnabled;
     saveSoundSetting(soundEnabled);
   }, [soundEnabled]);
+
+  // فحص وإطلاق تذكيرات العادات المحلية في المتصفح دورياً أثناء فتح التطبيق
+  useEffect(() => {
+    setIsPushActive(isLocalNotificationEnabled());
+
+    // فحص أولي بعد 2 ثانية من فتح التطبيق
+    const initialTimer = setTimeout(() => {
+      checkAndSendHabitReminder(habits, allLogs);
+    }, 2000);
+
+    // فحص دوري كل دقيقة واحدة في الخلفية داخل المتصفح
+    const intervalTimer = setInterval(() => {
+      checkAndSendHabitReminder(habits, allLogs);
+    }, 60 * 1000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalTimer);
+    };
+  }, [habits, allLogs]);
 
   // حفظ العادات محلياً وسحابياً للمستخدم الحالي
   const handleUpdateHabits = (newHabits: Habit[]) => {
@@ -565,14 +588,14 @@ export function App() {
         onDelete={handleDeleteHabit}
       />
 
-      {/* نافذة إعدادات وتفعيل التنبيهات Web Push */}
+      {/* نافذة إعدادات وتفعيل تنبيهات المتصفح المحلية */}
       <NotificationSettingsModal
         isOpen={isNotificationModalOpen}
         onClose={() => {
           setIsNotificationModalOpen(false);
-          checkIsUserSubscribed().then(setIsPushActive);
+          setIsPushActive(isLocalNotificationEnabled());
         }}
-        currentUser={currentUser}
+        onStatusChange={(enabled) => setIsPushActive(enabled)}
       />
 
       {/* الجولة الإرشادية التفاعلية مع شخصية شرارة */}
