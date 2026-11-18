@@ -10,9 +10,12 @@ import {
   FileUp,
   RefreshCw,
   Loader2,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
+import type { User } from '@supabase/supabase-js';
 
 interface HeaderProps {
   theme: 'dark' | 'light';
@@ -22,6 +25,9 @@ interface HeaderProps {
   onOpenNewHabitModal: () => void;
   onResetData: () => void;
   onDataImported: () => void;
+  currentUser?: User | null;
+  onSignOut?: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,6 +38,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNewHabitModal,
   onResetData,
   onDataImported,
+  currentUser,
+  onSignOut,
+  onOpenAuthModal,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -73,6 +82,10 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const userInitial = currentUser?.email
+    ? currentUser.email.charAt(0).toUpperCase()
+    : 'U';
+
   return (
     <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-[#2A5C9E]">
       {/* Brand Identity */}
@@ -99,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Control Actions */}
+      {/* Control Actions & User Profile */}
       <div className="flex items-center gap-2 flex-wrap">
         {/* زر كتم / تفعيل الصوت */}
         <button
@@ -170,11 +183,43 @@ export const Header: React.FC<HeaderProps> = ({
         {/* زر إضافة عادة جديدة */}
         <button
           onClick={onOpenNewHabitModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-[#00A896]/20 transition-all hover:scale-102 cursor-pointer mr-1"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-[#00A896]/20 transition-all hover:scale-102 cursor-pointer"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>عادة جديدة</span>
         </button>
+
+        {/* ملف المستخدم وقائمة تسجيل الخروج */}
+        {currentUser ? (
+          <div className="flex items-center gap-1.5 bg-[#0F2854]/90 dark:bg-[#0F2854] border border-[#2A5C9E] rounded-xl px-2.5 py-1.5 shadow-2xs">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#00A896] to-[#02C39A] text-white flex items-center justify-center text-xs font-black shadow-xs">
+              {userInitial}
+            </div>
+            <span
+              className="text-xs font-bold text-slate-200 max-w-[120px] truncate hidden md:inline-block"
+              title={currentUser.email}
+              dir="ltr"
+            >
+              {currentUser.email}
+            </span>
+            <button
+              onClick={onSignOut}
+              className="p-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/15 transition-colors cursor-pointer mr-1"
+              title="تسجيل الخروج"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onOpenAuthModal}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#00A896] bg-[#00A896]/10 text-[#00A896] dark:text-[#02C39A] hover:bg-[#00A896]/20 transition-colors text-xs font-bold cursor-pointer"
+            title="تسجيل الدخول / إنشاء حساب"
+          >
+            <LogIn className="w-4 h-4" />
+            <span>تسجيل الدخول</span>
+          </button>
+        )}
       </div>
     </header>
   );

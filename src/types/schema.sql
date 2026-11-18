@@ -1,12 +1,15 @@
 -- ==============================================================================
--- ATOMIC HABITS - SUPABASE SQL SCHEMA & TABLES
--- انسخ هذا الكود والصقه في SQL Editor في Supabase ثم اضغط Run
+-- ATOMIC HABITS - MULTI-TENANT SUPABASE SQL SCHEMA (ROW-LEVEL SECURITY)
+-- قم بنسخ هذا الملف كاملاً ولصقه في Supabase SQL Editor ثم اضغط RUN
 -- ==============================================================================
 
--- 1. إنشاء جدول العادات (Habits)
+-- 1. تفعيل الامتدادات الضرورية
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 2. إنشاء جدول العادات (Habits) المرتبط بالمستخدم
 CREATE TABLE IF NOT EXISTS public.habits (
   id TEXT PRIMARY KEY,
-  user_id UUID DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
   name VARCHAR(255) NOT NULL,
   category VARCHAR(64) NOT NULL DEFAULT 'health',
   identity TEXT NOT NULL,
@@ -24,119 +27,167 @@ CREATE TABLE IF NOT EXISTS public.habits (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. إنشاء جدول سجلات الإنجاز اليومية (Habit Logs)
+-- في حال كان الجدول موجوداً مسبقاً، نضمن وجود عمود user_id وربطه
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'habits' AND column_name = 'user_id'
+  ) THEN
+    ALTER TABLE public.habits ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+  END IF;
+END $$;
+
+-- 3. إنشاء جدول سجلات الإنجاز اليومية (Habit Logs) المرتبط بالمستخدم والعادة
 CREATE TABLE IF NOT EXISTS public.habit_logs (
   id TEXT PRIMARY KEY,
   habit_id TEXT NOT NULL REFERENCES public.habits(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
   date TEXT NOT NULL, -- صيغة YYYY-MM-DD
   status VARCHAR(32) NOT NULL DEFAULT 'neutral', -- done, missed, neutral
   notes TEXT,
   logged_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT uq_habit_date UNIQUE (habit_id, date)
+  CONSTRAINT uq_habit_date_user UNIQUE (habit_id, date, user_id)
 );
 
--- 3. إنشاء الفهارس لسرعة الاستعلام اللحظي
-CREATE INDEX IF NOT EXISTS idx_habits_category ON public.habits(category);
-CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON public.habit_logs(date);
-CREATE INDEX IF NOT EXISTS idx_habit_logs_lookup ON public.habit_logs(habit_id, date, status);
+-- في حال كان الجدول موجوداً مسبقاً، نضمن وجود عمود user_id
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'habit_logs' AND column_name = 'user_id'
+  ) THEN
+    ALTER TABLE public.habit_logs ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+  END IF;
+END $$;
 
--- 4. تفعيل سياسات الأمان والحماية (Row Level Security - RLS)
+-- 4. إنشاء الفهارس لسرعة استعلام بيانات المستخدم
+CREATE INDEX IF NOT EXISTS idx_habits_user_id ON public.habits(user_id);
+CREATE INDEX IF NOT EXISTS idx_habits_category ON public.habits(category);
+CREATE INDEX IF NOT EXISTS idx_habit_logs_user_id ON public.habit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON public.habit_logs(date);
+CREATE INDEX IF NOT EXISTS idx_habit_logs_lookup ON public.habit_logs(habit_id, date, user_id);
+
+-- 5. تفعيل حماية الصفوف (Row Level Security - RLS)
 ALTER TABLE public.habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.habit_logs ENABLE ROW LEVEL SECURITY;
 
--- 5. إنشاء سياسات الوصول العام للقراءة والإدخال والتعديل والحذف
+-- 6. حذف السياسات القديمة إن وجدت وتطبيق سياسات عزل المستخدمين الصارمة
 DROP POLICY IF EXISTS "Allow public read access on habits" ON public.habits;
-CREATE POLICY "Allow public read access on habits" ON public.habits FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Allow public insert access on habits" ON public.habits;
-CREATE POLICY "Allow public insert access on habits" ON public.habits FOR INSERT WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Allow public update access on habits" ON public.habits;
-CREATE POLICY "Allow public update access on habits" ON public.habits FOR UPDATE USING (true);
-
 DROP POLICY IF EXISTS "Allow public delete access on habits" ON public.habits;
-CREATE POLICY "Allow public delete access on habits" ON public.habits FOR DELETE USING (true);
-
 DROP POLICY IF EXISTS "Allow public read access on habit_logs" ON public.habit_logs;
-CREATE POLICY "Allow public read access on habit_logs" ON public.habit_logs FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Allow public insert access on habit_logs" ON public.habit_logs;
-CREATE POLICY "Allow public insert access on habit_logs" ON public.habit_logs FOR INSERT WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Allow public update access on habit_logs" ON public.habit_logs;
-CREATE POLICY "Allow public update access on habit_logs" ON public.habit_logs FOR UPDATE USING (true);
-
 DROP POLICY IF EXISTS "Allow public delete access on habit_logs" ON public.habit_logs;
-CREATE POLICY "Allow public delete access on habit_logs" ON public.habit_logs FOR DELETE USING (true);
+DROP POLICY IF EXISTS "Users can only access their own habits" ON public.habits;
+DROP POLICY IF EXISTS "Users can only access their own logs" ON public.habit_logs;
+DROP POLICY IF EXISTS "Users can manage their own habits" ON public.habits;
+DROP POLICY IF EXISTS "Users can manage their own logs" ON public.habit_logs;
 
--- 6. إضافة العادات الذرية النموذجية الأولية
-INSERT INTO public.habits (id, name, category, identity, cue, routine, two_minute_rule, reward, color)
-VALUES
-  (
-    'habit-1',
-    'جلسة عمل عميق (90 دقيقة)',
-    'deep_work',
-    'أنا مهندس برمجيات ذو أثر عالٍ وتفكير استراتيجي عميق.',
-    'بعد شرب قهوة الصباح وإغلاق Slack والبريد تماماً.',
-    'ارتداء سماعات عزل الضوضاء والتركيز على التحدي البرمجي الأساسي دون تشتت.',
-    'فتح بيئة التطوير وكتابة السطر الأول فقط.',
-    'استراحة شاي منعشة لمدة 10 دقائق وتسجيل تقدم السلسلة.',
-    '#3b82f6'
-  ),
-  (
-    'habit-2',
-    'رفع كود يومي (Git Commit)',
-    'code',
-    'أنا مطوّر بنّاء يضيف قيمة برمجية تراكمية ومستمرة كل يوم.',
-    'الساعة 11:30 صباحاً قبل التوجه لوجبة الغداء.',
-    'إعادة تحسين الكود وكتابة اختبارات نظيفة، ثم عمل Commit واضح ورفعه إلى GitHub.',
-    'مراجعة التغييرات (Git diff) وحفظ تعديل صغير واحد.',
-    'رؤية المربع الأخضر يضيء في سجل مساهمات GitHub.',
-    '#00A896'
-  ),
-  (
-    'habit-3',
-    'تمارين لياقة / كارديو (45 دقيقة)',
-    'fitness',
-    'أنا رياضي أتمتع بطاقة استثنائية وجسد صحي قوي ومقاوم للإجهاد.',
-    'الساعة 5:30 مساءً بمجرد إغلاق حاسوب العمل.',
-    '45 دقيقة من تمارين الكارديو، الجري، أو رفع الأثقال في الصالة الرياضية.',
-    'ارتداء شورت التمرين وربط حذاء الرياضة فوراً.',
-    'دش بارد منعش ومشروب بروتين وشعور عارم بالنشاط.',
-    '#f97316'
-  ),
-  (
-    'habit-4',
-    'قراءة 15 صفحة من كتاب مفيد',
-    'reading',
-    'أنا طالب علم دائم التطوير ومراكمة النماذج الفكرية والمعرفية.',
-    'بعد تناول وجبة العشاء ووضع الهاتف المحمول على الشاحن في غرفة أخرى.',
-    'الجلوس في ركن القراءة الهادئ مع كتاب ورقي وقلم تمييز الفوائد.',
-    'فتح الكتاب عند الفاصل وقراءة فقرة واحدة فقط.',
-    'تدوين فكرة جوهرية واحدة في مفكرتي الذهبية.',
-    '#ec4899'
-  ),
-  (
-    'habit-5',
-    'هدوء ذهني وتأمل وامتنان',
-    'mind',
-    'أنا شخص هادئ، واثق، ومتحكم بقراراته وسلوكه اليومي.',
-    'فور النهوض من الفراش صباحاً قبل النظر في أي شاشة إلكترونية.',
-    '10 دقائق من التنفس العميق المريح، وتدوين 3 نعم ومشاعر امتنان لليوم.',
-    'إغماض العينين وأخذ 3 أنفاس عميقة واعية.',
-    'سلام داخلي وذهن صافٍ مستعد لليوم الجديد.',
-    '#8b5cf6'
-  ),
-  (
-    'habit-6',
-    'شرب 3 لترات ماء نقية',
-    'health',
-    'أنا أعتني بصحتي الخلوية ونشاطي الذهني وصفاء طاقتي اليومية.',
-    'إبقاء قارورة ماء سعة 1 لتر ممتلئة أمامي على المكتب طوال الوقت.',
-    'إنهاء الزجاجة الأولى قبل 11 ص، والثانية قبل 3 م، والثالثة قبل 7 م.',
-    'شرب كأس ماء بارد الآن في هذه اللحظة.',
-    'نشاط وحيوية متجددة وتجنب خمول بعد الظهر.',
-    '#00A896'
-  )
-ON CONFLICT (id) DO NOTHING;
+-- سياسة جدول العادات: يسمح للمستخدم المسجل فقط بالوصول لعاداته
+CREATE POLICY "Users can manage their own habits"
+  ON public.habits
+  FOR ALL
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- سياسة جدول السجلات: يسمح للمستخدم المسجل فقط بالوصول لسجلاته
+CREATE POLICY "Users can manage their own logs"
+  ON public.habit_logs
+  FOR ALL
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- 7. مشغل تلقائي (Trigger): إدراج العادات الذرية النموذجية تلقائياً لأي مستخدم جديد فور تسجيل حسابه
+CREATE OR REPLACE FUNCTION public.handle_new_user_starter_habits()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.habits (id, user_id, name, category, identity, cue, routine, two_minute_rule, reward, color)
+  VALUES
+    (
+      'habit-1-' || NEW.id,
+      NEW.id,
+      'جلسة عمل عميق (90 دقيقة)',
+      'deep_work',
+      'أنا مهندس برمجيات ذو أثر عالٍ وتفكير استراتيجي عميق.',
+      'بعد شرب قهوة الصباح وإغلاق Slack والبريد تماماً.',
+      'ارتداء سماعات عزل الضوضاء والتركيز على التحدي البرمجي الأساسي دون تشتت.',
+      'فتح بيئة التطوير وكتابة السطر الأول فقط.',
+      'استراحة شاي منعشة لمدة 10 دقائق وتسجيل تقدم السلسلة.',
+      '#3b82f6'
+    ),
+    (
+      'habit-2-' || NEW.id,
+      NEW.id,
+      'رفع كود يومي (Git Commit)',
+      'code',
+      'أنا مطوّر بنّاء يضيف قيمة برمجية تراكمية ومستمرة كل يوم.',
+      'الساعة 11:30 صباحاً قبل التوجه لوجبة الغداء.',
+      'إعادة تحسين الكود وكتابة اختبارات نظيفة، ثم عمل Commit واضح ورفعه إلى GitHub.',
+      'مراجعة التغييرات (Git diff) وحفظ تعديل صغير واحد.',
+      'رؤية المربع الأخضر يضيء في سجل مساهمات GitHub.',
+      '#00A896'
+    ),
+    (
+      'habit-3-' || NEW.id,
+      NEW.id,
+      'تمارين لياقة / كارديو (45 دقيقة)',
+      'fitness',
+      'أنا رياضي أتمتع بطاقة استثنائية وجسد صحي قوي ومقاوم للإجهاد.',
+      'الساعة 5:30 مساءً بمجرد إغلاق حاسوب العمل.',
+      '45 دقيقة من تمارين الكارديو، الجري، أو رفع الأثقال في الصالة الرياضية.',
+      'ارتداء شورت التمرين وربط حذاء الرياضة فوراً.',
+      'دش بارد منعش ومشروب بروتين وشعور عارم بالنشاط.',
+      '#f97316'
+    ),
+    (
+      'habit-4-' || NEW.id,
+      NEW.id,
+      'قراءة 15 صفحة من كتاب مفيد',
+      'reading',
+      'أنا طالب علم دائم التطوير ومراكمة النماذج الفكرية والمعرفية.',
+      'بعد تناول وجبة العشاء ووضع الهاتف المحمول على الشاحن في غرفة أخرى.',
+      'الجلوس في ركن القراءة الهادئ مع كتاب ورقي وقلم تمييز الفوائد.',
+      'فتح الكتاب عند الفاصل وقراءة فقرة واحدة فقط.',
+      'تدوين فكرة جوهرية واحدة في مفكرتي الذهبية.',
+      '#ec4899'
+    ),
+    (
+      'habit-5-' || NEW.id,
+      NEW.id,
+      'هدوء ذهني وتأمل وامتنان',
+      'mind',
+      'أنا شخص هادئ، واثق، ومتحكم بقراراته وسلوكه اليومي.',
+      'فور النهوض من الفراش صباحاً قبل النظر في أي شاشة إلكترونية.',
+      '10 دقائق من التنفس العميق المريح، وتدوين 3 نعم ومشاعر امتنان لليوم.',
+      'إغماض العينين وأخذ 3 أنفاس عميقة واعية.',
+      'سلام داخلي وذهن صافٍ مستعد لليوم الجديد.',
+      '#8b5cf6'
+    ),
+    (
+      'habit-6-' || NEW.id,
+      NEW.id,
+      'شرب 3 لترات ماء نقية',
+      'health',
+      'أنا أعتني بصحتي الخلوية ونشاطي الذهني وصفاء طاقتي اليومية.',
+      'إبقاء قارورة ماء سعة 1 لتر ممتلئة أمامي على المكتب طوال الوقت.',
+      'إنهاء الزجاجة الأولى قبل 11 ص، والثانية قبل 3 م، والثالثة قبل 7 م.',
+      'شرب كأس ماء بارد الآن في هذه اللحظة.',
+      'نشاط وحيوية متجددة وتجنب خمول بعد الظهر.',
+      '#00A896'
+    )
+  ON CONFLICT DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ربط المشغل بجدول مستخدمي Supabase Auth
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_starter_habits();

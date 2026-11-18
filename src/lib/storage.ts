@@ -1,5 +1,5 @@
 import type { Habit, HabitLog } from '../types/habit';
-import { generateInitialLogs, INITIAL_HABITS } from './initialData';
+import { INITIAL_HABITS } from './initialData';
 
 const HABITS_STORAGE_KEY = 'atomic_habits_data_ar_v2';
 const LOGS_STORAGE_KEY = 'atomic_habits_logs_ar_v2';
@@ -11,39 +11,47 @@ export interface StorageData {
   logs: Record<string, HabitLog>;
 }
 
-export function loadStoredHabits(): Habit[] {
+function getHabitsKey(userId?: string): string {
+  return userId ? `${HABITS_STORAGE_KEY}_${userId}` : HABITS_STORAGE_KEY;
+}
+
+function getLogsKey(userId?: string): string {
+  return userId ? `${LOGS_STORAGE_KEY}_${userId}` : LOGS_STORAGE_KEY;
+}
+
+export function loadStoredHabits(userId?: string): Habit[] {
   if (typeof window === 'undefined') return INITIAL_HABITS;
   try {
-    const raw = localStorage.getItem(HABITS_STORAGE_KEY);
+    const key = getHabitsKey(userId);
+    const raw = localStorage.getItem(key);
     if (!raw) {
-      saveHabits(INITIAL_HABITS);
-      return INITIAL_HABITS;
+      return [];
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_HABITS;
+    return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
     console.error('Failed to load habits from storage:', err);
-    return INITIAL_HABITS;
+    return [];
   }
 }
 
-export function saveHabits(habits: Habit[]): void {
+export function saveHabits(habits: Habit[], userId?: string): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(habits));
+    const key = getHabitsKey(userId);
+    localStorage.setItem(key, JSON.stringify(habits));
   } catch (err) {
     console.error('Failed to save habits to storage:', err);
   }
 }
 
-export function loadStoredLogs(): Record<string, HabitLog> {
+export function loadStoredLogs(userId?: string): Record<string, HabitLog> {
   if (typeof window === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(LOGS_STORAGE_KEY);
+    const key = getLogsKey(userId);
+    const raw = localStorage.getItem(key);
     if (!raw) {
-      const initialLogs = generateInitialLogs(INITIAL_HABITS);
-      saveLogs(initialLogs);
-      return initialLogs;
+      return {};
     }
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === 'object' ? parsed : {};
@@ -53,10 +61,11 @@ export function loadStoredLogs(): Record<string, HabitLog> {
   }
 }
 
-export function saveLogs(logs: Record<string, HabitLog>): void {
+export function saveLogs(logs: Record<string, HabitLog>, userId?: string): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+    const key = getLogsKey(userId);
+    localStorage.setItem(key, JSON.stringify(logs));
   } catch (err) {
     console.error('Failed to save logs to storage:', err);
   }

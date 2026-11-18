@@ -12,6 +12,7 @@ export type HabitCategory =
 export interface HabitLog {
   id: string;
   habitId: string;
+  userId?: string;
   date: string; // YYYY-MM-DD
   status: HabitStatus;
   updatedAt: string; // Exact ISO timestamp: 2026-11-18T16:30:00.000Z
@@ -20,6 +21,7 @@ export interface HabitLog {
 
 export interface Habit {
   id: string;
+  userId?: string;
   name: string;
   category: HabitCategory;
   identity: string; // "Why" statement e.g. "I am a high-leverage software engineer"

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import type { Habit, HabitCategory, HabitLog, HabitStatus } from './types/habit';
 import {
@@ -17,15 +17,21 @@ import { soundManager } from './lib/sound';
 import { calculateStreakStats } from './lib/streak';
 import {
   isSupabaseConfigured,
+  getAuthSession,
+  onAuthChange,
+  signOutUser,
   fetchHabitsFromSupabase,
   fetchLogsFromSupabase,
   upsertHabitToSupabase,
   deleteHabitFromSupabase,
   upsertLogToSupabase,
+  seedInitialHabitsForUser,
 } from './lib/supabase';
+import type { Session, User } from '@supabase/supabase-js';
 
 // المكونات التفاعلية
 import { LoadingScreen } from './components/LoadingScreen';
+import { AuthScreen } from './components/AuthScreen';
 import { Header } from './components/Header';
 import { MetricsSummary } from './components/MetricsSummary';
 import { NeverMissTwiceBanner } from './components/NeverMissTwiceBanner';
@@ -35,8 +41,12 @@ import { HabitModal } from './components/HabitModal';
 import { HabitDetailDrawer } from './components/HabitDetailDrawer';
 
 export function App() {
-  // 1. حالة شاشة التحميل الترحيبية
+  // 1. حالة شاشة التحميل الترحيبية والمصادقة
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [, setSession] = useState<Session | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   // 2. حالة الإعدادات والمظهر
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -53,9 +63,9 @@ export function App() {
 
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => loadSoundSetting());
 
-  // 3. حالة البيانات
-  const [habits, setHabits] = useState<Habit[]>(() => loadStoredHabits());
-  const [allLogs, setAllLogs] = useState<Record<string, HabitLog>>(() => loadStoredLogs());
+  // 3. حالة البيانات (العادات والسجلات)
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [allLogs, setAllLogs] = useState<Record<string, HabitLog>>({});
 
   // 4. حالة التصفح والتنقل
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
@@ -68,32 +78,100 @@ export function App() {
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null);
 
-  // مزامنة البيانات مع Supabase عند التشغيل إذا كان مربوطاً
-  useEffect(() => {
-    if (!isSupabaseConfigured) return;
+  // دالة تحميل وتنسيق بيانات المستخدم (من السحابة أو التخزين المؤقت المحلي)
+  const loadUserData = useCallback(async (userId: string) => {
+    // 1. تحميل سريع من الكاش المحلي للمستخدم أولاً
+    const cachedHabits = loadStoredHabits(userId);
+    const cachedLogs = loadStoredLogs(userId);
 
-    async function syncFromCloud() {
+    if (cachedHabits.length > 0) {
+      setHabits(cachedHabits);
+      setAllLogs(cachedLogs);
+    }
+
+    // 2. مزامنة كاملة من Supabase
+    if (isSupabaseConfigured) {
       try {
         const [cloudHabits, cloudLogs] = await Promise.all([
-          fetchHabitsFromSupabase(),
-          fetchLogsFromSupabase(),
+          fetchHabitsFromSupabase(userId),
+          fetchLogsFromSupabase(userId),
         ]);
 
         if (cloudHabits && cloudHabits.length > 0) {
           setHabits(cloudHabits);
-          saveHabits(cloudHabits);
+          saveHabits(cloudHabits, userId);
+        } else if (!cachedHabits || cachedHabits.length === 0) {
+          // حساب جديد بدون عادات: نزرع له العادات النموذجية
+          const starter = await seedInitialHabitsForUser(userId);
+          setHabits(starter);
+          saveHabits(starter, userId);
         }
-        if (cloudLogs && Object.keys(cloudLogs).length > 0) {
+
+        if (cloudLogs) {
           setAllLogs(cloudLogs);
-          saveLogs(cloudLogs);
+          saveLogs(cloudLogs, userId);
         }
       } catch (err) {
-        console.error('Initial Supabase sync error:', err);
+        console.error('Error synchronizing user data from Supabase:', err);
+      }
+    } else {
+      if (cachedHabits.length === 0) {
+        setHabits(INITIAL_HABITS);
+        saveHabits(INITIAL_HABITS, userId);
+        const initLogs = generateInitialLogs(INITIAL_HABITS);
+        setAllLogs(initLogs);
+        saveLogs(initLogs, userId);
+      }
+    }
+  }, []);
+
+  // الاستماع لحالة المصادقة ومزامنة الجلسة العالمية
+  useEffect(() => {
+    let isMounted = true;
+
+    async function initAuth() {
+      try {
+        const initialSession = await getAuthSession();
+        if (!isMounted) return;
+
+        if (initialSession && initialSession.user) {
+          setSession(initialSession);
+          setCurrentUser(initialSession.user);
+          await loadUserData(initialSession.user.id);
+        } else {
+          setSession(null);
+          setCurrentUser(null);
+        }
+      } catch (err) {
+        console.error('Error checking initial auth session:', err);
+      } finally {
+        if (isMounted) setIsAuthChecking(false);
       }
     }
 
-    syncFromCloud();
-  }, []);
+    initAuth();
+
+    // الاشتراك في مستمع تغيرات المصادقة (دخول، خروج، انتهاء التوكن)
+    const { unsubscribe } = onAuthChange(async (newSession, newUser) => {
+      if (!isMounted) return;
+      setSession(newSession);
+      setCurrentUser(newUser);
+
+      if (newUser) {
+        setIsGuestMode(false);
+        await loadUserData(newUser.id);
+      } else {
+        // تم تسجيل الخروج
+        setHabits([]);
+        setAllLogs({});
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [loadUserData]);
 
   // مزامنة المظهر المظلم / الفاتح مع وثيقة HTML بشكل فوري وموثوق
   useEffect(() => {
@@ -114,16 +192,52 @@ export function App() {
     saveSoundSetting(soundEnabled);
   }, [soundEnabled]);
 
-  // حفظ العادات محلياً وسحابياً
+  // حفظ العادات محلياً وسحابياً للمستخدم الحالي
   const handleUpdateHabits = (newHabits: Habit[]) => {
     setHabits(newHabits);
-    saveHabits(newHabits);
+    saveHabits(newHabits, currentUser?.id);
   };
 
-  // حفظ السجلات محلياً وسحابياً
+  // حفظ السجلات محلياً وسحابياً للمستخدم الحالي
   const handleUpdateLogs = (newLogs: Record<string, HabitLog>) => {
     setAllLogs(newLogs);
-    saveLogs(newLogs);
+    saveLogs(newLogs, currentUser?.id);
+  };
+
+  // معالجة تسجيل الخروج السلس
+  const handleSignOut = async () => {
+    if (confirm('هل أنت متأكد من رغبتك في تسجيل الخروج؟')) {
+      await signOutUser();
+      setSession(null);
+      setCurrentUser(null);
+      setIsGuestMode(false);
+      setHabits([]);
+      setAllLogs({});
+    }
+  };
+
+  // بدء وضع الزائر للتجربة السريعة المحلية
+  const handleContinueAsGuest = () => {
+    setIsGuestMode(true);
+    const guestHabits = loadStoredHabits('guest');
+    if (guestHabits.length > 0) {
+      setHabits(guestHabits);
+      setAllLogs(loadStoredLogs('guest'));
+    } else {
+      setHabits(INITIAL_HABITS);
+      saveHabits(INITIAL_HABITS, 'guest');
+      const initLogs = generateInitialLogs(INITIAL_HABITS);
+      setAllLogs(initLogs);
+      saveLogs(initLogs, 'guest');
+    }
+  };
+
+  // نجاح تسجيل الدخول من شاشة المصادقة
+  const handleAuthSuccess = async (user: User, userSession: Session) => {
+    setCurrentUser(user);
+    setSession(userSession);
+    setIsGuestMode(false);
+    await loadUserData(user.id);
   };
 
   // احتساب أعمدة التواريخ
@@ -151,12 +265,13 @@ export function App() {
     });
   }, [habits, selectedCategory, searchQuery]);
 
-  // تبديل حالة السجل اليومي (استجابة فورية بدون أي تأخير + مزامنة سحابية)
+  // تبديل حالة السجل اليومي (استجابة فورية 0 ثانية + مزامنة سحابية خاصة بالمستخدم)
   const handleToggleLog = (habitId: string, date: string, nextStatus: HabitStatus) => {
     const logId = `${habitId}_${date}`;
     const updatedLog: HabitLog = {
       id: logId,
       habitId,
+      userId: currentUser?.id,
       date,
       status: nextStatus,
       updatedAt: new Date().toISOString(),
@@ -169,9 +284,9 @@ export function App() {
 
     handleUpdateLogs(nextLogs);
 
-    // مزامنة سحابية غير معطلة للواجهة (Background Sync)
-    if (isSupabaseConfigured) {
-      upsertLogToSupabase(updatedLog).catch(() => {});
+    // مزامنة سحابية خلفية معزولة للمستخدم
+    if (isSupabaseConfigured && currentUser) {
+      upsertLogToSupabase(updatedLog, currentUser.id).catch(() => {});
     }
 
     // احتفال بالمفرقعات عند بلوغ أرقام قياسية في السلسلة
@@ -199,14 +314,15 @@ export function App() {
       const logEntry: HabitLog = {
         id: logId,
         habitId: h.id,
+        userId: currentUser?.id,
         date: todayStr,
         status: 'done',
         updatedAt: new Date().toISOString(),
       };
       nextLogs[logId] = logEntry;
 
-      if (isSupabaseConfigured) {
-        upsertLogToSupabase(logEntry).catch(() => {});
+      if (isSupabaseConfigured && currentUser) {
+        upsertLogToSupabase(logEntry, currentUser.id).catch(() => {});
       }
     });
 
@@ -238,22 +354,27 @@ export function App() {
     setAnchorDate(new Date());
   };
 
-  // إدارة العادات
+  // حفظ العادة (إضافة جديدة أو تعديل)
   const handleSaveHabit = (habitData: Partial<Habit>) => {
     if (editingHabit) {
-      const updatedHabit = { ...editingHabit, ...habitData } as Habit;
+      const updatedHabit = {
+        ...editingHabit,
+        ...habitData,
+        userId: currentUser?.id,
+      } as Habit;
       const updated = habits.map((h) =>
         h.id === editingHabit.id ? updatedHabit : h
       );
       handleUpdateHabits(updated);
       setEditingHabit(null);
 
-      if (isSupabaseConfigured) {
-        upsertHabitToSupabase(updatedHabit).catch(() => {});
+      if (isSupabaseConfigured && currentUser) {
+        upsertHabitToSupabase(updatedHabit, currentUser.id).catch(() => {});
       }
     } else {
       const newHabit: Habit = {
         id: `habit-${Date.now()}`,
+        userId: currentUser?.id,
         name: habitData.name || 'عادة جديدة',
         category: habitData.category || 'health',
         identity: habitData.identity || 'أنا شخص ملتزم ومستمر يومياً.',
@@ -272,8 +393,8 @@ export function App() {
       handleUpdateHabits([...habits, newHabit]);
       soundManager.playCelebration();
 
-      if (isSupabaseConfigured) {
-        upsertHabitToSupabase(newHabit).catch(() => {});
+      if (isSupabaseConfigured && currentUser) {
+        upsertHabitToSupabase(newHabit, currentUser.id).catch(() => {});
       }
     }
   };
@@ -282,8 +403,8 @@ export function App() {
     const remaining = habits.filter((h) => h.id !== habitId);
     handleUpdateHabits(remaining);
 
-    if (isSupabaseConfigured) {
-      deleteHabitFromSupabase(habitId).catch(() => {});
+    if (isSupabaseConfigured && currentUser) {
+      deleteHabitFromSupabase(habitId, currentUser.id).catch(() => {});
     }
   };
 
@@ -294,22 +415,32 @@ export function App() {
       handleUpdateLogs(initialLogs);
       soundManager.playCelebration();
 
-      if (isSupabaseConfigured) {
-        INITIAL_HABITS.forEach((h) => upsertHabitToSupabase(h).catch(() => {}));
-        Object.values(initialLogs).forEach((l) => upsertLogToSupabase(l).catch(() => {}));
+      if (isSupabaseConfigured && currentUser) {
+        INITIAL_HABITS.forEach((h) => upsertHabitToSupabase(h, currentUser.id).catch(() => {}));
+        Object.values(initialLogs).forEach((l) => upsertLogToSupabase(l, currentUser.id).catch(() => {}));
       }
     }
   };
 
+  // التحقق المبدئي من الجلسة أو انتهاء شاشة الترحيب
+  if (isLoading) {
+    return <LoadingScreen onLoaded={() => setIsLoading(false)} minDuration={850} />;
+  }
+
+  // إذا لم يكن المستخدم مسجلاً ولم يختر وضع الزائر، نعرض صفحة تسجيل الدخول / إنشاء الحساب
+  if (!currentUser && !isGuestMode && !isAuthChecking) {
+    return (
+      <AuthScreen
+        onAuthSuccess={handleAuthSuccess}
+        onContinueAsGuest={handleContinueAsGuest}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0F2854] text-slate-900 dark:text-[#F8FAFC] transition-colors duration-200">
-      {/* شاشة التحميل الاحترافية بنفس الشعار */}
-      {isLoading && (
-        <LoadingScreen onLoaded={() => setIsLoading(false)} minDuration={850} />
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* الترويسة الرئيسية */}
+        {/* الترويسة الرئيسية مع بيانات المستخدم وأزرار التحكم */}
         <Header
           theme={theme}
           onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
@@ -321,9 +452,16 @@ export function App() {
           }}
           onResetData={handleResetData}
           onDataImported={() => {
-            setHabits(loadStoredHabits());
-            setAllLogs(loadStoredLogs());
+            if (currentUser) {
+              loadUserData(currentUser.id);
+            } else {
+              setHabits(loadStoredHabits('guest'));
+              setAllLogs(loadStoredLogs('guest'));
+            }
           }}
+          currentUser={currentUser}
+          onSignOut={handleSignOut}
+          onOpenAuthModal={() => setIsGuestMode(false)}
         />
 
         {/* بطاقات الإحصائيات الفورية */}
@@ -379,7 +517,7 @@ export function App() {
             — جيمس كلير، <span className="font-bold text-slate-700 dark:text-[#F8FAFC]">كتاب العادات الذرية (Atomic Habits)</span>
           </p>
           <p className="text-[11px] text-slate-400 dark:text-[#94A3B8]/80 mt-1">
-            مبني بمعمارية Local-First فائقة السرعة استجابة 0 ثانية · توثيق زمني دقيق · مزامنة سحابية Supabase · تصدير واستيراد Word (.docx)
+            مبني بمعمارية Local-First فائقة السرعة استجابة 0 ثانية · مصادقة ومزامنة آمنة Supabase Auth · نظام متعدد المستخدمين RLS · تصدير واستيراد Word (.docx)
           </p>
         </footer>
       </div>
