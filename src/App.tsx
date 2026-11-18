@@ -15,6 +15,14 @@ import { INITIAL_HABITS, generateInitialLogs } from './lib/initialData';
 import { formatISODate, getWeekColumns, getRollingDays } from './lib/utils';
 import { soundManager } from './lib/sound';
 import { calculateStreakStats } from './lib/streak';
+import {
+  isSupabaseConfigured,
+  fetchHabitsFromSupabase,
+  fetchLogsFromSupabase,
+  upsertHabitToSupabase,
+  deleteHabitFromSupabase,
+  upsertLogToSupabase,
+} from './lib/supabase';
 
 // المكونات التفاعلية
 import { LoadingScreen } from './components/LoadingScreen';
@@ -60,6 +68,33 @@ export function App() {
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null);
 
+  // مزامنة البيانات مع Supabase عند التشغيل إذا كان مربوطاً
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    async function syncFromCloud() {
+      try {
+        const [cloudHabits, cloudLogs] = await Promise.all([
+          fetchHabitsFromSupabase(),
+          fetchLogsFromSupabase(),
+        ]);
+
+        if (cloudHabits && cloudHabits.length > 0) {
+          setHabits(cloudHabits);
+          saveHabits(cloudHabits);
+        }
+        if (cloudLogs && Object.keys(cloudLogs).length > 0) {
+          setAllLogs(cloudLogs);
+          saveLogs(cloudLogs);
+        }
+      } catch (err) {
+        console.error('Initial Supabase sync error:', err);
+      }
+    }
+
+    syncFromCloud();
+  }, []);
+
   // مزامنة المظهر المظلم / الفاتح مع وثيقة HTML بشكل فوري وموثوق
   useEffect(() => {
     const root = document.documentElement;
@@ -79,13 +114,13 @@ export function App() {
     saveSoundSetting(soundEnabled);
   }, [soundEnabled]);
 
-  // حفظ العادات
+  // حفظ العادات محلياً وسحابياً
   const handleUpdateHabits = (newHabits: Habit[]) => {
     setHabits(newHabits);
     saveHabits(newHabits);
   };
 
-  // حفظ السجلات
+  // حفظ السجلات محلياً وسحابياً
   const handleUpdateLogs = (newLogs: Record<string, HabitLog>) => {
     setAllLogs(newLogs);
     saveLogs(newLogs);
@@ -116,7 +151,7 @@ export function App() {
     });
   }, [habits, selectedCategory, searchQuery]);
 
-  // تبديل حالة السجل اليومي (استجابة فورية بدون أي تأخير)
+  // تبديل حالة السجل اليومي (استجابة فورية بدون أي تأخير + مزامنة سحابية)
   const handleToggleLog = (habitId: string, date: string, nextStatus: HabitStatus) => {
     const logId = `${habitId}_${date}`;
     const updatedLog: HabitLog = {
@@ -133,6 +168,11 @@ export function App() {
     };
 
     handleUpdateLogs(nextLogs);
+
+    // مزامنة سحابية غير معطلة للواجهة (Background Sync)
+    if (isSupabaseConfigured) {
+      upsertLogToSupabase(updatedLog).catch(() => {});
+    }
 
     // احتفال بالمفرقعات عند بلوغ أرقام قياسية في السلسلة
     if (nextStatus === 'done') {
@@ -156,13 +196,18 @@ export function App() {
 
     habits.forEach((h) => {
       const logId = `${h.id}_${todayStr}`;
-      nextLogs[logId] = {
+      const logEntry: HabitLog = {
         id: logId,
         habitId: h.id,
         date: todayStr,
         status: 'done',
         updatedAt: new Date().toISOString(),
       };
+      nextLogs[logId] = logEntry;
+
+      if (isSupabaseConfigured) {
+        upsertLogToSupabase(logEntry).catch(() => {});
+      }
     });
 
     handleUpdateLogs(nextLogs);
@@ -196,11 +241,16 @@ export function App() {
   // إدارة العادات
   const handleSaveHabit = (habitData: Partial<Habit>) => {
     if (editingHabit) {
+      const updatedHabit = { ...editingHabit, ...habitData } as Habit;
       const updated = habits.map((h) =>
-        h.id === editingHabit.id ? ({ ...h, ...habitData } as Habit) : h
+        h.id === editingHabit.id ? updatedHabit : h
       );
       handleUpdateHabits(updated);
       setEditingHabit(null);
+
+      if (isSupabaseConfigured) {
+        upsertHabitToSupabase(updatedHabit).catch(() => {});
+      }
     } else {
       const newHabit: Habit = {
         id: `habit-${Date.now()}`,
@@ -221,12 +271,20 @@ export function App() {
 
       handleUpdateHabits([...habits, newHabit]);
       soundManager.playCelebration();
+
+      if (isSupabaseConfigured) {
+        upsertHabitToSupabase(newHabit).catch(() => {});
+      }
     }
   };
 
   const handleDeleteHabit = (habitId: string) => {
     const remaining = habits.filter((h) => h.id !== habitId);
     handleUpdateHabits(remaining);
+
+    if (isSupabaseConfigured) {
+      deleteHabitFromSupabase(habitId).catch(() => {});
+    }
   };
 
   const handleResetData = () => {
@@ -235,6 +293,11 @@ export function App() {
       const initialLogs = generateInitialLogs(INITIAL_HABITS);
       handleUpdateLogs(initialLogs);
       soundManager.playCelebration();
+
+      if (isSupabaseConfigured) {
+        INITIAL_HABITS.forEach((h) => upsertHabitToSupabase(h).catch(() => {}));
+        Object.values(initialLogs).forEach((l) => upsertLogToSupabase(l).catch(() => {}));
+      }
     }
   };
 
@@ -316,7 +379,7 @@ export function App() {
             — جيمس كلير، <span className="font-bold text-slate-700 dark:text-[#F8FAFC]">كتاب العادات الذرية (Atomic Habits)</span>
           </p>
           <p className="text-[11px] text-slate-400 dark:text-[#94A3B8]/80 mt-1">
-            مبني بمعمارية Local-First فائقة السرعة استجابة 0 ثانية · توثيق زمني دقيق · تصدير واستيراد Word (.docx) · مؤثرات صوتية تفاعلية
+            مبني بمعمارية Local-First فائقة السرعة استجابة 0 ثانية · توثيق زمني دقيق · مزامنة سحابية Supabase · تصدير واستيراد Word (.docx)
           </p>
         </footer>
       </div>
