@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="maskGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00A896" />
+      <stop offset="100%" stop-color="#02C39A" />
+    </linearGradient>
+    <linearGradient id="flameGradMask" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFD166" />
+      <stop offset="50%" stop-color="#F39C12" />
+      <stop offset="100%" stop-color="#E67E22" />
+    </linearGradient>
+    <linearGradient id="coreGradMask" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9E6" />
+      <stop offset="100%" stop-color="#FFD166" />
+    </linearGradient>
+    <filter id="dropShadowMask" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0F2854" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Full Edge-to-Edge Background for Android Masking -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#maskGrad)" />
+
+  <!-- Center Safe Zone Flame -->
+  <g filter="url(#dropShadowMask)" transform="translate(136, 120) scale(6.6)">
+    <path
+      d="M18 1C18 1 21.5 5.5 21.5 10C21.5 12.8 19.8 15.2 18 17C16.2 15.2 14.5 12.8 14.5 10C14.5 5.5 18 1 18 1Z"
+      fill="url(#flameGradMask)"
+      opacity="0.9"
+    />
+    <path
+      d="M18 2C18 2 27 12 27 23C27 29.6 23 35 18 35C13 35 9 29.6 9 23C9 14.5 16 9.5 18 2Z"
+      fill="url(#flameGradMask)"
+    />
+    <path
+      d="M18 16C18 16 22 21 22 26C22 29.3 20.2 32 18 32C15.8 32 14 29.3 14 26C14 22 17 19.5 18 16Z"
+      fill="url(#coreGradMask)"
+    />
+  </g>
+</svg>

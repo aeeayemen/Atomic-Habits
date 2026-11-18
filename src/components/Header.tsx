@@ -14,6 +14,7 @@ import {
   LogIn,
   Bell,
   BellRing,
+  Download,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
@@ -51,6 +52,30 @@ export const Header: React.FC<HeaderProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  // الاستماع لحدث جاهزية تثبيت التطبيق PWA (قبل نافذة التثبيت الافتراضية)
+  React.useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      soundManager.playCelebration();
+      setDeferredPrompt(null);
+    }
+  };
 
   const handleExportWord = async () => {
     try {
@@ -201,6 +226,18 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <RefreshCw className="w-4 h-4" />
         </button>
+
+        {/* زر تثبيت تطبيق الويب PWA عند توفره */}
+        {deferredPrompt && (
+          <button
+            onClick={handleInstallPWA}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-95 text-white font-bold text-xs shadow-md shadow-amber-500/20 transition-all hover:scale-102 cursor-pointer animate-pulse"
+            title="تثبيت منظومة العادات كتطبيق على جهازك (PWA)"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">تثبيت التطبيق</span>
+          </button>
+        )}
 
         {/* زر إضافة عادة جديدة */}
         <button

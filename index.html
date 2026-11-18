@@ -2,14 +2,32 @@
 <html lang="ar" dir="rtl" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <title>العادات الذرية · محرك الاتساق اليومي وتتبع السلاسل</title>
     <meta name="description" content="تطبيق تفاعلي فائق الأداء لتتبع وبناء العادات اليومية وفق منهج كتاب العادات الذرية (Atomic Habits) لجيمس كلير." />
     
-    <!-- الأيقونة في تبويب المتصفح (Favicon) -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <!-- PWA Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Theme Colors -->
     <meta name="theme-color" content="#0F2854" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="application-name" content="العادات الذرية" />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Apple iOS Safari PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="العادات" />
+    <link rel="apple-touch-icon" href="/icon-192.svg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.svg" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.svg" />
+
+    <!-- Android / Chrome PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
 
     <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
