@@ -10,6 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS public.habits (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  type VARCHAR(32) NOT NULL DEFAULT 'build', -- 'build' (بناء عادة إيجابية) أو 'break' (الإقلاع عن عادة سلبية)
   name VARCHAR(255) NOT NULL,
   category VARCHAR(64) NOT NULL DEFAULT 'health',
   identity TEXT NOT NULL,
@@ -27,7 +28,7 @@ CREATE TABLE IF NOT EXISTS public.habits (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- في حال كان الجدول موجوداً مسبقاً، نضمن وجود عمود user_id وربطه
+-- في حال كان الجدول موجوداً مسبقاً، نضمن وجود عمود user_id وعمود type
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -35,6 +36,13 @@ BEGIN
     WHERE table_schema = 'public' AND table_name = 'habits' AND column_name = 'user_id'
   ) THEN
     ALTER TABLE public.habits ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'habits' AND column_name = 'type'
+  ) THEN
+    ALTER TABLE public.habits ADD COLUMN type VARCHAR(32) NOT NULL DEFAULT 'build';
   END IF;
 END $$;
 

@@ -1,4 +1,5 @@
 export type HabitStatus = 'done' | 'missed' | 'neutral';
+export type HabitType = 'build' | 'break';
 
 export type HabitCategory = 
   | 'health' 
@@ -22,6 +23,7 @@ export interface HabitLog {
 export interface Habit {
   id: string;
   userId?: string;
+  type?: HabitType; // 'build' (بناء عادة إيجابية) أو 'break' (الإقلاع عن عادة سلبية)
   name: string;
   category: HabitCategory;
   identity: string; // "Why" statement e.g. "I am a high-leverage software engineer"

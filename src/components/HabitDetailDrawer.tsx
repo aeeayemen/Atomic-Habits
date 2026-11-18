@@ -9,6 +9,10 @@ import {
   Shield,
   Trash2,
   Edit3,
+  ShieldCheck,
+  EyeOff,
+  Lock,
+  Frown,
 } from 'lucide-react';
 import type { Habit, HabitLog } from '../types/habit';
 import { calculateStreakStats } from '../lib/streak';
@@ -33,7 +37,8 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
 }) => {
   if (!isOpen || !habit) return null;
 
-  const stats = calculateStreakStats(habit.id, allLogs);
+  const isBreak = habit.type === 'break';
+  const stats = calculateStreakStats(habit.id, allLogs, new Date(), habit.type || 'build', habit.createdAt);
   const categoryMeta = CATEGORIES_META[habit.category] || CATEGORIES_META.health;
 
   // خريطة حرارية لآخر 28 يوماً
@@ -48,6 +53,7 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
       dateStr,
       dayNum: d.getDate(),
       status: log?.status || 'neutral',
+      notes: log?.notes,
       isToday: i === 0,
     });
   }
@@ -66,11 +72,20 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
           {/* الترويسة */}
           <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-[#2A5C9E]">
             <div>
-              <span
-                className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border mb-1.5 ${categoryMeta.badgeBg} ${categoryMeta.badgeBorder} ${categoryMeta.accentText}`}
-              >
-                {categoryMeta.label}
-              </span>
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <span
+                  className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${categoryMeta.badgeBg} ${categoryMeta.badgeBorder} ${categoryMeta.accentText}`}
+                >
+                  {categoryMeta.label}
+                </span>
+
+                {isBreak && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-600 dark:text-amber-400">
+                    <Shield className="w-3 h-3" />
+                    خطة إقلاع عن عادة سيئة
+                  </span>
+                )}
+              </div>
               <h2 className="text-xl font-black text-slate-900 dark:text-[#F8FAFC]">
                 {habit.name}
               </h2>
@@ -84,10 +99,10 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
           </div>
 
           {/* بيان الهوية */}
-          <div className="my-4 p-3.5 rounded-xl bg-[#00A896]/10 dark:bg-[#00A896]/15 border border-[#00A896]/30">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#00A896] dark:text-[#02C39A] mb-1">
+          <div className={`my-4 p-3.5 rounded-xl border ${isBreak ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/30' : 'bg-[#00A896]/10 dark:bg-[#00A896]/15 border-[#00A896]/30'}`}>
+            <div className={`flex items-center gap-1.5 text-xs font-bold mb-1 ${isBreak ? 'text-amber-600 dark:text-amber-400' : 'text-[#00A896] dark:text-[#02C39A]'}`}>
               <Shield className="w-4 h-4" />
-              الهوية الجوهرية ("لماذا؟")
+              {isBreak ? 'الهوية التحررية المنشودة ("لماذا؟")' : 'الهوية الجوهرية ("لماذا؟")'}
             </div>
             <p className="text-xs text-slate-700 dark:text-[#F8FAFC] italic font-medium leading-relaxed">
               "{habit.identity}"
@@ -98,12 +113,18 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200/80 dark:border-[#2A5C9E]">
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
-                <Flame className="w-4 h-4 text-[#F39C12] fill-[#F39C12]" />
-                السلسلة الحالية
+                {isBreak ? (
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <Flame className="w-4 h-4 text-[#F39C12] fill-[#F39C12]" />
+                )}
+                {isBreak ? 'سلسلة الصمود النقي' : 'السلسلة الحالية'}
               </div>
-              <div className="text-2xl font-black text-[#F39C12]">
+              <div className={`text-2xl font-black ${isBreak ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#F39C12]'}`}>
                 {stats.currentStreak}{' '}
-                <span className="text-xs font-normal text-slate-400 dark:text-[#94A3B8]">أيام</span>
+                <span className="text-xs font-normal text-slate-400 dark:text-[#94A3B8]">
+                  {isBreak ? 'أيام صمود' : 'أيام'}
+                </span>
               </div>
               <div className="text-[11px] text-slate-400 dark:text-[#94A3B8] mt-0.5 font-bold">
                 الرقم القياسي: {stats.longestStreak} يوماً
@@ -113,13 +134,13 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200/80 dark:border-[#2A5C9E]">
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
                 <Award className="w-4 h-4 text-[#00A896] dark:text-[#02C39A]" />
-                معدل الالتزام
+                {isBreak ? 'معدل الصمود والنقاء' : 'معدل الالتزام'}
               </div>
               <div className="text-2xl font-black text-slate-900 dark:text-[#F8FAFC]">
                 {stats.completionRate}%
               </div>
               <div className="text-[11px] text-slate-400 dark:text-[#94A3B8] mt-0.5">
-                {stats.totalDone} منجز · {stats.totalMissed} مفوّت
+                {isBreak ? `${stats.totalMissed} زلة مسجلة` : `${stats.totalDone} منجز · ${stats.totalMissed} مفوّت`}
               </div>
             </div>
           </div>
@@ -127,15 +148,19 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
           {/* الخريطة الحرارية لآخر 4 أسابيع */}
           <div className="mb-6">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8] mb-2">
-              سجل الالتزام خلال آخر 4 أسابيع
+              {isBreak ? 'سجل الصمود والزلات خلال آخر 4 أسابيع' : 'سجل الالتزام خلال آخر 4 أسابيع'}
             </h4>
             <div className="grid grid-cols-7 gap-1.5 p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E]">
               {heatmapDays.map((hd) => (
                 <div
                   key={hd.dateStr}
-                  title={`${hd.dateStr}: ${hd.status}`}
+                  title={`${hd.dateStr}: ${hd.status}${hd.notes ? ` (${hd.notes})` : ''}`}
                   className={`h-8 rounded-md flex items-center justify-center text-[10px] font-bold border transition-all ${
-                    hd.status === 'done'
+                    isBreak
+                      ? hd.status === 'missed'
+                        ? 'bg-amber-500/25 border-amber-500 text-amber-600 dark:text-amber-400 font-black ring-1 ring-amber-500/50'
+                        : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
+                      : hd.status === 'done'
                       ? 'bg-[#00A896]/25 border-[#00A896] text-[#00A896] dark:text-[#02C39A] font-black'
                       : hd.status === 'missed'
                       ? 'bg-rose-500/20 border-rose-500/60 text-rose-500'
@@ -151,42 +176,42 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
           {/* تفاصيل القوانين الأربعة */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8]">
-              مخطط هندسة العادة (القوانين الأربعة)
+              {isBreak ? 'مخطط الإقلاع (القوانين المعكوسة)' : 'مخطط هندسة العادة (القوانين الأربعة)'}
             </h4>
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E]">
               <div className="flex items-center gap-1.5 text-xs font-bold text-blue-500 dark:text-blue-400 mb-0.5">
-                <Target className="w-3.5 h-3.5" />
-                القانون 1: اجعلها واضحة (الإشارة / المثير)
+                {isBreak ? <EyeOff className="w-3.5 h-3.5 text-amber-500" /> : <Target className="w-3.5 h-3.5" />}
+                {isBreak ? 'القانون 1: اجعلها خفية (إزالة المثيرات)' : 'القانون 1: اجعلها واضحة (الإشارة / المثير)'}
               </div>
               <p className="text-xs text-slate-700 dark:text-[#F8FAFC]">{habit.cue || 'غير محدد'}</p>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E]">
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#F39C12] mb-0.5">
-                <Zap className="w-3.5 h-3.5" />
-                القانون 3: اجعلها سهلة (قاعدة الدقيقتين للبدء)
+                {isBreak ? <Lock className="w-3.5 h-3.5 text-rose-500" /> : <Zap className="w-3.5 h-3.5" />}
+                {isBreak ? 'القانون 3: اجعلها صعبة (زيادة الاحتكاك)' : 'القانون 3: اجعلها سهلة (قاعدة الدقيقتين للبدء)'}
               </div>
               <p className="text-xs text-slate-700 dark:text-[#F8FAFC]">
-                {habit.twoMinuteRule || 'ابدأ بخطوة صغيرة'}
+                {habit.twoMinuteRule || (isBreak ? 'ضع حواجز صعوبة' : 'ابدأ بخطوة صغيرة')}
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E]">
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#00A896] dark:text-[#02C39A] mb-0.5">
-                <Gift className="w-3.5 h-3.5" />
-                القانون 4: اجعلها مشبعة (المكافأة الفورية)
+                {isBreak ? <Frown className="w-3.5 h-3.5 text-amber-500" /> : <Gift className="w-3.5 h-3.5" />}
+                {isBreak ? 'القانون 4: اجعلها غير مشبعة (المساءلة والتكلفة)' : 'القانون 4: اجعلها مشبعة (المكافأة الفورية)'}
               </div>
               <p className="text-xs text-slate-700 dark:text-[#F8FAFC]">{habit.reward || 'غير محدد'}</p>
             </div>
           </div>
         </div>
 
-        {/* أزرار أسفل السحب */}
-        <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-[#2A5C9E] mt-6">
+        {/* أزرار الإجراءات السفلية */}
+        <div className="flex items-center justify-between gap-3 pt-6 border-t border-slate-100 dark:border-[#2A5C9E] mt-6">
           <button
             onClick={handleDelete}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
             حذف العادة
@@ -197,10 +222,10 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
               onEdit(habit);
               onClose();
             }}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-slate-900 dark:text-[#F8FAFC] bg-slate-100 dark:bg-[#0F2854] hover:bg-slate-200 dark:hover:bg-[#2A5C9E] rounded-xl transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#02C39A] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
           >
             <Edit3 className="w-4 h-4" />
-            تعديل تفاصيل العادة
+            تعديل النظام
           </button>
         </div>
       </div>

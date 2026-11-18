@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import type { Habit, HabitCategory, HabitLog, HabitStatus } from './types/habit';
+import type { Habit, HabitCategory, HabitLog, HabitStatus, HabitType } from './types/habit';
 import {
   loadStoredHabits,
   saveHabits,
@@ -41,6 +41,7 @@ import { HabitModal } from './components/HabitModal';
 import { HabitDetailDrawer } from './components/HabitDetailDrawer';
 import { NotificationSettingsModal } from './components/NotificationSettingsModal';
 import { OnboardingTour } from './components/OnboardingTour';
+import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
 import {
   isLocalNotificationEnabled,
   checkAndSendHabitReminder,
@@ -77,6 +78,7 @@ export function App() {
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'rolling'>('week');
   const [selectedCategory, setSelectedCategory] = useState<HabitCategory | 'all'>('all');
+  const [selectedType, setSelectedType] = useState<HabitType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // 5. حالة النوافذ المنبثقة
@@ -86,6 +88,15 @@ export function App() {
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isPushActive, setIsPushActive] = useState(false);
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [reflectionModal, setReflectionModal] = useState<{
+    isOpen: boolean;
+    habit: Habit | null;
+    date: string;
+  }>({
+    isOpen: false,
+    habit: null,
+    date: '',
+  });
 
   // دالة تحميل وتنسيق بيانات المستخدم (من السحابة أو التخزين المؤقت المحلي)
   const loadUserData = useCallback(async (userId: string) => {
@@ -281,10 +292,11 @@ export function App() {
     return getRollingDays(14, anchorDate);
   }, [anchorDate, viewMode]);
 
-  // تصفية العادات حسب التصنيف والبحث
+  // تصفية العادات حسب النوع والتصنيف والبحث
   const filteredHabits = useMemo(() => {
     return habits.filter((h) => {
       if (h.archived) return false;
+      if (selectedType !== 'all' && (h.type || 'build') !== selectedType) return false;
       if (selectedCategory !== 'all' && h.category !== selectedCategory) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -296,7 +308,7 @@ export function App() {
       }
       return true;
     });
-  }, [habits, selectedCategory, searchQuery]);
+  }, [habits, selectedCategory, selectedType, searchQuery]);
 
   // تبديل حالة السجل اليومي (استجابة فورية 0 ثانية + مزامنة سحابية خاصة بالمستخدم)
   const handleToggleLog = (habitId: string, date: string, nextStatus: HabitStatus) => {
@@ -409,14 +421,15 @@ export function App() {
         id: `habit-${Date.now()}`,
         userId: currentUser?.id,
         name: habitData.name || 'عادة جديدة',
+        type: habitData.type || 'build',
         category: habitData.category || 'health',
         identity: habitData.identity || 'أنا شخص ملتزم ومستمر يومياً.',
         cue: habitData.cue || 'جدول يومي منتظم',
         routine: habitData.routine || habitData.name || '',
         twoMinuteRule: habitData.twoMinuteRule || 'ابدأ بخطوة دقيقتين',
         reward: habitData.reward || 'احتفل بالإنجاز اليومي',
-        color: habitData.color || '#00A896',
-        icon: 'Flame',
+        color: habitData.color || (habitData.type === 'break' ? '#F59E0B' : '#00A896'),
+        icon: habitData.type === 'break' ? 'Shield' : 'Flame',
         frequency: habitData.frequency || 'daily',
         timeOfDay: 'anytime',
         targetDaysPerWeek: habitData.targetDaysPerWeek || 7,
@@ -429,6 +442,34 @@ export function App() {
       if (isSupabaseConfigured && currentUser) {
         upsertHabitToSupabase(newHabit, currentUser.id).catch(() => {});
       }
+    }
+  };
+
+  // حفظ ملاحظات وتأملات الزلة السلوكية لعادات الإقلاع
+  const handleSaveReflection = (notes: string) => {
+    if (!reflectionModal.habit || !reflectionModal.date) return;
+    const { habit, date } = reflectionModal;
+    const logId = `${habit.id}_${date}`;
+
+    const updatedLog: HabitLog = {
+      id: logId,
+      habitId: habit.id,
+      userId: currentUser?.id,
+      date,
+      status: 'missed',
+      notes,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const nextLogs = {
+      ...allLogs,
+      [logId]: updatedLog,
+    };
+
+    handleUpdateLogs(nextLogs);
+
+    if (isSupabaseConfigured && currentUser) {
+      upsertLogToSupabase(updatedLog, currentUser.id).catch(() => {});
     }
   };
 
@@ -517,10 +558,12 @@ export function App() {
           />
         </div>
 
-        {/* تصفيات التصنيف والبحث */}
+        {/* تصفيات التصنيف والنوع والبحث */}
         <CategoryFilter
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
+          selectedType={selectedType}
+          onSelectType={setSelectedType}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           totalHabitsCount={habits.length}
@@ -542,6 +585,13 @@ export function App() {
             onAddNewHabit={() => {
               setEditingHabit(null);
               setIsModalOpen(true);
+            }}
+            onOpenReflection={(habit, date) => {
+              setReflectionModal({
+                isOpen: true,
+                habit,
+                date,
+              });
             }}
             viewMode={viewMode}
             onChangeViewMode={setViewMode}
@@ -597,6 +647,23 @@ export function App() {
         }}
         onStatusChange={(enabled) => setIsPushActive(enabled)}
       />
+
+      {/* نافذة تأمل وتدوين محفزات الزلة لعادات الإقلاع */}
+      {reflectionModal.habit && (
+        <SlipUpReflectionModal
+          isOpen={reflectionModal.isOpen}
+          onClose={() => setReflectionModal((prev) => ({ ...prev, isOpen: false }))}
+          habitName={reflectionModal.habit.name}
+          date={reflectionModal.date}
+          existingNotes={allLogs[`${reflectionModal.habit.id}_${reflectionModal.date}`]?.notes}
+          onSave={handleSaveReflection}
+          onCancelSlipUp={() => {
+            if (reflectionModal.habit) {
+              handleToggleLog(reflectionModal.habit.id, reflectionModal.date, 'neutral');
+            }
+          }}
+        />
+      )}
 
       {/* الجولة الإرشادية التفاعلية مع شخصية شرارة */}
       <OnboardingTour

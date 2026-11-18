@@ -191,6 +191,7 @@ export async function fetchHabitsFromSupabase(userId: string): Promise<Habit[] |
     return (data || []).map((row) => ({
       id: row.id,
       userId: row.user_id,
+      type: (row.type as Habit['type']) || 'build',
       name: row.name,
       category: row.category,
       identity: row.identity,
@@ -221,6 +222,7 @@ export async function upsertHabitToSupabase(habit: Habit, userId: string): Promi
     const { error } = await supabase.from('habits').upsert({
       id: habit.id,
       user_id: userId,
+      type: habit.type || 'build',
       name: habit.name,
       category: habit.category,
       identity: habit.identity,
@@ -353,6 +355,7 @@ export async function seedInitialHabitsForUser(userId: string): Promise<Habit[]>
     const preparedHabits = INITIAL_HABITS.map((h, idx) => ({
       id: `habit-${idx + 1}-${userId.slice(0, 8)}`,
       user_id: userId,
+      type: h.type || 'build',
       name: h.name,
       category: h.category,
       identity: h.identity,
@@ -379,6 +382,7 @@ export async function seedInitialHabitsForUser(userId: string): Promise<Habit[]>
     return preparedHabits.map((row) => ({
       id: row.id,
       userId: row.user_id,
+      type: (row.type as Habit['type']) || 'build',
       name: row.name,
       category: row.category as Habit['category'],
       identity: row.identity,

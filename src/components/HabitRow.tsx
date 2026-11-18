@@ -8,6 +8,8 @@ import {
   Zap,
   CheckCircle2,
   Trash2,
+  Shield,
+  ShieldCheck,
 } from 'lucide-react';
 import type { DayColumn, Habit, HabitLog, HabitStatus } from '../types/habit';
 import { calculateStreakStats } from '../lib/streak';
@@ -22,6 +24,7 @@ interface HabitRowProps {
   onOpenDetail: (habit: Habit) => void;
   onEditHabit: (habit: Habit) => void;
   onDeleteHabit: (habitId: string) => void;
+  onOpenReflection?: (habit: Habit, date: string) => void;
   viewMode: 'week' | 'rolling';
 }
 
@@ -33,40 +36,60 @@ export const HabitRow: React.FC<HabitRowProps> = ({
   onOpenDetail,
   onEditHabit,
   onDeleteHabit,
+  onOpenReflection,
   viewMode,
 }) => {
-  const stats = calculateStreakStats(habit.id, allLogs);
+  const isBreakHabit = habit.type === 'break';
+  const stats = calculateStreakStats(habit.id, allLogs, new Date(), habit.type || 'build', habit.createdAt);
   const categoryMeta = CATEGORIES_META[habit.category] || CATEGORIES_META.health;
 
   return (
-    <div className="group relative flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200/80 dark:border-[#2A5C9E] hover:border-slate-300 dark:hover:border-[#00A896] transition-all duration-200 shadow-2xs hover:shadow-md">
+    <div
+      className={cn(
+        'group relative flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-white dark:bg-[#1C4D8D] border transition-all duration-200 shadow-2xs hover:shadow-md',
+        isBreakHabit
+          ? 'border-amber-500/40 dark:border-amber-500/40 hover:border-amber-500/70 bg-gradient-to-r from-amber-500/[0.02] to-transparent'
+          : 'border-slate-200/80 dark:border-[#2A5C9E] hover:border-slate-300 dark:hover:border-[#00A896]'
+      )}
+    >
       
       {/* 1. عمود هوية العادة والتصنيف */}
       <div className="flex items-start gap-3.5 min-w-[280px] max-w-sm">
-        {/* خط تمييز لون التصنيف */}
+        {/* خط تمييز لون التصنيف أو شريط التحذير */}
         <div
-          className="mt-1 w-1.5 h-12 rounded-full shrink-0"
-          style={{ backgroundColor: habit.color || categoryMeta.color }}
+          className={cn(
+            'mt-1 w-1.5 h-12 rounded-full shrink-0',
+            isBreakHabit && 'bg-amber-500 shadow-xs shadow-amber-500/50'
+          )}
+          style={{ backgroundColor: isBreakHabit ? '#F59E0B' : (habit.color || categoryMeta.color) }}
         />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span
-              className={cn(
-                'inline-flex items-center text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border',
-                categoryMeta.badgeBg,
-                categoryMeta.badgeBorder,
-                categoryMeta.accentText
-              )}
-            >
-              {categoryMeta.label}
-            </span>
+            {/* شارة نوع العادة: إقلاع 🛡️ أو بناء ⚡ */}
+            {isBreakHabit ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider px-2.5 py-0.5 rounded-full border bg-amber-500/15 border-amber-500/40 text-amber-600 dark:text-amber-400">
+                <Shield className="w-3 h-3" />
+                إقلاع عن عادة سيئة
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  'inline-flex items-center text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border',
+                  categoryMeta.badgeBg,
+                  categoryMeta.badgeBorder,
+                  categoryMeta.accentText
+                )}
+              >
+                {categoryMeta.label}
+              </span>
+            )}
 
             {/* شارة تحذير إياك أن تفوت مرتين */}
             {stats.isAtRisk && (
               <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-500 animate-pulse">
                 <AlertTriangle className="w-3 h-3" />
-                إياك أن تفوّت مرتين!
+                {isBreakHabit ? 'احذر تكرار الانتكاس اليوم!' : 'إياك أن تفوّت مرتين!'}
               </span>
             )}
           </div>
@@ -84,11 +107,14 @@ export const HabitRow: React.FC<HabitRowProps> = ({
             "{habit.identity}"
           </p>
 
-          {/* قاعدة الدقيقتين */}
+          {/* قاعدة الدقيقتين أو استراتيجية المقاومة */}
           {habit.twoMinuteRule && (
-            <div className="flex items-center gap-1 mt-1 text-[11px] text-[#00A896] dark:text-[#02C39A] font-medium">
+            <div className={cn(
+              'flex items-center gap-1 mt-1 text-[11px] font-medium truncate',
+              isBreakHabit ? 'text-amber-600 dark:text-amber-400' : 'text-[#00A896] dark:text-[#02C39A]'
+            )}>
               <Zap className="w-3 h-3 shrink-0" />
-              <span className="truncate">قاعدة الدقيقتين: {habit.twoMinuteRule}</span>
+              <span className="truncate">{isBreakHabit ? `حاجز المقاومة: ${habit.twoMinuteRule}` : `قاعدة الدقيقتين: ${habit.twoMinuteRule}`}</span>
             </div>
           )}
         </div>
@@ -108,7 +134,9 @@ export const HabitRow: React.FC<HabitRowProps> = ({
                 isFuture={day.isFuture}
                 log={log}
                 habitName={habit.name}
+                habitType={habit.type || 'build'}
                 onToggle={(date, nextStatus) => onToggleLog(habit.id, date, nextStatus)}
+                onOpenReflection={(date) => onOpenReflection?.(habit, date)}
                 compact={viewMode === 'rolling'}
               />
             </div>
@@ -118,33 +146,56 @@ export const HabitRow: React.FC<HabitRowProps> = ({
 
       {/* 3. عمود الإحصائيات والإجراءات */}
       <div className="flex items-center justify-between md:justify-start gap-4 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-slate-100 dark:border-[#2A5C9E]">
-        {/* عداد السلسلة (#F39C12 Amber) */}
+        {/* عداد السلسلة أو الصمود */}
         <div className="flex items-center gap-2.5">
           <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0F2854] border border-slate-200/70 dark:border-[#2A5C9E]"
-            title={`السلسلة الحالية: ${stats.currentStreak} يوم | القياسي: ${stats.longestStreak} يوم`}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border',
+              isBreakHabit
+                ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/30'
+                : 'bg-slate-50 dark:bg-[#0F2854] border-slate-200/70 dark:border-[#2A5C9E]'
+            )}
+            title={
+              isBreakHabit
+                ? `سلسلة الصمود النقي: ${stats.currentStreak} يوم | القياسي: ${stats.longestStreak} يوم | عدد الزلات: ${stats.totalMissed}`
+                : `السلسلة الحالية: ${stats.currentStreak} يوم | القياسي: ${stats.longestStreak} يوم`
+            }
           >
-            <Flame
-              className={cn(
-                'w-4 h-4 text-[#F39C12]',
-                stats.currentStreak > 0 && 'fill-[#F39C12]'
-              )}
-            />
+            {isBreakHabit ? (
+              <ShieldCheck
+                className={cn(
+                  'w-4 h-4 text-emerald-500 dark:text-emerald-400',
+                  stats.currentStreak > 0 && 'fill-emerald-500/20'
+                )}
+              />
+            ) : (
+              <Flame
+                className={cn(
+                  'w-4 h-4 text-[#F39C12]',
+                  stats.currentStreak > 0 && 'fill-[#F39C12]'
+                )}
+              />
+            )}
             <div className="text-right">
               <div className="text-xs font-black leading-none text-slate-800 dark:text-[#F8FAFC]">
                 {stats.currentStreak}
-                <span className="text-[10px] font-normal text-slate-400 dark:text-[#94A3B8] mr-1">أيام سلسلة</span>
+                <span className="text-[10px] font-normal text-slate-400 dark:text-[#94A3B8] mr-1">
+                  {isBreakHabit ? 'أيام صمود' : 'أيام سلسلة'}
+                </span>
               </div>
-              <div className="text-[9px] text-[#F39C12] leading-none mt-1 font-bold">
-                القياسي: {stats.longestStreak} ي
+              <div className={cn(
+                'text-[9px] leading-none mt-1 font-bold',
+                isBreakHabit ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#F39C12]'
+              )}>
+                {isBreakHabit ? `الزلات: ${stats.totalMissed}` : `القياسي: ${stats.longestStreak} ي`}
               </div>
             </div>
           </div>
 
-          {/* نسبة الاتساق (#00A896 Teal) */}
+          {/* نسبة الاتساق أو الصمود */}
           <div
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0F2854] border border-slate-200/70 dark:border-[#2A5C9E]"
-            title={`نسبة الاتساق خلال 30 يوماً: ${stats.completionRate}%`}
+            title={isBreakHabit ? `نسبة النقاء خلال 30 يوماً: ${stats.completionRate}%` : `نسبة الاتساق خلال 30 يوماً: ${stats.completionRate}%`}
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A]" />
             <span className="text-xs font-black text-slate-700 dark:text-[#F8FAFC]">

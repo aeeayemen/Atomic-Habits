@@ -19,6 +19,7 @@ interface HabitGridProps {
   onEditHabit: (habit: Habit) => void;
   onDeleteHabit: (habitId: string) => void;
   onAddNewHabit: () => void;
+  onOpenReflection?: (habit: Habit, date: string) => void;
   viewMode: 'week' | 'rolling';
   onChangeViewMode: (mode: 'week' | 'rolling') => void;
   onPrevPeriod: () => void;
@@ -36,6 +37,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
   onEditHabit,
   onDeleteHabit,
   onAddNewHabit,
+  onOpenReflection,
   viewMode,
   onChangeViewMode,
   onPrevPeriod,
@@ -160,6 +162,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
                 onOpenDetail={onOpenDetail}
                 onEditHabit={onEditHabit}
                 onDeleteHabit={onDeleteHabit}
+                onOpenReflection={onOpenReflection}
                 viewMode={viewMode}
               />
             </div>
