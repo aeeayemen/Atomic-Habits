@@ -17,6 +17,7 @@ import { soundManager } from './lib/sound';
 import { calculateStreakStats } from './lib/streak';
 
 // المكونات التفاعلية
+import { LoadingScreen } from './components/LoadingScreen';
 import { Header } from './components/Header';
 import { MetricsSummary } from './components/MetricsSummary';
 import { NeverMissTwiceBanner } from './components/NeverMissTwiceBanner';
@@ -26,7 +27,10 @@ import { HabitModal } from './components/HabitModal';
 import { HabitDetailDrawer } from './components/HabitDetailDrawer';
 
 export function App() {
-  // 1. حالة الإعدادات والمظهر
+  // 1. حالة شاشة التحميل الترحيبية
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 2. حالة الإعدادات والمظهر
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = loadTheme();
     if (typeof document !== 'undefined') {
@@ -41,17 +45,17 @@ export function App() {
 
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => loadSoundSetting());
 
-  // 2. حالة البيانات
+  // 3. حالة البيانات
   const [habits, setHabits] = useState<Habit[]>(() => loadStoredHabits());
   const [allLogs, setAllLogs] = useState<Record<string, HabitLog>>(() => loadStoredLogs());
 
-  // 3. حالة التصفح والتنقل
+  // 4. حالة التصفح والتنقل
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'rolling'>('week');
   const [selectedCategory, setSelectedCategory] = useState<HabitCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 4. حالة النوافذ المنبثقة
+  // 5. حالة النوافذ المنبثقة
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null);
@@ -236,6 +240,11 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0F2854] text-slate-900 dark:text-[#F8FAFC] transition-colors duration-200">
+      {/* شاشة التحميل الاحترافية بنفس الشعار */}
+      {isLoading && (
+        <LoadingScreen onLoaded={() => setIsLoading(false)} minDuration={850} />
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* الترويسة الرئيسية */}
         <Header

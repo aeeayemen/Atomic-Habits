@@ -9,9 +9,94 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      /* Fallback Instant Loader before React Mounts */
+      #app-loader {
+        position: fixed;
+        inset: 0;
+        background-color: #0F2854;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+        color: #F8FAFC;
+      }
+      .loader-logo {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #00A896, #02C39A);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(0, 168, 150, 0.35);
+        margin-bottom: 20px;
+        animation: pulseLogo 2s infinite ease-in-out;
+      }
+      .loader-logo svg {
+        width: 42px;
+        height: 42px;
+        fill: #F39C12;
+      }
+      .loader-title {
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.5px;
+      }
+      .loader-subtitle {
+        font-size: 11px;
+        font-weight: 700;
+        color: #02C39A;
+        margin-top: 4px;
+        letter-spacing: 1px;
+      }
+      .loader-bar-container {
+        width: 220px;
+        height: 5px;
+        background: #1C4D8D;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 28px;
+        border: 1px solid #2A5C9E;
+      }
+      .loader-bar {
+        height: 100%;
+        width: 30%;
+        background: linear-gradient(90deg, #00A896, #02C39A, #F39C12);
+        border-radius: 999px;
+        animation: loadingProgress 1.6s infinite ease-in-out;
+      }
+      @keyframes loadingProgress {
+        0% { transform: translateX(100%); width: 20%; }
+        50% { transform: translateX(0%); width: 60%; }
+        100% { transform: translateX(-100%); width: 20%; }
+      }
+      @keyframes pulseLogo {
+        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(0, 168, 150, 0.4)); }
+        50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(0, 168, 150, 0.7)); }
+      }
+    </style>
   </head>
   <body class="bg-slate-50 dark:bg-[#0F2854] text-slate-900 dark:text-[#F8FAFC] min-h-screen selection:bg-[#00A896] selection:text-white font-['Cairo',sans-serif]">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Instant Preload Splash -->
+      <div id="app-loader">
+        <div class="loader-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+          </svg>
+        </div>
+        <h1 class="loader-title">العادات الذرية</h1>
+        <div class="loader-subtitle">ATOMIC HABITS · محرك الاتساق التراكمي</div>
+        <div class="loader-bar-container">
+          <div class="loader-bar"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
