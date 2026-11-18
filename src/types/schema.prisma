@@ -1,0 +1,142 @@
+// ==============================================================================
+// ATOMIC HABITS PERSISTENCE SCHEMA (Prisma ORM for PostgreSQL / MySQL)
+// ==============================================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum HabitCategory {
+  HEALTH
+  CODE
+  MIND
+  FITNESS
+  DEEP_WORK
+  FINANCE
+  READING
+}
+
+enum HabitStatus {
+  DONE
+  MISSED
+  NEUTRAL
+}
+
+enum FrequencyType {
+  DAILY
+  WEEKDAYS
+  WEEKENDS
+  CUSTOM
+}
+
+enum TimeOfDay {
+  MORNING
+  AFTERNOON
+  EVENING
+  ANYTIME
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  habits       Habit[]
+  streaks      StreakCache[]
+  settings     UserSettings?
+
+  @@index([email])
+}
+
+model Habit {
+  id                String         @id @default(uuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Atomic Habits Core Framework
+  name              String         // Habit name (e.g., "Code 90 Minutes")
+  category          HabitCategory  @default(HEALTH)
+  identity          String         // Identity statement ("I am a disciplined engineer")
+  cue               String         // 1st Law: Cue / Habit stacking trigger
+  routine           String         // Routine details
+  twoMinuteRule     String         // 3rd Law: Micro-habit 2-minute starter version
+  reward            String         // 4th Law: Immediate satisfaction reward
+  
+  // Customization & Scheduling
+  color             String         @default("#14b8a6") // Hex accent color
+  icon              String         @default("Flame")
+  frequency         FrequencyType  @default(DAILY)
+  timeOfDay         TimeOfDay      @default(ANYTIME)
+  targetDaysPerWeek Int            @default(7)
+  archived          Boolean        @default(false)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relationships
+  logs              HabitLog[]
+  streakCache       StreakCache?
+
+  @@index([userId, archived])
+  @@index([category])
+}
+
+model HabitLog {
+  id         String      @id @default(uuid())
+  habitId    String
+  habit      Habit       @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  
+  // Daily binary status tracking
+  date       String      // Formatted YYYY-MM-DD for fast date indexing
+  status     HabitStatus @default(NEUTRAL) // DONE, MISSED, NEUTRAL
+  notes      String?     @db.Text
+  
+  // Exact high-resolution timestamp when the log occurred
+  loggedAt   DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  // Ensure unique entry per habit per calendar day
+  @@unique([habitId, date], name: "habit_day_unique")
+  @@index([date])
+  @@index([habitId, date, status])
+}
+
+model StreakCache {
+  id              String   @id @default(uuid())
+  habitId         String   @unique
+  habit           Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  totalCompletions Int     @default(0)
+  totalMissed     Int      @default(0)
+  completionRate  Float    @default(0.0) // 0.0 - 100.0%
+  lastCompletedDate String? // YYYY-MM-DD
+  
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model UserSettings {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  theme          String   @default("dark") // "dark" | "light" | "system"
+  soundEffects   Boolean  @default(true)
+  confettiEnabled Boolean @default(true)
+  firstDayOfWeek Int      @default(1) // 0 = Sunday, 1 = Monday
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
