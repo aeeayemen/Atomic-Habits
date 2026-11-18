@@ -12,6 +12,8 @@ import {
   Loader2,
   LogOut,
   LogIn,
+  Bell,
+  BellRing,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
@@ -28,6 +30,8 @@ interface HeaderProps {
   currentUser?: User | null;
   onSignOut?: () => void;
   onOpenAuthModal?: () => void;
+  onOpenNotifications?: () => void;
+  isPushActive?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -41,6 +45,8 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onSignOut,
   onOpenAuthModal,
+  onOpenNotifications,
+  isPushActive = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -139,6 +145,22 @@ export const Header: React.FC<HeaderProps> = ({
               <Moon className="w-4 h-4 text-slate-700" />
               <span className="text-xs font-bold text-slate-700">مظلم</span>
             </>
+          )}
+        </button>
+
+        {/* زر إعدادات التنبيهات Web Push */}
+        <button
+          onClick={onOpenNotifications}
+          className="relative p-2 rounded-xl border border-slate-200 dark:border-[#2A5C9E] bg-white dark:bg-[#1C4D8D] text-slate-600 dark:text-[#F8FAFC] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/60 transition-colors shadow-2xs cursor-pointer"
+          title="إعدادات إشعارات وتذكيرات العادات اليومية (Web Push)"
+        >
+          {isPushActive ? (
+            <>
+              <BellRing className="w-4 h-4 text-[#F39C12]" />
+              <span className="absolute top-1 left-1 w-2 h-2 rounded-full bg-[#02C39A] ring-1 ring-white dark:ring-[#0F2854]" />
+            </>
+          ) : (
+            <Bell className="w-4 h-4" />
           )}
         </button>
 

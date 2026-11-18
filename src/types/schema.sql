@@ -62,18 +62,33 @@ BEGIN
   END IF;
 END $$;
 
--- 4. إنشاء الفهارس لسرعة استعلام بيانات المستخدم
+-- 4. إنشاء جدول اشتراكات إشعارات الويب (Web Push Subscriptions)
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  endpoint TEXT NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_user_endpoint UNIQUE (user_id, endpoint)
+);
+
+-- 5. إنشاء الفهارس لسرعة استعلام بيانات المستخدم
 CREATE INDEX IF NOT EXISTS idx_habits_user_id ON public.habits(user_id);
 CREATE INDEX IF NOT EXISTS idx_habits_category ON public.habits(category);
 CREATE INDEX IF NOT EXISTS idx_habit_logs_user_id ON public.habit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON public.habit_logs(date);
 CREATE INDEX IF NOT EXISTS idx_habit_logs_lookup ON public.habit_logs(habit_id, date, user_id);
+CREATE INDEX IF NOT EXISTS idx_push_subs_user_id ON public.push_subscriptions(user_id);
 
--- 5. تفعيل حماية الصفوف (Row Level Security - RLS)
+-- 6. تفعيل حماية الصفوف (Row Level Security - RLS)
 ALTER TABLE public.habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.habit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
--- 6. حذف السياسات القديمة إن وجدت وتطبيق سياسات عزل المستخدمين الصارمة
+-- 7. حذف السياسات القديمة إن وجدت وتطبيق سياسات عزل المستخدمين الصارمة
 DROP POLICY IF EXISTS "Allow public read access on habits" ON public.habits;
 DROP POLICY IF EXISTS "Allow public insert access on habits" ON public.habits;
 DROP POLICY IF EXISTS "Allow public update access on habits" ON public.habits;
@@ -86,6 +101,7 @@ DROP POLICY IF EXISTS "Users can only access their own habits" ON public.habits;
 DROP POLICY IF EXISTS "Users can only access their own logs" ON public.habit_logs;
 DROP POLICY IF EXISTS "Users can manage their own habits" ON public.habits;
 DROP POLICY IF EXISTS "Users can manage their own logs" ON public.habit_logs;
+DROP POLICY IF EXISTS "Users can manage their own push subscriptions" ON public.push_subscriptions;
 
 -- سياسة جدول العادات: يسمح للمستخدم المسجل فقط بالوصول لعاداته
 CREATE POLICY "Users can manage their own habits"
@@ -103,7 +119,15 @@ CREATE POLICY "Users can manage their own logs"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
--- 7. مشغل تلقائي (Trigger): إدراج العادات الذرية النموذجية تلقائياً لأي مستخدم جديد فور تسجيل حسابه
+-- سياسة جدول الإشعارات: يسمح للمستخدم المسجل بإدارة اشتراكاته في الإشعارات
+CREATE POLICY "Users can manage their own push subscriptions"
+  ON public.push_subscriptions
+  FOR ALL
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- 8. مشغل تلقائي (Trigger): إدراج العادات الذرية النموذجية تلقائياً لأي مستخدم جديد فور تسجيل حسابه
 CREATE OR REPLACE FUNCTION public.handle_new_user_starter_habits()
 RETURNS TRIGGER AS $$
 BEGIN

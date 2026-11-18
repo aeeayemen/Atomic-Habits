@@ -39,6 +39,8 @@ import { CategoryFilter } from './components/CategoryFilter';
 import { HabitGrid } from './components/HabitGrid';
 import { HabitModal } from './components/HabitModal';
 import { HabitDetailDrawer } from './components/HabitDetailDrawer';
+import { NotificationSettingsModal } from './components/NotificationSettingsModal';
+import { checkIsUserSubscribed } from './lib/pushService';
 
 export function App() {
   // 1. حالة شاشة التحميل الترحيبية والمصادقة
@@ -77,6 +79,8 @@ export function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isPushActive, setIsPushActive] = useState(false);
 
   // دالة تحميل وتنسيق بيانات المستخدم (من السحابة أو التخزين المؤقت المحلي)
   const loadUserData = useCallback(async (userId: string) => {
@@ -138,9 +142,11 @@ export function App() {
           setSession(initialSession);
           setCurrentUser(initialSession.user);
           await loadUserData(initialSession.user.id);
+          checkIsUserSubscribed().then(setIsPushActive);
         } else {
           setSession(null);
           setCurrentUser(null);
+          setIsPushActive(false);
         }
       } catch (err) {
         console.error('Error checking initial auth session:', err);
@@ -160,10 +166,12 @@ export function App() {
       if (newUser) {
         setIsGuestMode(false);
         await loadUserData(newUser.id);
+        checkIsUserSubscribed().then(setIsPushActive);
       } else {
         // تم تسجيل الخروج
         setHabits([]);
         setAllLogs({});
+        setIsPushActive(false);
       }
     });
 
@@ -462,6 +470,8 @@ export function App() {
           currentUser={currentUser}
           onSignOut={handleSignOut}
           onOpenAuthModal={() => setIsGuestMode(false)}
+          onOpenNotifications={() => setIsNotificationModalOpen(true)}
+          isPushActive={isPushActive}
         />
 
         {/* بطاقات الإحصائيات الفورية */}
@@ -544,6 +554,16 @@ export function App() {
           setIsModalOpen(true);
         }}
         onDelete={handleDeleteHabit}
+      />
+
+      {/* نافذة إعدادات وتفعيل التنبيهات Web Push */}
+      <NotificationSettingsModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => {
+          setIsNotificationModalOpen(false);
+          checkIsUserSubscribed().then(setIsPushActive);
+        }}
+        currentUser={currentUser}
       />
     </div>
   );
