@@ -150,18 +150,19 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
       {/* قائمة العادات */}
       <div className="space-y-3">
         {habits.length > 0 ? (
-          habits.map((habit) => (
-            <HabitRow
-              key={habit.id}
-              habit={habit}
-              days={days}
-              allLogs={allLogs}
-              onToggleLog={onToggleLog}
-              onOpenDetail={onOpenDetail}
-              onEditHabit={onEditHabit}
-              onDeleteHabit={onDeleteHabit}
-              viewMode={viewMode}
-            />
+          habits.map((habit, idx) => (
+            <div key={habit.id} data-tour={idx === 0 ? 'tour-first-habit' : undefined}>
+              <HabitRow
+                habit={habit}
+                days={days}
+                allLogs={allLogs}
+                onToggleLog={onToggleLog}
+                onOpenDetail={onOpenDetail}
+                onEditHabit={onEditHabit}
+                onDeleteHabit={onDeleteHabit}
+                viewMode={viewMode}
+              />
+            </div>
           ))
         ) : (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#2A5C9E] bg-white/50 dark:bg-[#1C4D8D]/40">

@@ -9,11 +9,11 @@ import {
 import { MascotCharacter, type MascotMood } from './MascotCharacter';
 
 export interface TourStep {
-  target: string; // CSS selector e.g. '[data-tour="tour-brand"]'
+  target: string; // CSS selector
   title: string;
   content: string;
   mood: MascotMood;
-  position?: 'top' | 'bottom' | 'center';
+  position?: 'top' | 'bottom';
 }
 
 const TOUR_STEPS: TourStep[] = [
@@ -42,12 +42,12 @@ const TOUR_STEPS: TourStep[] = [
     position: 'bottom',
   },
   {
-    target: '[data-tour="tour-grid"]',
+    target: '[data-tour="tour-first-habit"], [data-tour="tour-grid"]',
     title: 'شبكة الإنجاز اليومي السريعة 📅',
     content:
       'قلب المنظومة النابض! بنقرة واحدة سريعة (استجابة 0 ثانية)، وثّق إنجازك اليومي، راقب تدرج ألوان السلسلة، واحتفل بالمفرقعات عند كسر الأرقام القياسية.',
     mood: 'proud',
-    position: 'top',
+    position: 'bottom',
   },
   {
     target: '[data-tour="tour-new-habit"]',
@@ -59,9 +59,9 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="tour-notifications"]',
-    title: 'التذكيرات الذكية (Web Push) 🔔',
+    title: 'التذكيرات الذكية في المتصفح 🔔',
     content:
-      'لا تدع النسيان يكسر سلاسلك! فعّل الإشعارات لتصلك تنبيهات العادات المتبقية حتى بعد إغلاق المتصفح أو على شاشة هاتفك المحمول.',
+      'لا تدع النسيان يكسر سلاسلك! فعّل الإشعارات المحلية لتصلك تنبيهات العادات المتبقية أثناء استخدامك للمتصفح دون الحاجة لخوادم معقدة.',
     mood: 'celebrate',
     position: 'bottom',
   },
@@ -94,7 +94,6 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
 
     const hasCompleted = localStorage.getItem(TOUR_STORAGE_KEY);
     if (!hasCompleted) {
-      // إطلاق الجولة بعد نصف ثانية لمنح الواجهة فرصة للظهور والاستقرار
       const timer = setTimeout(() => {
         setIsOpen(true);
         setCurrentStepIndex(0);
@@ -103,7 +102,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     }
   }, [forceOpen]);
 
-  // تحديث أبعاد وموقع العنصر المستهدف
+  // تحديث أبعاد وموقع العنصر المستهدف مع معالجة التمرير السلس
   const updateTargetRect = useCallback(() => {
     if (!isOpen) return;
 
@@ -112,10 +111,22 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
 
     const element = document.querySelector(currentStep.target);
     if (element) {
-      // تمرير العنصر إلى منتصف الشاشة بسلاسة
+      // تمرير العنصر إلى نطاق الرؤية بسلاسة
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const rect = element.getBoundingClientRect();
-      setTargetRect(rect);
+      setTargetRect(element.getBoundingClientRect());
+
+      // تحديث إضافي بعد اكتمال أنيميشن التمرير للتأكد التام من دقة الإحداثيات
+      const timer1 = setTimeout(() => {
+        if (element) setTargetRect(element.getBoundingClientRect());
+      }, 150);
+      const timer2 = setTimeout(() => {
+        if (element) setTargetRect(element.getBoundingClientRect());
+      }, 350);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
     } else {
       setTargetRect(null);
     }
@@ -179,31 +190,51 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === TOUR_STEPS.length - 1;
 
-  // احتساب موقع صندوق التلميح (Tooltip) بذكاء لتجنب الخروج عن حدود الشاشة
-  const tooltipWidth = Math.min(typeof window !== 'undefined' ? window.innerWidth - 32 : 380, 400);
+  // احتساب أبعاد الشاشة وموقع صندوق التلميح مع صمام أمان صارم
+  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const tooltipWidth = Math.min(viewportWidth - 32, 400);
+  const tooltipEstimatedHeight = 240; // الارتفاع التقريبي للكارت بما فيه الشخصية والأزرار
   const padding = 8;
 
   let tooltipTop = 0;
   let tooltipLeft = 0;
 
   if (targetRect) {
-    const isTargetInUpperHalf = targetRect.top < (typeof window !== 'undefined' ? window.innerHeight / 2 : 400);
+    const spaceAbove = targetRect.top - padding;
+    const spaceBelow = viewportHeight - (targetRect.bottom + padding);
 
-    // إذا كان العنصر في النصف العلوي نضع التلميح أسفله، والعكس صحيح
-    if (isTargetInUpperHalf || currentStep.position === 'bottom') {
-      tooltipTop = targetRect.bottom + 16;
+    // اختيار الموضع الأنسب (أعلى أو أسفل العنصر) مع التحقق من كفاية المساحة
+    if (currentStep.position === 'top') {
+      if (spaceAbove >= tooltipEstimatedHeight + 16) {
+        tooltipTop = targetRect.top - padding - tooltipEstimatedHeight - 16;
+      } else {
+        tooltipTop = targetRect.bottom + padding + 16;
+      }
     } else {
-      tooltipTop = Math.max(16, targetRect.top - 240);
+      // الوضع السفلي الافتراضي
+      if (spaceBelow >= tooltipEstimatedHeight + 16) {
+        tooltipTop = targetRect.bottom + padding + 16;
+      } else if (spaceAbove >= tooltipEstimatedHeight + 16) {
+        tooltipTop = targetRect.top - padding - tooltipEstimatedHeight - 16;
+      } else {
+        // إذا كان العنصر طويلاً جداً ويغطي أغلب الشاشة، نثبت الصندوق في الأسفل داخل الشاشة بأمان
+        tooltipTop = viewportHeight - tooltipEstimatedHeight - 24;
+      }
     }
 
-    // توسط أفقي مع ضمان عدم الخروج عن حواف الشاشة
+    // توسط أفقي مع مراعاة حواف الشاشة
     const centerLeft = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
-    const maxLeft = (typeof window !== 'undefined' ? window.innerWidth : 800) - tooltipWidth - 16;
+    const maxLeft = viewportWidth - tooltipWidth - 16;
     tooltipLeft = Math.max(16, Math.min(centerLeft, maxLeft));
+
+    // صمام أمان صارم: يضمن استحالة خروج صندوق التلميح عن الجزء المرئي من الشاشة إطلاقاً!
+    const maxAllowedTop = viewportHeight - tooltipEstimatedHeight - 20;
+    tooltipTop = Math.max(20, Math.min(tooltipTop, maxAllowedTop));
   } else {
-    // تمركز تلقائي عند عدم العثور على العنصر
-    tooltipTop = (typeof window !== 'undefined' ? window.innerHeight / 2 - 120 : 250);
-    tooltipLeft = (typeof window !== 'undefined' ? window.innerWidth / 2 - tooltipWidth / 2 : 50);
+    // تمركز وسطي في الشاشة عند عدم وجود عنصر
+    tooltipTop = Math.max(20, (viewportHeight - tooltipEstimatedHeight) / 2);
+    tooltipLeft = Math.max(16, (viewportWidth - tooltipWidth) / 2);
   }
 
   return (
@@ -216,9 +247,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
       >
         <defs>
           <mask id="tour-spotlight-mask">
-            {/* الشاشة بالكامل بيضاء (معتمة) */}
             <rect x="0" y="0" width="100%" height="100%" fill="white" />
-            {/* ثقب شفاف مستدير حول العنصر المحدد */}
             {targetRect && (
               <rect
                 x={targetRect.left - padding}
@@ -232,7 +261,6 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           </mask>
         </defs>
 
-        {/* مستطيل الخلفية الداكن بلون التطبيق الكحلي المظلم */}
         <rect
           x="0"
           y="0"
@@ -257,7 +285,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
         />
       )}
 
-      {/* 3. صندوق التلميح الأنيق مع شخصية "شرارة" اللطيفة */}
+      {/* 3. صندوق التلميح الأنيق المضمون الظهور 100% داخل الشاشة */}
       <div
         className="fixed z-[10001] transition-all duration-300 ease-out"
         style={{
@@ -268,11 +296,11 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
       >
         {/* شخصية "شرارة" تقف بأعلى الصندوق تلوح أو ترشد */}
         <div className="absolute -top-16 -right-3 z-10 animate-bounce duration-1000 pointer-events-none">
-          <MascotCharacter mood={currentStep.mood} size={88} />
+          <MascotCharacter mood={currentStep.mood} size={84} />
         </div>
 
         {/* كارت التلميح المتناسق مع هوية التطبيق */}
-        <div className="bg-[#1C4D8D] border-2 border-[#2A5C9E] rounded-3xl p-5 sm:p-6 shadow-2xl shadow-black/60 text-[#F8FAFC] backdrop-blur-md relative overflow-hidden">
+        <div className="bg-[#1C4D8D] border-2 border-[#2A5C9E] rounded-3xl p-5 sm:p-6 shadow-2xl shadow-black/70 text-[#F8FAFC] backdrop-blur-md relative overflow-hidden">
           {/* زخرفة خلفية بلون التيل الخافت */}
           <div className="absolute -top-12 -left-12 w-32 h-32 bg-[#00A896]/15 rounded-full blur-2xl pointer-events-none" />
 
@@ -349,9 +377,6 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   );
 };
 
-/**
- * دالة مساعدة لإعادة تشغيل الجولة يدوياً في أي وقت
- */
 export function restartOnboardingTour(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(TOUR_STORAGE_KEY);
