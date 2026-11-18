@@ -42,12 +42,12 @@ export const HabitModal: React.FC<HabitModalProps> = ({
     } else {
       setName('');
       setHabitType('build');
-      setCategory('deep_work');
-      setIdentity('أنا شخص يقدر الإتقان والتركيز العميق والإنجاز المستمر.');
-      setCue('بعد شرب قهوة الصباح...');
+      setCategory('health');
+      setIdentity('');
+      setCue('');
       setRoutine('');
-      setTwoMinuteRule('فتح بيئة العمل وكتابة أول سطر فقط.');
-      setReward('أخذ استراحة منعشة وتسجيل تقدم السلسلة.');
+      setTwoMinuteRule('');
+      setReward('');
       setColor('#00A896');
       setFrequency('daily');
     }
@@ -193,7 +193,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
               type="text"
               value={identity}
               onChange={(e) => setIdentity(e.target.value)}
-              placeholder={isBreak ? 'مثال: أنا شخص سيد قراراته يملك صفاءً ذهنياً وصحة عالية.' : 'مثال: أنا مهندس برمجي محترف يبني أنظمة متينة كل يوم.'}
+              placeholder={isBreak ? 'مثال: أنا شخص سيد قراراته يملك صفاءً ذهنياً وصحة عالية.' : 'أنا شخص يقدر الإتقان والتركيز العميق والإنجاز المستمر.'}
               className="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E] text-slate-900 dark:text-[#F8FAFC] focus:outline-none focus:border-[#00A896] placeholder:text-slate-400 dark:placeholder:text-[#94A3B8]"
             />
           </div>
@@ -215,7 +215,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                   type="text"
                   value={cue}
                   onChange={(e) => setCue(e.target.value)}
-                  placeholder={isBreak ? 'إبعاد الهاتف خارج الغرفة، إلغاء الاشتراك في...' : 'بعد أن [عادة حالية]، سأقوم بـ...'}
+                  placeholder={isBreak ? 'إبعاد الهاتف خارج الغرفة، إلغاء الاشتراك في...' : 'بعد شرب قهوة الصباح...'}
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E] text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-400 dark:placeholder:text-[#94A3B8]"
                 />
               </div>
@@ -230,7 +230,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                   type="text"
                   value={twoMinuteRule}
                   onChange={(e) => setTwoMinuteRule(e.target.value)}
-                  placeholder={isBreak ? 'وضع كلمة سر معقدة، شحن الجهاز في صالة أخرى...' : 'قلّص العادة: فتح المحرر وكتابة سطر واحد...'}
+                  placeholder={isBreak ? 'وضع كلمة سر معقدة، شحن الجهاز في صالة أخرى...' : 'فتح بيئة العمل وكتابة أول سطر فقط.'}
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E] text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-400 dark:placeholder:text-[#94A3B8]"
                 />
               </div>
@@ -260,7 +260,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                   type="text"
                   value={reward}
                   onChange={(e) => setReward(e.target.value)}
-                  placeholder={isBreak ? 'شريك مساءلة أو عقوبة رمزية فورية عند الانتكاس...' : 'مكافأة فورية محفزة وتسجيل السلسلة'}
+                  placeholder={isBreak ? 'شريك مساءلة أو عقوبة رمزية فورية عند الانتكاس...' : 'أخذ استراحة منعشة وتسجيل تقدم السلسلة.'}
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E] text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-400 dark:placeholder:text-[#94A3B8]"
                 />
               </div>
