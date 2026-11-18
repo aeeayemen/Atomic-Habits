@@ -221,8 +221,8 @@ model HabitLog {
 
 ### 1. استنساخ المستودع (Clone):
 ```bash
-git clone https://github.com/your-username/atomic-habits-tracker.git
-cd atomic-habits-tracker
+git clone https://github.com/aeeayemen/Atomic-Habits.git
+cd Atomic-Habits
 ```
 
 ### 2. تثبيت الحزم (Install Dependencies):
