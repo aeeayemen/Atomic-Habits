@@ -15,6 +15,7 @@ import {
   Bell,
   BellRing,
   Download,
+  HelpCircle,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
@@ -33,6 +34,7 @@ interface HeaderProps {
   onOpenAuthModal?: () => void;
   onOpenNotifications?: () => void;
   isPushActive?: boolean;
+  onRestartTour?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -48,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuthModal,
   onOpenNotifications,
   isPushActive = false,
+  onRestartTour,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -120,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-[#2A5C9E]">
       {/* Brand Identity */}
-      <div className="flex items-center gap-3">
+      <div data-tour="tour-brand" className="flex items-center gap-3">
         <div className="relative p-2.5 rounded-2xl bg-gradient-to-br from-[#00A896] to-[#02C39A] text-white shadow-lg shadow-[#00A896]/25">
           <Flame className="w-6 h-6 animate-pulse text-[#F39C12] fill-[#F39C12]" />
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -175,6 +178,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* زر إعدادات التنبيهات Web Push */}
         <button
+          data-tour="tour-notifications"
           onClick={onOpenNotifications}
           className="relative p-2 rounded-xl border border-slate-200 dark:border-[#2A5C9E] bg-white dark:bg-[#1C4D8D] text-slate-600 dark:text-[#F8FAFC] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/60 transition-colors shadow-2xs cursor-pointer"
           title="إعدادات إشعارات وتذكيرات العادات اليومية (Web Push)"
@@ -239,8 +243,20 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
+        {/* زر إعادة تشغيل الجولة الإرشادية */}
+        {onRestartTour && (
+          <button
+            onClick={onRestartTour}
+            className="p-2 rounded-xl border border-slate-200 dark:border-[#2A5C9E] bg-white dark:bg-[#1C4D8D] text-slate-600 dark:text-[#F8FAFC] hover:text-[#00A896] dark:hover:text-[#02C39A] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/60 transition-colors shadow-2xs cursor-pointer"
+            title="الجولة الإرشادية ودليل الاستخدام السريع (شرارة 🔥)"
+          >
+            <HelpCircle className="w-4 h-4 text-[#F39C12]" />
+          </button>
+        )}
+
         {/* زر إضافة عادة جديدة */}
         <button
+          data-tour="tour-new-habit"
           onClick={onOpenNewHabitModal}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-[#00A896]/20 transition-all hover:scale-102 cursor-pointer"
         >

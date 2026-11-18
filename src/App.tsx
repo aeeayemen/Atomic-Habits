@@ -40,6 +40,7 @@ import { HabitGrid } from './components/HabitGrid';
 import { HabitModal } from './components/HabitModal';
 import { HabitDetailDrawer } from './components/HabitDetailDrawer';
 import { NotificationSettingsModal } from './components/NotificationSettingsModal';
+import { OnboardingTour } from './components/OnboardingTour';
 import { checkIsUserSubscribed } from './lib/pushService';
 
 export function App() {
@@ -81,6 +82,7 @@ export function App() {
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isPushActive, setIsPushActive] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   // دالة تحميل وتنسيق بيانات المستخدم (من السحابة أو التخزين المؤقت المحلي)
   const loadUserData = useCallback(async (userId: string) => {
@@ -472,20 +474,25 @@ export function App() {
           onOpenAuthModal={() => setIsGuestMode(false)}
           onOpenNotifications={() => setIsNotificationModalOpen(true)}
           isPushActive={isPushActive}
+          onRestartTour={() => setIsTourOpen(true)}
         />
 
         {/* بطاقات الإحصائيات الفورية */}
-        <MetricsSummary habits={habits} allLogs={allLogs} />
+        <div data-tour="tour-metrics">
+          <MetricsSummary habits={habits} allLogs={allLogs} />
+        </div>
 
         {/* شريط تنبيه: إياك أن تفوت مرتين */}
-        <NeverMissTwiceBanner
-          habits={habits}
-          allLogs={allLogs}
-          onMarkHabitDoneToday={(habitId) => {
-            const todayStr = formatISODate(new Date());
-            handleToggleLog(habitId, todayStr, 'done');
-          }}
-        />
+        <div data-tour="tour-banner">
+          <NeverMissTwiceBanner
+            habits={habits}
+            allLogs={allLogs}
+            onMarkHabitDoneToday={(habitId) => {
+              const todayStr = formatISODate(new Date());
+              handleToggleLog(habitId, todayStr, 'done');
+            }}
+          />
+        </div>
 
         {/* تصفيات التصنيف والبحث */}
         <CategoryFilter
@@ -497,28 +504,30 @@ export function App() {
         />
 
         {/* الشبكة اليومية التفاعلية لتتبع العادات */}
-        <HabitGrid
-          habits={filteredHabits}
-          days={activeDays}
-          allLogs={allLogs}
-          onToggleLog={handleToggleLog}
-          onOpenDetail={(habit) => setDetailHabit(habit)}
-          onEditHabit={(habit) => {
-            setEditingHabit(habit);
-            setIsModalOpen(true);
-          }}
-          onDeleteHabit={handleDeleteHabit}
-          onAddNewHabit={() => {
-            setEditingHabit(null);
-            setIsModalOpen(true);
-          }}
-          viewMode={viewMode}
-          onChangeViewMode={setViewMode}
-          onPrevPeriod={handlePrevPeriod}
-          onNextPeriod={handleNextPeriod}
-          onResetToToday={handleResetToToday}
-          onMarkAllTodayDone={handleMarkAllTodayDone}
-        />
+        <div data-tour="tour-grid">
+          <HabitGrid
+            habits={filteredHabits}
+            days={activeDays}
+            allLogs={allLogs}
+            onToggleLog={handleToggleLog}
+            onOpenDetail={(habit) => setDetailHabit(habit)}
+            onEditHabit={(habit) => {
+              setEditingHabit(habit);
+              setIsModalOpen(true);
+            }}
+            onDeleteHabit={handleDeleteHabit}
+            onAddNewHabit={() => {
+              setEditingHabit(null);
+              setIsModalOpen(true);
+            }}
+            viewMode={viewMode}
+            onChangeViewMode={setViewMode}
+            onPrevPeriod={handlePrevPeriod}
+            onNextPeriod={handleNextPeriod}
+            onResetToToday={handleResetToToday}
+            onMarkAllTodayDone={handleMarkAllTodayDone}
+          />
+        </div>
 
         {/* حكمة العادات الذرية في التذييل */}
         <footer className="pt-6 pb-4 border-t border-slate-200/60 dark:border-[#2A5C9E] text-center">
@@ -564,6 +573,12 @@ export function App() {
           checkIsUserSubscribed().then(setIsPushActive);
         }}
         currentUser={currentUser}
+      />
+
+      {/* الجولة الإرشادية التفاعلية مع شخصية شرارة */}
+      <OnboardingTour
+        forceOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
       />
     </div>
   );
