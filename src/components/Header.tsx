@@ -16,6 +16,7 @@ import {
   BellRing,
   Download,
   HelpCircle,
+  HardDriveDownload,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
@@ -35,6 +36,7 @@ interface HeaderProps {
   onOpenNotifications?: () => void;
   isPushActive?: boolean;
   onRestartTour?: () => void;
+  onOpenBackup?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -51,6 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNotifications,
   isPushActive = false,
   onRestartTour,
+  onOpenBackup,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -193,15 +196,27 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </button>
 
+        {/* زر النسخ الاحتياطي والاستعادة الشامل (JSON, CSV, Word) */}
+        {onOpenBackup && (
+          <button
+            onClick={onOpenBackup}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#00A896]/40 dark:border-[#00A896]/50 bg-[#00A896]/10 dark:bg-[#00A896]/20 text-[#00A896] dark:text-[#02C39A] hover:bg-[#00A896]/20 dark:hover:bg-[#00A896]/30 transition-colors shadow-2xs cursor-pointer text-xs font-bold"
+            title="النسخ الاحتياطي واستعادة البيانات (JSON, CSV, Word)"
+          >
+            <HardDriveDownload className="w-4 h-4" />
+            <span>النسخ والبيانات</span>
+          </button>
+        )}
+
         {/* تصدير كملف Word (.docx) */}
         <button
           onClick={handleExportWord}
           disabled={isExporting}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#00A896]/40 dark:border-[#00A896]/50 bg-[#00A896]/10 dark:bg-[#00A896]/20 text-[#00A896] dark:text-[#02C39A] hover:bg-[#00A896]/20 dark:hover:bg-[#00A896]/30 transition-colors shadow-2xs cursor-pointer text-xs font-bold"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A5C9E] bg-white dark:bg-[#1C4D8D] text-slate-700 dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/60 transition-colors shadow-2xs cursor-pointer text-xs font-bold"
           title="تصدير تقرير وسجلات العادات في مستند Word (.docx)"
         >
           {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
-          <span>تصدير Word</span>
+          <span className="hidden sm:inline">تقرير Word</span>
         </button>
 
         {/* استيراد من ملف Word (.docx) */}
@@ -215,11 +230,11 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isImporting}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A5C9E] bg-white dark:bg-[#1C4D8D] text-slate-700 dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/60 transition-colors shadow-2xs cursor-pointer text-xs font-bold"
+          className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-slate-200 dark:border-[#2A5C9E] bg-white dark:bg-[#1C4D8D] text-slate-700 dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/60 transition-colors shadow-2xs cursor-pointer text-xs font-bold"
           title="استيراد العادات من مستند Word (.docx)"
         >
           {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
-          <span>استيراد Word</span>
+          <span className="hidden sm:inline">استيراد Word</span>
         </button>
 
         {/* إعادة ضبط البيانات النموذجية */}

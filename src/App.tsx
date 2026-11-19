@@ -43,6 +43,7 @@ import { NotificationSettingsModal } from './components/NotificationSettingsModa
 import { OnboardingTour } from './components/OnboardingTour';
 import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
 import { BehavioralAnalyticsCard } from './components/BehavioralAnalyticsCard';
+import { BackupModal } from './components/BackupModal';
 import {
   isLocalNotificationEnabled,
   checkAndSendHabitReminder,
@@ -87,6 +88,7 @@ export function App() {
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isPushActive, setIsPushActive] = useState(false);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [reflectionModal, setReflectionModal] = useState<{
@@ -483,6 +485,61 @@ export function App() {
     }
   };
 
+  // استعادة ومزامنة بيانات النسخة الاحتياطية (JSON / CSV / Word)
+  const handleRestoreBackup = async (
+    importedHabits: Habit[],
+    importedLogs: HabitLog[],
+    mode: 'merge' | 'replace'
+  ) => {
+    // 1. ربط كافة العادات والسجلات بهوية المستخدم الحالي
+    const scopedHabits = importedHabits.map((h) => ({
+      ...h,
+      userId: currentUser?.id,
+    }));
+
+    const scopedLogs = importedLogs.map((l) => ({
+      ...l,
+      userId: currentUser?.id,
+    }));
+
+    let nextHabits: Habit[] = [];
+    let nextLogs: Record<string, HabitLog> = {};
+
+    if (mode === 'replace') {
+      nextHabits = scopedHabits;
+      for (const log of scopedLogs) {
+        nextLogs[log.id] = log;
+      }
+    } else {
+      // وضع الدمج الذكي (Merge)
+      const habitMap = new Map<string, Habit>();
+      for (const h of habits) {
+        habitMap.set(h.id, h);
+      }
+      for (const h of scopedHabits) {
+        habitMap.set(h.id, h);
+      }
+      nextHabits = Array.from(habitMap.values());
+
+      nextLogs = { ...allLogs };
+      for (const log of scopedLogs) {
+        nextLogs[log.id] = log;
+      }
+    }
+
+    // 2. تحديث الحالة المحلية والتخزين فورياً
+    handleUpdateHabits(nextHabits);
+    handleUpdateLogs(nextLogs);
+
+    // 3. مزامنة سحابية كاملة مع Supabase إن كان المستخدم مسجلاً
+    if (isSupabaseConfigured && currentUser) {
+      await Promise.allSettled([
+        ...scopedHabits.map((h) => upsertHabitToSupabase(h, currentUser.id)),
+        ...scopedLogs.map((l) => upsertLogToSupabase(l, currentUser.id)),
+      ]);
+    }
+  };
+
   const handleResetData = () => {
     if (confirm('هل ترغب في إعادة ضبط البيانات إلى نموذج العادات الذرية القياسي؟ سيتم استبدال البيانات الحالية.')) {
       handleUpdateHabits(INITIAL_HABITS);
@@ -540,6 +597,7 @@ export function App() {
           onOpenNotifications={() => setIsNotificationModalOpen(true)}
           isPushActive={isPushActive}
           onRestartTour={() => setIsTourOpen(true)}
+          onOpenBackup={() => setIsBackupModalOpen(true)}
         />
 
         {/* بطاقات الإحصائيات الفورية */}
@@ -670,6 +728,16 @@ export function App() {
           }}
         />
       )}
+
+      {/* نافذة النسخ الاحتياطي واستعادة البيانات الشاملة (JSON, CSV, Word) */}
+      <BackupModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        habits={habits}
+        allLogs={allLogs}
+        currentUserId={currentUser?.id}
+        onRestoreData={handleRestoreBackup}
+      />
 
       {/* الجولة الإرشادية التفاعلية مع شخصية شرارة */}
       <OnboardingTour
