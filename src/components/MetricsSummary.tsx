@@ -50,7 +50,7 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
       {/* 1. إنجاز اليوم */}
       <div className="p-4 rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200/80 dark:border-[#2A5C9E] shadow-2xs relative overflow-hidden group">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold text-slate-500 dark:text-[#94A3B8]">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
             تركيز اليوم
           </span>
           <div className="p-2 rounded-lg bg-[#00A896]/15 text-[#00A896] dark:text-[#02C39A]">
@@ -77,7 +77,7 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
       {/* 2. أعلى سلسلة نشطة (Amber/Gold #F39C12) */}
       <div className="p-4 rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200/80 dark:border-[#2A5C9E] shadow-2xs relative overflow-hidden group">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold text-slate-500 dark:text-[#94A3B8]">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
             أعلى سلسلة مستمرة 🔥
           </span>
           <div className="p-2 rounded-lg bg-[#F39C12]/15 text-[#F39C12]">
@@ -88,9 +88,9 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
           <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-[#F8FAFC]">
             {maxActiveStreak}
           </span>
-          <span className="text-xs text-slate-500 dark:text-[#94A3B8]">أيام متتالية</span>
+          <span className="text-xs text-slate-700 dark:text-slate-300">أيام متتالية</span>
         </div>
-        <p className="text-[11px] text-slate-400 dark:text-[#94A3B8] mt-2 truncate">
+        <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 truncate">
           {maxActiveStreak > 0 ? 'الزخم يتراكم كل يوم!' : 'ابدأ سلسلتك اليوم!'}
         </p>
       </div>
@@ -98,7 +98,7 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
       {/* 3. الرقم القياسي التاريخي (#F39C12) */}
       <div className="p-4 rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200/80 dark:border-[#2A5C9E] shadow-2xs relative overflow-hidden group">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold text-slate-500 dark:text-[#94A3B8]">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
             الرقم القياسي التاريخي
           </span>
           <div className="p-2 rounded-lg bg-[#F39C12]/15 text-[#F39C12]">
@@ -109,9 +109,9 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
           <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-[#F8FAFC]">
             {allTimeRecord}
           </span>
-          <span className="text-xs text-slate-500 dark:text-[#94A3B8]">يوماً أقصى استمرار</span>
+          <span className="text-xs text-slate-700 dark:text-slate-300">يوماً أقصى استمرار</span>
         </div>
-        <p className="text-[11px] text-slate-400 dark:text-[#94A3B8] mt-2">
+        <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-2">
           أفضل أداء قياسي مسجل
         </p>
       </div>
@@ -119,7 +119,7 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
       {/* 4. معدل الاتساق والالتزام الكلي */}
       <div className="p-4 rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200/80 dark:border-[#2A5C9E] shadow-2xs relative overflow-hidden group">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold text-slate-500 dark:text-[#94A3B8]">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
             معدل الالتزام الكلي
           </span>
           <div className="p-2 rounded-lg bg-[#00A896]/15 text-[#00A896] dark:text-[#02C39A]">
@@ -130,9 +130,9 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
           <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-[#F8FAFC]">
             {overallRate}%
           </span>
-          <span className="text-xs text-slate-500 dark:text-[#94A3B8]">({totalCompletionsAllTime} تسجيل إنجاز)</span>
+          <span className="text-xs text-slate-700 dark:text-slate-300">({totalCompletionsAllTime} تسجيل إنجاز)</span>
         </div>
-        <p className="text-[11px] text-slate-400 dark:text-[#94A3B8] mt-2">
+        <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-2">
           نسبة النجاح التراكمية
         </p>
       </div>

@@ -1,0 +1,7 @@
+# Robots.txt for Atomic Habits (istomic)
+# https://atomic-habits-blyt.onrender.com/
+
+User-agent: *
+Allow: /
+
+Sitemap: https://atomic-habits-blyt.onrender.com/sitemap.xml

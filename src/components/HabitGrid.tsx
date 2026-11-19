@@ -107,7 +107,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
                 'px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer',
                 viewMode === 'week'
                   ? 'bg-white dark:bg-[#1C4D8D] text-[#00A896] dark:text-[#02C39A] shadow-2xs'
-                  : 'text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-[#F8FAFC]'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-[#F8FAFC]'
               )}
             >
               عرض 7 أيام
@@ -118,7 +118,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
                 'px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer',
                 viewMode === 'rolling'
                   ? 'bg-white dark:bg-[#1C4D8D] text-[#00A896] dark:text-[#02C39A] shadow-2xs'
-                  : 'text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-[#F8FAFC]'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-[#F8FAFC]'
               )}
             >
               عرض 14 يوماً
@@ -128,7 +128,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
       </div>
 
       {/* ترويسة الجدول لأيام الأسبوع */}
-      <div className="hidden md:flex items-center justify-between gap-4 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-400 dark:text-[#94A3B8]">
+      <div className="hidden md:flex items-center justify-between gap-4 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
         <div className="min-w-[280px] max-w-sm">العادة وبصمة الهوية الذاتية</div>
         <div className="flex items-center gap-2 justify-center flex-1">
           {days.map((day) => (
@@ -182,7 +182,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
             <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC]">
               لا توجد عادات مؤرشفة حالياً
             </h3>
-            <p className="text-xs text-slate-500 dark:text-[#94A3B8] max-w-sm mt-1">
+            <p className="text-xs text-slate-700 dark:text-slate-300 max-w-sm mt-1">
               جميع عاداتك نشطة وتظهر في لوحة المتابعة اليومية. يمكنك أرشفة أي عادة في أي وقت لتنظيف شاشتك دون فقدان سجلاتها السابقة.
             </p>
           </div>
@@ -192,7 +192,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
             <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC]">
               لم يتم العثور على عادات مطابقة لهذا الفلتر
             </h3>
-            <p className="text-xs text-slate-500 dark:text-[#94A3B8] max-w-sm mt-1 mb-5">
+            <p className="text-xs text-slate-700 dark:text-slate-300 max-w-sm mt-1 mb-5">
               "أنت لا ترتقي إلى مستوى أهدافك، بل تهبط إلى مستوى أنظمتك."
               — جيمس كلير
             </p>
@@ -208,9 +208,9 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
       </div>
 
       {/* دليل الحالات السفلي */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5 text-xs text-slate-500 dark:text-[#94A3B8] border-t border-slate-200/60 dark:border-[#2A5C9E]">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-300 border-t border-slate-200/60 dark:border-[#2A5C9E]">
         <div className="flex items-center gap-4 flex-wrap">
-          <span className="font-bold text-slate-700 dark:text-[#F8FAFC]">دليل الحالات:</span>
+          <span className="font-bold text-slate-800 dark:text-[#F8FAFC]">دليل الحالات:</span>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-[#00A896]/25 border border-[#00A896] inline-block" />
             <span>منجز بنجاح ✅</span>
@@ -225,7 +225,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
           </div>
         </div>
 
-        <div className="text-[11px] text-slate-400 dark:text-[#94A3B8]">
+        <div className="text-[11px] text-slate-600 dark:text-slate-400">
           ملاحظة: اضغط على المربع للتبديل السريع بين الحالات، أو اضغط زر الفأرة الأيمن للتفويت المباشر.
         </div>
       </div>

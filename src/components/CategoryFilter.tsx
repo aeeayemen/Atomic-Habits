@@ -38,18 +38,18 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         {/* حقل البحث */}
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-[#94A3B8] pointer-events-none" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 dark:text-slate-400 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="ابحث في العادات أو عبارات الهوية..."
-            className="w-full pr-9 pl-3 py-2 text-xs rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200 dark:border-[#2A5C9E] focus:outline-none focus:ring-2 focus:ring-[#00A896]/30 focus:border-[#00A896] transition-all text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-400 dark:placeholder:text-[#94A3B8]"
+            className="w-full pr-9 pl-3 py-2 text-xs rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200 dark:border-[#2A5C9E] focus:outline-none focus:ring-2 focus:ring-[#00A896]/30 focus:border-[#00A896] transition-all text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-500 dark:placeholder:text-slate-400"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white cursor-pointer"
             >
               مسح
             </button>
@@ -68,7 +68,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
                   archiveView === 'active'
                     ? 'bg-white dark:bg-[#0F2854] text-[#00A896] dark:text-[#02C39A] shadow-2xs'
-                    : 'text-slate-500 dark:text-[#94A3B8] hover:text-slate-800 dark:hover:text-white'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
                 )}
               >
                 <Inbox className="w-3.5 h-3.5" />
@@ -82,7 +82,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
                   archiveView === 'archived'
                     ? 'bg-[#F39C12] text-white shadow-2xs'
-                    : 'text-slate-500 dark:text-[#94A3B8] hover:text-amber-500'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400'
                 )}
               >
                 <Archive className="w-3.5 h-3.5" />
@@ -100,7 +100,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   'px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
                   selectedType === 'all'
                     ? 'bg-white dark:bg-[#0F2854] text-slate-900 dark:text-white shadow-2xs'
-                    : 'text-slate-500 dark:text-[#94A3B8] hover:text-slate-800 dark:hover:text-white'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
                 )}
               >
                 الكل
@@ -112,7 +112,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
                   selectedType === 'build'
                     ? 'bg-[#00A896] text-white shadow-2xs'
-                    : 'text-slate-500 dark:text-[#94A3B8] hover:text-[#00A896]'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-[#00A896] dark:hover:text-[#02C39A]'
                 )}
               >
                 <Zap className="w-3.5 h-3.5" />
@@ -125,7 +125,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
                   selectedType === 'break'
                     ? 'bg-amber-500 text-white shadow-2xs'
-                    : 'text-slate-500 dark:text-[#94A3B8] hover:text-amber-500'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400'
                 )}
               >
                 <Shield className="w-3.5 h-3.5" />

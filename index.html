@@ -4,8 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <title>العادات الذرية · محرك الاتساق اليومي وتتبع السلاسل</title>
-    <meta name="description" content="تطبيق تفاعلي فائق الأداء لتتبع وبناء العادات اليومية وفق منهج كتاب العادات الذرية (Atomic Habits) لجيمس كلير." />
+    <meta name="description" content="تطبيق تفاعلي فائق الأداء لتتبع وبناء العادات اليومية والتخلص من العادات السلبية وفق منهج كتاب العادات الذرية (Atomic Habits) لجيمس كلير." />
+    <link rel="canonical" href="https://atomic-habits-blyt.onrender.com/" />
     
+    <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content="العادات الذرية · istomic" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://atomic-habits-blyt.onrender.com/" />
+    <meta property="og:title" content="العادات الذرية · محرك الاتساق اليومي وتتبع السلاسل" />
+    <meta property="og:description" content="تطبيق تفاعلي فائق الأداء لتتبع وبناء العادات اليومية والتخلص من العادات السلبية وفق منهج كتاب العادات الذرية لجيمس كلير." />
+    <meta property="og:image" content="https://atomic-habits-blyt.onrender.com/icon-512.svg" />
+    <meta property="og:locale" content="ar_AR" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:url" content="https://atomic-habits-blyt.onrender.com/" />
+    <meta name="twitter:title" content="العادات الذرية · محرك الاتساق اليومي وتتبع السلاسل" />
+    <meta name="twitter:description" content="تطبيق تفاعلي فائق الأداء لتتبع وبناء العادات اليومية والتخلص من العادات السلبية وفق منهج كتاب العادات الذرية لجيمس كلير." />
+    <meta name="twitter:image" content="https://atomic-habits-blyt.onrender.com/icon-512.svg" />
+
     <!-- PWA Web App Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
@@ -88,17 +105,20 @@
         margin-top: 28px;
         border: 1px solid #2A5C9E;
       }
+      /* Pure GPU-composited transform animation (no width reflows) */
       .loader-bar {
         height: 100%;
-        width: 30%;
+        width: 100%;
         background: linear-gradient(90deg, #00A896, #02C39A, #F39C12);
         border-radius: 999px;
+        transform-origin: 50% 50%;
+        will-change: transform;
         animation: loadingProgress 1.6s infinite ease-in-out;
       }
       @keyframes loadingProgress {
-        0% { transform: translateX(100%); width: 20%; }
-        50% { transform: translateX(0%); width: 60%; }
-        100% { transform: translateX(-100%); width: 20%; }
+        0% { transform: translateX(80%) scaleX(0.25); }
+        50% { transform: translateX(0%) scaleX(0.65); }
+        100% { transform: translateX(-80%) scaleX(0.25); }
       }
       @keyframes pulseLogo {
         0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(0, 168, 150, 0.4)); }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { MessageSquarePlus } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Habit, HabitCategory, HabitLog, HabitStatus, HabitType } from './types/habit';
@@ -29,7 +29,7 @@ import {
 } from './lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 
-// المكونات التفاعلية
+// المكونات التفاعلية الأساسية (Critical Path Components)
 import { LoadingScreen } from './components/LoadingScreen';
 import { AuthScreen } from './components/AuthScreen';
 import { Header } from './components/Header';
@@ -37,16 +37,18 @@ import { MetricsSummary } from './components/MetricsSummary';
 import { NeverMissTwiceBanner } from './components/NeverMissTwiceBanner';
 import { CategoryFilter } from './components/CategoryFilter';
 import { HabitGrid } from './components/HabitGrid';
-import { HabitModal } from './components/HabitModal';
-import { HabitDetailDrawer } from './components/HabitDetailDrawer';
-import { NotificationSettingsModal } from './components/NotificationSettingsModal';
-import { OnboardingTour } from './components/OnboardingTour';
-import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
-import { BehavioralAnalyticsCard } from './components/BehavioralAnalyticsCard';
-import { WeeklyReflectionCard } from './components/WeeklyReflectionCard';
-import { BackupModal } from './components/BackupModal';
-import { AccountabilityModal } from './components/AccountabilityModal';
-import { FeedbackModal } from './components/FeedbackModal';
+
+// المكونات المفصولة برمجياً عند الطلب (Code-Split via React.lazy)
+const HabitModal = lazy(() => import('./components/HabitModal').then((m) => ({ default: m.HabitModal })));
+const HabitDetailDrawer = lazy(() => import('./components/HabitDetailDrawer').then((m) => ({ default: m.HabitDetailDrawer })));
+const NotificationSettingsModal = lazy(() => import('./components/NotificationSettingsModal').then((m) => ({ default: m.NotificationSettingsModal })));
+const OnboardingTour = lazy(() => import('./components/OnboardingTour').then((m) => ({ default: m.OnboardingTour })));
+const SlipUpReflectionModal = lazy(() => import('./components/SlipUpReflectionModal').then((m) => ({ default: m.SlipUpReflectionModal })));
+const BehavioralAnalyticsCard = lazy(() => import('./components/BehavioralAnalyticsCard').then((m) => ({ default: m.BehavioralAnalyticsCard })));
+const WeeklyReflectionCard = lazy(() => import('./components/WeeklyReflectionCard').then((m) => ({ default: m.WeeklyReflectionCard })));
+const BackupModal = lazy(() => import('./components/BackupModal').then((m) => ({ default: m.BackupModal })));
+const AccountabilityModal = lazy(() => import('./components/AccountabilityModal').then((m) => ({ default: m.AccountabilityModal })));
+const FeedbackModal = lazy(() => import('./components/FeedbackModal').then((m) => ({ default: m.FeedbackModal })));
 import {
   executeOrQueueMutation,
   initializeOfflineQueueSync,
@@ -180,7 +182,10 @@ export function App() {
       } catch (err) {
         console.error('Error checking initial auth session:', err);
       } finally {
-        if (isMounted) setIsAuthChecking(false);
+        if (isMounted) {
+          setIsAuthChecking(false);
+          setIsLoading(false);
+        }
       }
     }
 
@@ -630,8 +635,8 @@ export function App() {
   };
 
   // التحقق المبدئي من الجلسة أو انتهاء شاشة الترحيب
-  if (isLoading) {
-    return <LoadingScreen onLoaded={() => setIsLoading(false)} minDuration={850} />;
+  if (isLoading && isAuthChecking) {
+    return <LoadingScreen onLoaded={() => setIsLoading(false)} minDuration={0} />;
   }
 
   // إذا لم يكن المستخدم مسجلاً ولم يختر وضع الزائر، نعرض صفحة تسجيل الدخول / إنشاء الحساب
@@ -646,7 +651,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0F2854] text-slate-900 dark:text-[#F8FAFC] transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main id="main-content" role="main" tabIndex={-1} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* الترويسة الرئيسية مع بيانات المستخدم وأزرار التحكم */}
         <Header
           theme={theme}
@@ -699,16 +704,20 @@ export function App() {
         </div>
 
         {/* تحليل الأداء والمحفزات السلوكية */}
-        <div data-tour="tour-analytics">
-          <BehavioralAnalyticsCard habits={habits} allLogs={allLogs} />
-        </div>
+        <Suspense fallback={<div className="h-28 rounded-2xl bg-slate-100 dark:bg-[#1C4D8D]/20 animate-pulse" />}>
+          <div data-tour="tour-analytics">
+            <BehavioralAnalyticsCard habits={habits} allLogs={allLogs} />
+          </div>
+        </Suspense>
 
         {/* بطاقة التأمل الأسبوعي ومراجعة الزخم */}
-        <WeeklyReflectionCard
-          habits={habits}
-          allLogs={allLogs}
-          userId={currentUser?.id}
-        />
+        <Suspense fallback={<div className="h-28 rounded-2xl bg-slate-100 dark:bg-[#1C4D8D]/20 animate-pulse" />}>
+          <WeeklyReflectionCard
+            habits={habits}
+            allLogs={allLogs}
+            userId={currentUser?.id}
+          />
+        </Suspense>
 
         {/* تصفيات التصنيف والنوع والبحث ومفتاح الأرشيف */}
         <CategoryFilter
@@ -781,94 +790,103 @@ export function App() {
             مبني بمعمارية Local-First فائقة السرعة استجابة 0 ثانية · مصادقة ومزامنة آمنة Supabase Auth · نظام متعدد المستخدمين RLS · تصدير واستيراد Word (.docx)
           </p>
         </footer>
-      </div>
+      </main>
 
-      {/* نافذة إضافة أو تعديل العادة */}
-      <HabitModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingHabit(null);
-        }}
-        onSave={handleSaveHabit}
-        initialHabit={editingHabit}
-      />
+      {/* النوافذ العائمة المنفصلة كودياً (Lazy-Loaded Modals via Suspense) */}
+      <Suspense fallback={null}>
+        {isModalOpen && (
+          <HabitModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setEditingHabit(null);
+            }}
+            onSave={handleSaveHabit}
+            initialHabit={editingHabit}
+          />
+        )}
 
-      {/* نافذة تفاصيل العادة العميقة */}
-      <HabitDetailDrawer
-        isOpen={Boolean(detailHabit)}
-        habit={detailHabit}
-        allLogs={allLogs}
-        onClose={() => setDetailHabit(null)}
-        onEdit={(habit) => {
-          setEditingHabit(habit);
-          setIsModalOpen(true);
-        }}
-        onDelete={handleDeleteHabit}
-        onArchive={handleArchiveHabit}
-        onRestore={handleRestoreHabit}
-      />
+        {Boolean(detailHabit) && (
+          <HabitDetailDrawer
+            isOpen={Boolean(detailHabit)}
+            habit={detailHabit}
+            allLogs={allLogs}
+            onClose={() => setDetailHabit(null)}
+            onEdit={(habit) => {
+              setEditingHabit(habit);
+              setIsModalOpen(true);
+            }}
+            onDelete={handleDeleteHabit}
+            onArchive={handleArchiveHabit}
+            onRestore={handleRestoreHabit}
+          />
+        )}
 
-      {/* نافذة إعدادات وتفعيل تنبيهات المتصفح المحلية */}
-      <NotificationSettingsModal
-        isOpen={isNotificationModalOpen}
-        onClose={() => {
-          setIsNotificationModalOpen(false);
-          setIsPushActive(isLocalNotificationEnabled());
-        }}
-        onStatusChange={(enabled) => setIsPushActive(enabled)}
-      />
+        {isNotificationModalOpen && (
+          <NotificationSettingsModal
+            isOpen={isNotificationModalOpen}
+            onClose={() => {
+              setIsNotificationModalOpen(false);
+              setIsPushActive(isLocalNotificationEnabled());
+            }}
+            onStatusChange={(enabled) => setIsPushActive(enabled)}
+          />
+        )}
 
-      {/* نافذة تأمل وتدوين محفزات الزلة لعادات الإقلاع */}
-      {reflectionModal.habit && (
-        <SlipUpReflectionModal
-          isOpen={reflectionModal.isOpen}
-          onClose={() => setReflectionModal((prev) => ({ ...prev, isOpen: false }))}
-          habitName={reflectionModal.habit.name}
-          date={reflectionModal.date}
-          existingNotes={allLogs[`${reflectionModal.habit.id}_${reflectionModal.date}`]?.notes}
-          onSave={handleSaveReflection}
-          onCancelSlipUp={() => {
-            if (reflectionModal.habit) {
-              handleToggleLog(reflectionModal.habit.id, reflectionModal.date, 'neutral');
-            }
-          }}
-        />
-      )}
+        {reflectionModal.habit && (
+          <SlipUpReflectionModal
+            isOpen={reflectionModal.isOpen}
+            onClose={() => setReflectionModal((prev) => ({ ...prev, isOpen: false }))}
+            habitName={reflectionModal.habit.name}
+            date={reflectionModal.date}
+            existingNotes={allLogs[`${reflectionModal.habit.id}_${reflectionModal.date}`]?.notes}
+            onSave={handleSaveReflection}
+            onCancelSlipUp={() => {
+              if (reflectionModal.habit) {
+                handleToggleLog(reflectionModal.habit.id, reflectionModal.date, 'neutral');
+              }
+            }}
+          />
+        )}
 
-      {/* نافذة مشاركة الإنجاز ومساءلة الأصدقاء */}
-      <AccountabilityModal
-        isOpen={isAccountabilityModalOpen}
-        onClose={() => setIsAccountabilityModalOpen(false)}
-        habits={habits}
-        allLogs={allLogs}
-        currentUserId={currentUser?.id}
-        userName={currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0]}
-      />
+        {isAccountabilityModalOpen && (
+          <AccountabilityModal
+            isOpen={isAccountabilityModalOpen}
+            onClose={() => setIsAccountabilityModalOpen(false)}
+            habits={habits}
+            allLogs={allLogs}
+            currentUserId={currentUser?.id}
+            userName={currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0]}
+          />
+        )}
 
-      {/* نافذة ملاحظات وتجربة النسخة التجريبية (Beta Feedback) */}
-      <FeedbackModal
-        isOpen={isFeedbackModalOpen}
-        onClose={() => setIsFeedbackModalOpen(false)}
-        userId={currentUser?.id}
-        userEmail={currentUser?.email}
-      />
+        {isFeedbackModalOpen && (
+          <FeedbackModal
+            isOpen={isFeedbackModalOpen}
+            onClose={() => setIsFeedbackModalOpen(false)}
+            userId={currentUser?.id}
+            userEmail={currentUser?.email}
+          />
+        )}
 
-      {/* نافذة النسخ الاحتياطي واستعادة البيانات الشاملة (JSON, CSV, Word) */}
-      <BackupModal
-        isOpen={isBackupModalOpen}
-        onClose={() => setIsBackupModalOpen(false)}
-        habits={habits}
-        allLogs={allLogs}
-        currentUserId={currentUser?.id}
-        onRestoreData={handleRestoreBackup}
-      />
+        {isBackupModalOpen && (
+          <BackupModal
+            isOpen={isBackupModalOpen}
+            onClose={() => setIsBackupModalOpen(false)}
+            habits={habits}
+            allLogs={allLogs}
+            currentUserId={currentUser?.id}
+            onRestoreData={handleRestoreBackup}
+          />
+        )}
 
-      {/* الجولة الإرشادية التفاعلية مع شخصية شرارة */}
-      <OnboardingTour
-        forceOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
-      />
+        {isTourOpen && (
+          <OnboardingTour
+            forceOpen={isTourOpen}
+            onClose={() => setIsTourOpen(false)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }
