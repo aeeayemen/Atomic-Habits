@@ -786,7 +786,10 @@ export function App() {
               title="إرسال ملاحظة أو عائق في التجربة لمطوري التطبيق (Beta Feedback)"
             >
               <FontAwesomeIcon icon={faCommentMedical} className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>إرسال ملاحظة / تجربة (Beta Feedback 📝)</span>
+              <span className="flex items-center gap-1.5">
+                <span>إرسال ملاحظة / تجربة (Beta Feedback)</span>
+                <FontAwesomeIcon icon={faCommentMedical} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              </span>
             </button>
           </div>
           <p className="text-[11px] text-slate-400 dark:text-[#94A3B8]/80 mt-1">

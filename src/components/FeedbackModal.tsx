@@ -136,8 +136,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               <FontAwesomeIcon icon={faCommentMedical} className="w-6 h-6 text-[#00A896] dark:text-[#02C39A]" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-black text-white">
-                ملاحظات وتجربة النسخة التجريبية (Beta) 📝
+              <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-1.5 flex-wrap">
+                <span>ملاحظات وتجربة النسخة التجريبية (Beta)</span>
+                <FontAwesomeIcon icon={faCommentMedical} className="w-4 h-4 text-[#02C39A] shrink-0" aria-hidden="true" />
               </h3>
               <p className="text-xs text-[#94A3B8] mt-0.5">
                 رأيك يساعدنا على تحسين الواجهة وتسهيل بناء العادات
@@ -193,8 +194,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-[#00A896]/20 border-2 border-[#00A896] flex items-center justify-center text-[#02C39A]">
                   <FontAwesomeIcon icon={faCheck} className="w-7 h-7" aria-hidden="true" />
                 </div>
-                <h4 className="text-base font-black text-white">
-                  شكراً جزيلاً لملاحظتك القيمة! 🎉
+                <h4 className="text-base font-black text-white flex items-center justify-center gap-1.5">
+                  <span>شكراً جزيلاً لملاحظتك القيمة!</span>
+                  <FontAwesomeIcon icon={faCheck} className="w-4 h-4 text-[#02C39A] shrink-0" aria-hidden="true" />
                 </h4>
                 <p className="text-xs text-[#CBD5E1] max-w-sm mx-auto leading-relaxed">
                   تم استلام ملاحظتك بنجاح وتوثيق السياق التقني لتحسين التطبيق في التحديث القادم.

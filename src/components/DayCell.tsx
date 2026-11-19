@@ -122,17 +122,17 @@ export const DayCell: React.FC<DayCellProps> = ({
 
   const statusLabel = isBreakHabit
     ? currentStatus === 'missed'
-      ? 'انتكاسة / زلة مسجلة ⚠️'
+      ? 'انتكاسة / زلة مسجلة'
       : isFuture
       ? 'يوم قادم'
-      : 'يوم نقي بلا زلات '
+      : 'يوم نقي بلا زلات'
     : currentStatus === 'done'
-    ? 'منجز بنجاح ✅'
+    ? 'منجز بنجاح'
     : currentStatus === 'missed'
-    ? 'مفوّت ❌'
+    ? 'مفوّت'
     : isFuture
     ? 'يوم قادم'
-    : 'قيد الانتظار ⏳';
+    : 'قيد الانتظار';
 
   const tooltipTitle = isBreakHabit
     ? `${date} · ${statusLabel}${log?.notes ? ` (المحفز: ${log.notes})` : ''} - انقر لتسجيل زلة`

@@ -129,15 +129,15 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
               <button
                 type="button"
                 onClick={handleShareHabit}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer shrink-0"
                 title="مشاركة إنجاز وسلسلة هذه العادة عبر واتساب أو الحافظة"
               >
+                <span>{copied ? 'تم النسخ!' : 'مشاركة العادة'}</span>
                 {copied ? (
                   <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-hidden="true" />
                 ) : (
                   <FontAwesomeIcon icon={faShareNodes} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 )}
-                <span>{copied ? 'تم النسخ!' : 'مشاركة العادة'}</span>
               </button>
               <button
                 onClick={onClose}

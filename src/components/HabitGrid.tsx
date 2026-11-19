@@ -7,6 +7,9 @@ import {
   faWandMagicSparkles,
   faCirclePlus,
   faBoxArchive,
+  faCheck,
+  faXmark,
+  faClock,
 } from '../lib/icons';
 import type { DayColumn, Habit, HabitLog, HabitStatus } from '../types/habit';
 import { HabitRow } from './HabitRow';
@@ -215,16 +218,25 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
         <div className="flex items-center gap-4 flex-wrap">
           <span className="font-bold text-slate-800 dark:text-[#F8FAFC]">دليل الحالات:</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-[#00A896]/25 border border-[#00A896] inline-block" />
-            <span>منجز بنجاح ✅</span>
+            <span className="w-3 h-3 rounded-sm bg-[#00A896]/25 border border-[#00A896] inline-block shrink-0" />
+            <span className="flex items-center gap-1">
+              <span>منجز بنجاح</span>
+              <FontAwesomeIcon icon={faCheck} className="w-3 h-3 text-[#00A896] shrink-0" aria-hidden="true" />
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-rose-500/20 border border-rose-500/60 inline-block" />
-            <span>مفوّت / لم يُنجز ❌</span>
+            <span className="w-3 h-3 rounded-sm bg-rose-500/20 border border-rose-500/60 inline-block shrink-0" />
+            <span className="flex items-center gap-1">
+              <span>مفوّت / لم يُنجز</span>
+              <FontAwesomeIcon icon={faXmark} className="w-3 h-3 text-rose-500 shrink-0" aria-hidden="true" />
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-slate-200 dark:bg-[#0F2854] border border-slate-300 dark:border-[#2A5C9E] inline-block" />
-            <span>قيد الانتظار / محايد ⏳</span>
+            <span className="w-3 h-3 rounded-sm bg-slate-200 dark:bg-[#0F2854] border border-slate-300 dark:border-[#2A5C9E] inline-block shrink-0" />
+            <span className="flex items-center gap-1">
+              <span>قيد الانتظار / محايد</span>
+              <FontAwesomeIcon icon={faClock} className="w-3 h-3 text-slate-400 shrink-0" aria-hidden="true" />
+            </span>
           </div>
         </div>
 

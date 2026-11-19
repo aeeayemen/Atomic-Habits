@@ -6,12 +6,19 @@ import {
   faXmark,
   faWandMagicSparkles,
   faCircleCheck,
+  faBolt,
+  faArrowTrendUp,
+  faBrain,
+  faCalendarDays,
+  faPlus,
+  faBell,
 } from '../lib/icons';
 import { MascotCharacter, type MascotMood } from './MascotCharacter';
 
 export interface TourStep {
   target: string; // CSS selector
   title: string;
+  icon?: any;
   content: string;
   mood: MascotMood;
   position?: 'top' | 'bottom';
@@ -20,7 +27,8 @@ export interface TourStep {
 const TOUR_STEPS: TourStep[] = [
   {
     target: '[data-tour="tour-brand"]',
-    title: 'أهلاً بك في منظومة العادات الذرية! ',
+    title: 'أهلاً بك في منظومة العادات الذرية!',
+    icon: faBolt,
     content:
       'أنا «شرارة»، رفيقك الذكي! صُممت هذه المنظومة بناءً على قوانين كتاب العادات الذرية لجيمس كلير لمساعدتك على بناء هوية جديدة من خلال مكاسب صغيرة بنسبة 1% يومياً.',
     mood: 'wave',
@@ -28,7 +36,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="tour-metrics"]',
-    title: 'مؤشرات الاتساق والسلاسل اللحظية ',
+    title: 'مؤشرات الاتساق والسلاسل اللحظية',
+    icon: faArrowTrendUp,
     content:
       'تابع هنا نبض تقدمك اليومي: نسبة الالتزام العامة، أطول سلسلة إنجاز مستمرة، والشارات التحفيزية التي ستفتحها كلما حافظت على سلاسلك دون انقطاع.',
     mood: 'idea',
@@ -36,7 +45,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="tour-banner"]',
-    title: 'القانون الذهبي: إياك أن تفوت مرتين! ⚡',
+    title: 'القانون الذهبي: إياك أن تفوت مرتين!',
+    icon: faBolt,
     content:
       'التعثر ليوم واحد حادث عابر، أما التعثر ليومين متتاليين فهو بداية عادة سلبية جديدة. هذا الشريط الذكي يرصد أي عادة تعثرت فيها بالأمس ليذكرك بإنجازها اليوم فوراً.',
     mood: 'point',
@@ -44,7 +54,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="tour-analytics"]',
-    title: 'تحليل الأداء والمحفزات السلوكية 🧠',
+    title: 'تحليل الأداء والمحفزات السلوكية',
+    icon: faBrain,
     content:
       'اكتشف أضعف أيام التزامك خلال الأسبوع، راقب الفترات الحساسة للزلات، وتعرف على أهم المحفزات التي تؤثر على استمرارك لتضع حواجز استباقية تحميك.',
     mood: 'idea',
@@ -52,7 +63,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="tour-first-habit"], [data-tour="tour-grid"]',
-    title: 'شبكة الإنجاز اليومي السريعة 📅',
+    title: 'شبكة الإنجاز اليومي السريعة',
+    icon: faCalendarDays,
     content:
       'قلب المنظومة النابض! بنقرة واحدة سريعة (استجابة 0 ثانية)، وثّق إنجازك اليومي، راقب تدرج ألوان السلسلة، واحتفل بالمفرقعات عند كسر الأرقام القياسية.',
     mood: 'proud',
@@ -60,7 +72,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="tour-new-habit"]',
-    title: 'إضافة عادة ذرية جديدة ➕',
+    title: 'إضافة عادة ذرية جديدة',
+    icon: faPlus,
     content:
       'انقر هنا لإضافة عادة مصممة بقوانين السلوك: حدد الهوية ("أنا شخص..."), الإشارة، الروتين، وقاعدة الدقيقتين لجعل البداية سهلة للغاية.',
     mood: 'point',
@@ -68,7 +81,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="tour-notifications"]',
-    title: 'التذكيرات الذكية في المتصفح 🔔',
+    title: 'التذكيرات الذكية في المتصفح',
+    icon: faBell,
     content:
       'لا تدع النسيان يكسر سلاسلك! فعّل الإشعارات المحلية لتصلك تنبيهات العادات المتبقية أثناء استخدامك للمتصفح دون الحاجة لخوادم معقدة.',
     mood: 'celebrate',
@@ -401,8 +415,11 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           </div>
 
           {/* العنوان والمحتوى التوجيهي */}
-          <h4 className="text-base font-black text-white mb-2 tracking-tight">
-            {currentStep.title}
+          <h4 className="text-base font-black text-white mb-2 tracking-tight flex items-center gap-2 flex-wrap">
+            <span>{currentStep.title}</span>
+            {currentStep.icon && (
+              <FontAwesomeIcon icon={currentStep.icon} className="w-4 h-4 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
+            )}
           </h4>
           <p className="text-xs text-[#CBD5E1] leading-relaxed mb-5">
             {currentStep.content}

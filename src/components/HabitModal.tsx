@@ -106,10 +106,20 @@ export const HabitModal: React.FC<HabitModalProps> = ({
               )}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-[#F8FAFC]">
-                {initialHabit
-                  ? isBreak ? 'تعديل خطة الإقلاع عن العادة' : 'تعديل العادة والنظام'
-                  : isBreak ? 'هندسة خطة الإقلاع عن عادة سيئة ' : 'هندسة عادة ذرية جديدة ⚡'}
+              <h3 className="text-lg font-bold text-slate-900 dark:text-[#F8FAFC] flex items-center gap-1.5 flex-wrap">
+                {initialHabit ? (
+                  isBreak ? 'تعديل خطة الإقلاع عن العادة' : 'تعديل العادة والنظام'
+                ) : isBreak ? (
+                  <>
+                    <span>هندسة خطة الإقلاع عن عادة سيئة</span>
+                    <FontAwesomeIcon icon={faShieldHalved} className="w-4 h-4 text-amber-500 shrink-0" aria-hidden="true" />
+                  </>
+                ) : (
+                  <>
+                    <span>هندسة عادة ذرية جديدة</span>
+                    <FontAwesomeIcon icon={faBolt} className="w-4 h-4 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
+                  </>
+                )}
               </h3>
               <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
                 {isBreak
@@ -144,8 +154,8 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                     : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <FontAwesomeIcon icon={faBolt} className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>بناء عادة إيجابية (Build)</span>
+                <FontAwesomeIcon icon={faBolt} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               </button>
 
               <button
@@ -157,8 +167,8 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                     : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <FontAwesomeIcon icon={faShieldHalved} className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>الإقلاع عن عادة سيئة (Break)</span>
+                <FontAwesomeIcon icon={faShieldHalved} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               </button>
             </div>
           </div>

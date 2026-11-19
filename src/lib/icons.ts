@@ -84,4 +84,7 @@ export {
   faFileExcel,
   faFileWord,
   faFileCsv,
+  faUsers,
+  faRocket,
+  faHourglassHalf,
 } from '@fortawesome/free-solid-svg-icons';

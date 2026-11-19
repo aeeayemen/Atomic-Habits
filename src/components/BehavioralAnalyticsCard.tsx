@@ -131,12 +131,14 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
 
                 {/* استنتاج وتوصية ذكية */}
                 {analytics.weakestDay ? (
-                  <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed">
-                    ⚡ يظهر التحليل أن <span className="font-bold text-amber-600 dark:text-amber-400">يوم {analytics.weakestDay.dayName}</span> هو أكثر يوم يشهد تفويتاً أو زلات بنسبة <span className="font-bold">{analytics.weakestDay.failureRate}%</span>.
+                  <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed flex items-center gap-1.5 flex-wrap">
+                    <span>يظهر التحليل أن <span className="font-bold text-amber-600 dark:text-amber-400">يوم {analytics.weakestDay.dayName}</span> هو أكثر يوم يشهد تفويتاً أو زلات بنسبة <span className="font-bold">{analytics.weakestDay.failureRate}%</span>.</span>
+                    <FontAwesomeIcon icon={faBolt} className="w-3.5 h-3.5 text-amber-500 shrink-0" aria-hidden="true" />
                   </p>
                 ) : (
-                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">
-                    ✅ أداؤك متوازن وثابت على مدار الأسبوع بدون أي يوم تعثر بارز!
+                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed flex items-center gap-1.5 flex-wrap">
+                    <span>أداؤك متوازن وثابت على مدار الأسبوع بدون أي يوم تعثر بارز!</span>
+                    <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
                   </p>
                 )}
               </div>

@@ -6,6 +6,7 @@ import {
   faTrophy,
   faChartLine,
   faShareNodes,
+  faHandshake,
 } from '../lib/icons';
 import type { Habit, HabitLog } from '../types/habit';
 import { formatISODate } from '../lib/utils';
@@ -154,8 +155,9 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
               <FontAwesomeIcon icon={faFire} className="w-4 h-4" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-xs font-black text-slate-900 dark:text-white">
-                شريك المساءلة ومشاركة الإنجاز 🤝
+              <h2 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span>شريك المساءلة ومشاركة الإنجاز</span>
+                <FontAwesomeIcon icon={faHandshake} className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
               </h2>
               <p className="text-[11px] text-slate-700 dark:text-slate-300">
                 شارك بطاقة سلاسلك ونسبة التزامك بإيجابية مع صديقك أو شريك المساءلة دون أي ضغوط.

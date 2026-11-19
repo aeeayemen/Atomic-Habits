@@ -13,6 +13,7 @@ import {
   faHardDrive,
   faWandMagicSparkles,
   faShieldHalved,
+  faFloppyDisk,
 } from '../lib/icons';
 import type { Habit, HabitLog } from '../types/habit';
 import {
@@ -183,8 +184,9 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               <FontAwesomeIcon icon={faHardDrive} className="w-6 h-6" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-slate-900 dark:text-[#F8FAFC]">
-                النسخ الاحتياطي واستعادة البيانات 💾
+              <h3 className="text-lg font-black text-slate-900 dark:text-[#F8FAFC] flex items-center gap-1.5 flex-wrap">
+                <span>النسخ الاحتياطي واستعادة البيانات</span>
+                <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
               </h3>
               <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
                 تصدير واستيراد سريع بصيغ JSON و CSV و Word لمزامنة عاداتك بأمان

@@ -131,8 +131,8 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     : 'text-slate-700 dark:text-slate-300 hover:text-[#0b7a6e] dark:hover:text-[#02C39A]'
                 )}
               >
+                <span>بناء</span>
                 <FontAwesomeIcon icon={faBolt} className="w-3 h-3 shrink-0" aria-hidden="true" />
-                <span>بناء ⚡</span>
               </button>
 
               <button
@@ -146,8 +146,8 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     : 'text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400'
                 )}
               >
+                <span>إقلاع</span>
                 <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3 shrink-0" aria-hidden="true" />
-                <span>إقلاع </span>
               </button>
             </div>
           )}

@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShieldHalved, faXmark, faWandMagicSparkles, faFloppyDisk } from '../lib/icons';
+import {
+  faShieldHalved,
+  faXmark,
+  faWandMagicSparkles,
+  faFloppyDisk,
+  faTriangleExclamation,
+  faClock,
+  faMoon,
+  faUsers,
+  faBolt,
+} from '../lib/icons';
 
 interface SlipUpReflectionModalProps {
   isOpen: boolean;
@@ -13,11 +23,11 @@ interface SlipUpReflectionModalProps {
 }
 
 const COMMON_TRIGGERS = [
-  { id: 'stress', label: 'توتر وضغط نفسي 😫', tip: 'اجعلها غير جذابة: تذكر أن الراحة لحظية والندم يدوم' },
-  { id: 'boredom', label: 'ملل وفراغ ذهني 🥱', tip: 'اجعلها خفية: استبدل الفراغ بعادة بديلة إيجابية' },
-  { id: 'fatigue', label: 'إرهاق وقلة نوم 😴', tip: 'اجعلها صعبة: ابتعد عن بيئة الإغراء فور الشعور بالتعب' },
-  { id: 'environment', label: 'مؤثر بيئي أو رفقاء 👥', tip: 'غيّر البيئة المحيطة لتجعل الإشارة مستحيلة الظهور' },
-  { id: 'craving', label: 'إغراء أو رغبة مفاجئة ⚡', tip: 'طبّق قاعدة الـ 10 دقائق: انتظر 10 دقائق قبل الاستجابة' },
+  { id: 'stress', label: 'توتر وضغط نفسي', icon: faTriangleExclamation, tip: 'اجعلها غير جذابة: تذكر أن الراحة لحظية والندم يدوم' },
+  { id: 'boredom', label: 'ملل وفراغ ذهني', icon: faClock, tip: 'اجعلها خفية: استبدل الفراغ بعادة بديلة إيجابية' },
+  { id: 'fatigue', label: 'إرهاق وقلة نوم', icon: faMoon, tip: 'اجعلها صعبة: ابتعد عن بيئة الإغراء فور الشعور بالتعب' },
+  { id: 'environment', label: 'مؤثر بيئي أو رفقاء', icon: faUsers, tip: 'غيّر البيئة المحيطة لتجعل الإشارة مستحيلة الظهور' },
+  { id: 'craving', label: 'إغراء أو رغبة مفاجئة', icon: faBolt, tip: 'طبّق قاعدة الـ 10 دقائق: انتظر 10 دقائق قبل الاستجابة' },
 ];
 
 export const SlipUpReflectionModal: React.FC<SlipUpReflectionModalProps> = ({
@@ -56,8 +66,9 @@ export const SlipUpReflectionModal: React.FC<SlipUpReflectionModalProps> = ({
               <FontAwesomeIcon icon={faShieldHalved} className="w-5 h-5 shrink-0" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-base font-black text-slate-900 dark:text-[#F8FAFC]">
-                تسجيل زلة / انتكاسة عابرة 
+              <h3 className="text-base font-black text-slate-900 dark:text-[#F8FAFC] flex items-center gap-1.5">
+                <span>تسجيل زلة / انتكاسة عابرة</span>
+                <FontAwesomeIcon icon={faShieldHalved} className="w-3.5 h-3.5 text-amber-500 shrink-0" aria-hidden="true" />
               </h3>
               <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
                 {habitName} · {date}
@@ -91,13 +102,14 @@ export const SlipUpReflectionModal: React.FC<SlipUpReflectionModalProps> = ({
                 key={t.id}
                 type="button"
                 onClick={() => setSelectedTrigger(selectedTrigger === t.id ? '' : t.id)}
-                className={`px-3 py-2 rounded-xl text-xs font-bold border text-right transition-all cursor-pointer ${
+                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                   selectedTrigger === t.id
                     ? 'bg-amber-500/20 border-amber-500 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500/30'
                     : 'bg-slate-50 dark:bg-[#0F2854]/60 border-slate-200 dark:border-[#2A5C9E] text-slate-600 dark:text-[#94A3B8] hover:border-amber-400'
                 }`}
               >
-                {t.label}
+                <span>{t.label}</span>
+                <FontAwesomeIcon icon={t.icon} className="w-3.5 h-3.5 shrink-0 opacity-80" aria-hidden="true" />
               </button>
             ))}
           </div>

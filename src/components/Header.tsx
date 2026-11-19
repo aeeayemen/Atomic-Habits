@@ -20,6 +20,7 @@ import {
   faShareNodes,
   faCommentMedical,
   faEllipsis,
+  faBolt,
 } from '../lib/icons';
 import { soundManager } from '../lib/sound';
 import type { User } from '@supabase/supabase-js';
@@ -194,9 +195,9 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onOpenAccountability}
             aria-label="مشاركة بطاقة الإنجاز ومساءلة الأصدقاء"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/40 dark:border-amber-500/50 bg-amber-500/10 dark:bg-amber-500/15 text-[#9a5b00] dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 transition-colors shadow-2xs cursor-pointer text-xs font-bold shrink-0"
-            title="مشاركة بطاقة الإنجاز ومساءلة الأصدقاء 🤝"
+            title="مشاركة بطاقة الإنجاز ومساءلة الأصدقاء"
           >
-            <FontAwesomeIcon icon={faShareNodes} className="w-3.5 h-3.5 text-[#9a5b00] dark:text-[#F39C12]" aria-hidden="true" />
+            <FontAwesomeIcon icon={faShareNodes} className="w-3.5 h-3.5 text-[#9a5b00] dark:text-[#F39C12] shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">مشاركة الإنجاز</span>
           </button>
         )}
@@ -291,8 +292,11 @@ export const Header: React.FC<HeaderProps> = ({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[#065f8a] dark:text-sky-400 hover:bg-slate-100 dark:hover:bg-[#1C4D8D] transition-colors cursor-pointer font-bold"
                 >
-                  <FontAwesomeIcon icon={faCommentMedical} className="w-4 h-4" aria-hidden="true" />
-                  <span>ملاحظات وعوائق التجربة 📝</span>
+                  <FontAwesomeIcon icon={faCommentMedical} className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span className="flex items-center gap-1.5">
+                    <span>ملاحظات وعوائق التجربة</span>
+                    <FontAwesomeIcon icon={faCommentMedical} className="w-3.5 h-3.5 text-sky-500 shrink-0" aria-hidden="true" />
+                  </span>
                 </button>
               )}
 
@@ -306,8 +310,11 @@ export const Header: React.FC<HeaderProps> = ({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#1C4D8D] transition-colors cursor-pointer"
                 >
-                  <FontAwesomeIcon icon={faCircleQuestion} className="w-4 h-4 text-[#9a5b00] dark:text-[#F39C12]" aria-hidden="true" />
-                  <span>الجولة الإرشادية (شرارة )</span>
+                  <FontAwesomeIcon icon={faCircleQuestion} className="w-4 h-4 text-[#9a5b00] dark:text-[#F39C12] shrink-0" aria-hidden="true" />
+                  <span className="flex items-center gap-1.5">
+                    <span>الجولة الإرشادية (شرارة)</span>
+                    <FontAwesomeIcon icon={faBolt} className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
+                  </span>
                 </button>
               )}
 
@@ -335,7 +342,7 @@ export const Header: React.FC<HeaderProps> = ({
                 disabled={isImporting}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#1C4D8D] transition-colors cursor-pointer"
               >
-                {isImporting ? <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4 text-[#00A896]" aria-hidden="true" /> : <FontAwesomeIcon icon={faFileArrowUp} className="w-4 h-4 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />}
+                {isImporting ? <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4 text-[#00A896]" aria-hidden="true" /> : <FontAwesomeIcon icon={faFileArrowUp} className="w-4 h-4 text-indigo-500 dark:indigo-400" aria-hidden="true" />}
                 <span>استيراد من Word (.docx)</span>
               </button>
 
@@ -349,8 +356,11 @@ export const Header: React.FC<HeaderProps> = ({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[#9a5b00] dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer font-bold"
                 >
-                  <FontAwesomeIcon icon={faDownload} className="w-4 h-4 text-[#9a5b00] dark:text-amber-500" aria-hidden="true" />
-                  <span>تثبيت التطبيق على الجهاز 📲</span>
+                  <FontAwesomeIcon icon={faDownload} className="w-4 h-4 text-[#9a5b00] dark:text-amber-500 shrink-0" aria-hidden="true" />
+                  <span className="flex items-center gap-1.5">
+                    <span>تثبيت التطبيق على الجهاز</span>
+                    <FontAwesomeIcon icon={faDownload} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  </span>
                 </button>
               )}
 
