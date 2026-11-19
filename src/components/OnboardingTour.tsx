@@ -42,6 +42,14 @@ const TOUR_STEPS: TourStep[] = [
     position: 'bottom',
   },
   {
+    target: '[data-tour="tour-analytics"]',
+    title: 'تحليل الأداء والمحفزات السلوكية 🧠',
+    content:
+      'اكتشف أضعف أيام التزامك خلال الأسبوع، راقب الفترات الحساسة للزلات، وتعرف على أهم المحفزات التي تؤثر على استمرارك لتضع حواجز استباقية تحميك.',
+    mood: 'idea',
+    position: 'bottom',
+  },
+  {
     target: '[data-tour="tour-first-habit"], [data-tour="tour-grid"]',
     title: 'شبكة الإنجاز اليومي السريعة 📅',
     content:

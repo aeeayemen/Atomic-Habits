@@ -42,6 +42,7 @@ import { HabitDetailDrawer } from './components/HabitDetailDrawer';
 import { NotificationSettingsModal } from './components/NotificationSettingsModal';
 import { OnboardingTour } from './components/OnboardingTour';
 import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
+import { BehavioralAnalyticsCard } from './components/BehavioralAnalyticsCard';
 import {
   isLocalNotificationEnabled,
   checkAndSendHabitReminder,
@@ -556,6 +557,11 @@ export function App() {
               handleToggleLog(habitId, todayStr, 'done');
             }}
           />
+        </div>
+
+        {/* تحليل الأداء والمحفزات السلوكية */}
+        <div data-tour="tour-analytics">
+          <BehavioralAnalyticsCard habits={habits} allLogs={allLogs} />
         </div>
 
         {/* تصفيات التصنيف والنوع والبحث */}
