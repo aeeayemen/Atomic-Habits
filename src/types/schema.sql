@@ -298,4 +298,32 @@ CREATE POLICY "Users can view their own feedback"
   TO authenticated
   USING (auth.uid() = user_id);
 
+-- ==============================================================================
+-- 11. جدول التأمل الأسبوعي (Weekly Reflections)
+-- يحفظ نصوص وعهود التأمل الأسبوعي للمستخدم بأمان
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.weekly_reflections (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  week_key VARCHAR(32) NOT NULL,
+  note TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_user_week UNIQUE (user_id, week_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_reflections_user ON public.weekly_reflections(user_id);
+CREATE INDEX IF NOT EXISTS idx_weekly_reflections_week ON public.weekly_reflections(week_key);
+
+ALTER TABLE public.weekly_reflections ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage their own weekly reflections" ON public.weekly_reflections;
+CREATE POLICY "Users can manage their own weekly reflections"
+  ON public.weekly_reflections
+  FOR ALL
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+
 

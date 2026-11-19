@@ -43,6 +43,7 @@ import { NotificationSettingsModal } from './components/NotificationSettingsModa
 import { OnboardingTour } from './components/OnboardingTour';
 import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
 import { BehavioralAnalyticsCard } from './components/BehavioralAnalyticsCard';
+import { WeeklyReflectionCard } from './components/WeeklyReflectionCard';
 import { BackupModal } from './components/BackupModal';
 import { AccountabilityModal } from './components/AccountabilityModal';
 import { FeedbackModal } from './components/FeedbackModal';
@@ -701,6 +702,13 @@ export function App() {
         <div data-tour="tour-analytics">
           <BehavioralAnalyticsCard habits={habits} allLogs={allLogs} />
         </div>
+
+        {/* بطاقة التأمل الأسبوعي ومراجعة الزخم */}
+        <WeeklyReflectionCard
+          habits={habits}
+          allLogs={allLogs}
+          userId={currentUser?.id}
+        />
 
         {/* تصفيات التصنيف والنوع والبحث ومفتاح الأرشيف */}
         <CategoryFilter
