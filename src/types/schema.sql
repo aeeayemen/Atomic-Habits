@@ -44,6 +44,13 @@ BEGIN
   ) THEN
     ALTER TABLE public.habits ADD COLUMN type VARCHAR(32) NOT NULL DEFAULT 'build';
   END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'habits' AND column_name = 'archived_at'
+  ) THEN
+    ALTER TABLE public.habits ADD COLUMN archived_at TIMESTAMPTZ;
+  END IF;
 END $$;
 
 -- 3. إنشاء جدول سجلات الإنجاز اليومية (Habit Logs) المرتبط بالمستخدم والعادة

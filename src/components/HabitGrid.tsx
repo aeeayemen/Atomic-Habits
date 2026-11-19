@@ -5,6 +5,7 @@ import {
   Calendar,
   Sparkles,
   PlusCircle,
+  Archive,
 } from 'lucide-react';
 import type { DayColumn, Habit, HabitLog, HabitStatus } from '../types/habit';
 import { HabitRow } from './HabitRow';
@@ -20,6 +21,9 @@ interface HabitGridProps {
   onDeleteHabit: (habitId: string) => void;
   onAddNewHabit: () => void;
   onOpenReflection?: (habit: Habit, date: string) => void;
+  onArchiveHabit?: (habitId: string) => void;
+  onRestoreHabit?: (habitId: string) => void;
+  isArchivedView?: boolean;
   viewMode: 'week' | 'rolling';
   onChangeViewMode: (mode: 'week' | 'rolling') => void;
   onPrevPeriod: () => void;
@@ -38,6 +42,9 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
   onDeleteHabit,
   onAddNewHabit,
   onOpenReflection,
+  onArchiveHabit,
+  onRestoreHabit,
+  isArchivedView = false,
   viewMode,
   onChangeViewMode,
   onPrevPeriod,
@@ -163,10 +170,22 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
                 onEditHabit={onEditHabit}
                 onDeleteHabit={onDeleteHabit}
                 onOpenReflection={onOpenReflection}
+                onArchiveHabit={onArchiveHabit}
+                onRestoreHabit={onRestoreHabit}
                 viewMode={viewMode}
               />
             </div>
           ))
+        ) : isArchivedView ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#2A5C9E] bg-white/50 dark:bg-[#1C4D8D]/40">
+            <Archive className="w-12 h-12 text-[#F39C12] mb-3 opacity-80" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC]">
+              لا توجد عادات مؤرشفة حالياً
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#94A3B8] max-w-sm mt-1">
+              جميع عاداتك نشطة وتظهر في لوحة المتابعة اليومية. يمكنك أرشفة أي عادة في أي وقت لتنظيف شاشتك دون فقدان سجلاتها السابقة.
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#2A5C9E] bg-white/50 dark:bg-[#1C4D8D]/40">
             <Sparkles className="w-10 h-10 text-[#00A896] mb-3 opacity-80" />

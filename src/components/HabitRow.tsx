@@ -10,6 +10,8 @@ import {
   Trash2,
   Shield,
   ShieldCheck,
+  Archive,
+  ArchiveRestore,
 } from 'lucide-react';
 import type { DayColumn, Habit, HabitLog, HabitStatus } from '../types/habit';
 import { calculateStreakStats } from '../lib/streak';
@@ -25,6 +27,8 @@ interface HabitRowProps {
   onEditHabit: (habit: Habit) => void;
   onDeleteHabit: (habitId: string) => void;
   onOpenReflection?: (habit: Habit, date: string) => void;
+  onArchiveHabit?: (habitId: string) => void;
+  onRestoreHabit?: (habitId: string) => void;
   viewMode: 'week' | 'rolling';
 }
 
@@ -37,9 +41,12 @@ export const HabitRow: React.FC<HabitRowProps> = ({
   onEditHabit,
   onDeleteHabit,
   onOpenReflection,
+  onArchiveHabit,
+  onRestoreHabit,
   viewMode,
 }) => {
   const isBreakHabit = habit.type === 'break';
+  const isArchived = Boolean(habit.is_archived ?? habit.archived);
   const stats = calculateStreakStats(habit.id, allLogs, new Date(), habit.type || 'build', habit.createdAt);
   const categoryMeta = CATEGORIES_META[habit.category] || CATEGORIES_META.health;
 
@@ -82,6 +89,14 @@ export const HabitRow: React.FC<HabitRowProps> = ({
                 )}
               >
                 {categoryMeta.label}
+              </span>
+            )}
+
+            {/* شارة العادة المؤرشفة 📦 */}
+            {isArchived && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider px-2.5 py-0.5 rounded-full border bg-amber-500/15 border-amber-500/40 text-amber-600 dark:text-amber-400">
+                <Archive className="w-3 h-3" />
+                مؤرشفة 📦
               </span>
             )}
 
@@ -231,6 +246,38 @@ export const HabitRow: React.FC<HabitRowProps> = ({
           >
             <MoreVertical className="w-4 h-4" />
           </button>
+
+          {/* زر الأرشفة أو الاستعادة */}
+          {isArchived ? (
+            onRestoreHabit && (
+              <button
+                onClick={() => onRestoreHabit(habit.id)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-all hover:scale-102 cursor-pointer shadow-2xs"
+                title="استعادة العادة إلى القائمة النشطة"
+              >
+                <ArchiveRestore className="w-3.5 h-3.5" />
+                <span>استعادة</span>
+              </button>
+            )
+          ) : (
+            onArchiveHabit && (
+              <button
+                onClick={() => {
+                  if (
+                    confirm(
+                      `هل ترغب في أرشفة عادة "${habit.name}"؟\nسيتم نقلها إلى الأرشيف وإخفاؤها من القائمة اليومية مع الحفاظ الكامل على كافة السجلات والإحصائيات.`
+                    )
+                  ) {
+                    onArchiveHabit(habit.id);
+                  }
+                }}
+                className="p-1.5 text-slate-400 dark:text-[#94A3B8] hover:text-[#F39C12] hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors cursor-pointer"
+                title="أرشفة العادة وتنظيف القائمة النشطة"
+              >
+                <Archive className="w-4 h-4" />
+              </button>
+            )
+          )}
 
           <button
             onClick={() => {

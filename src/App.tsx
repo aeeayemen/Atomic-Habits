@@ -87,6 +87,7 @@ export function App() {
   const [viewMode, setViewMode] = useState<'week' | 'rolling'>('week');
   const [selectedCategory, setSelectedCategory] = useState<HabitCategory | 'all'>('all');
   const [selectedType, setSelectedType] = useState<HabitType | 'all'>('all');
+  const [archiveView, setArchiveView] = useState<'active' | 'archived'>('active');
   const [searchQuery, setSearchQuery] = useState('');
 
   // 5. حالة النوافذ المنبثقة
@@ -309,10 +310,23 @@ export function App() {
     return getRollingDays(14, anchorDate);
   }, [anchorDate, viewMode]);
 
-  // تصفية العادات حسب النوع والتصنيف والبحث
+  // إحصائيات عدد العادات النشطة والمؤرشفة
+  const activeHabitsCount = useMemo(
+    () => habits.filter((h) => !h.archived && !h.is_archived).length,
+    [habits]
+  );
+  const archivedHabitsCount = useMemo(
+    () => habits.filter((h) => Boolean(h.archived || h.is_archived)).length,
+    [habits]
+  );
+
+  // تصفية العادات حسب حالة الأرشفة والنوع والتصنيف والبحث
   const filteredHabits = useMemo(() => {
     return habits.filter((h) => {
-      if (h.archived) return false;
+      const isArchived = Boolean(h.archived || h.is_archived);
+      if (archiveView === 'active' && isArchived) return false;
+      if (archiveView === 'archived' && !isArchived) return false;
+
       if (selectedType !== 'all' && (h.type || 'build') !== selectedType) return false;
       if (selectedCategory !== 'all' && h.category !== selectedCategory) return false;
       if (searchQuery.trim()) {
@@ -325,7 +339,7 @@ export function App() {
       }
       return true;
     });
-  }, [habits, selectedCategory, selectedType, searchQuery]);
+  }, [habits, selectedCategory, selectedType, searchQuery, archiveView]);
 
   // تبديل حالة السجل اليومي (استجابة فورية 0 ثانية + مزامنة سحابية خاصة بالمستخدم)
   const handleToggleLog = (habitId: string, date: string, nextStatus: HabitStatus) => {
@@ -499,6 +513,50 @@ export function App() {
     }
   };
 
+  // أرشفة عادة (إخفاء من القائمة اليومية مع الحفاظ على كامل السجلات والإحصائيات)
+  const handleArchiveHabit = (habitId: string) => {
+    const target = habits.find((h) => h.id === habitId);
+    if (!target) return;
+
+    const now = new Date().toISOString();
+    const updatedHabit: Habit = {
+      ...target,
+      archived: true,
+      is_archived: true,
+      archivedAt: now,
+      archived_at: now,
+    };
+
+    const nextHabits = habits.map((h) => (h.id === habitId ? updatedHabit : h));
+    handleUpdateHabits(nextHabits);
+
+    if (currentUser?.id) {
+      executeOrQueueMutation(currentUser.id, 'UPSERT_HABIT', updatedHabit);
+    }
+  };
+
+  // استعادة عادة مؤرشفة وإعادتها للقائمة اليومية النشطة
+  const handleRestoreHabit = (habitId: string) => {
+    const target = habits.find((h) => h.id === habitId);
+    if (!target) return;
+
+    const updatedHabit: Habit = {
+      ...target,
+      archived: false,
+      is_archived: false,
+      archivedAt: undefined,
+      archived_at: undefined,
+    };
+
+    const nextHabits = habits.map((h) => (h.id === habitId ? updatedHabit : h));
+    handleUpdateHabits(nextHabits);
+    soundManager.playSuccess();
+
+    if (currentUser?.id) {
+      executeOrQueueMutation(currentUser.id, 'UPSERT_HABIT', updatedHabit);
+    }
+  };
+
   // استعادة ومزامنة بيانات النسخة الاحتياطية (JSON / CSV / Word)
   const handleRestoreBackup = async (
     importedHabits: Habit[],
@@ -644,7 +702,7 @@ export function App() {
           <BehavioralAnalyticsCard habits={habits} allLogs={allLogs} />
         </div>
 
-        {/* تصفيات التصنيف والنوع والبحث */}
+        {/* تصفيات التصنيف والنوع والبحث ومفتاح الأرشيف */}
         <CategoryFilter
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
@@ -653,6 +711,10 @@ export function App() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           totalHabitsCount={habits.length}
+          archiveView={archiveView}
+          onToggleArchiveView={setArchiveView}
+          activeCount={activeHabitsCount}
+          archivedCount={archivedHabitsCount}
         />
 
         {/* الشبكة اليومية التفاعلية لتتبع العادات */}
@@ -668,6 +730,9 @@ export function App() {
               setIsModalOpen(true);
             }}
             onDeleteHabit={handleDeleteHabit}
+            onArchiveHabit={handleArchiveHabit}
+            onRestoreHabit={handleRestoreHabit}
+            isArchivedView={archiveView === 'archived'}
             onAddNewHabit={() => {
               setEditingHabit(null);
               setIsModalOpen(true);
@@ -732,6 +797,8 @@ export function App() {
           setIsModalOpen(true);
         }}
         onDelete={handleDeleteHabit}
+        onArchive={handleArchiveHabit}
+        onRestore={handleRestoreHabit}
       />
 
       {/* نافذة إعدادات وتفعيل تنبيهات المتصفح المحلية */}

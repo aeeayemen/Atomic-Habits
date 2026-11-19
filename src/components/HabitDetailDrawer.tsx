@@ -13,6 +13,8 @@ import {
   EyeOff,
   Lock,
   Frown,
+  Archive,
+  ArchiveRestore,
 } from 'lucide-react';
 import type { Habit, HabitLog } from '../types/habit';
 import { calculateStreakStats } from '../lib/streak';
@@ -25,6 +27,8 @@ interface HabitDetailDrawerProps {
   onClose: () => void;
   onEdit: (habit: Habit) => void;
   onDelete: (habitId: string) => void;
+  onArchive?: (habitId: string) => void;
+  onRestore?: (habitId: string) => void;
 }
 
 export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
@@ -34,6 +38,8 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
   onClose,
   onEdit,
   onDelete,
+  onArchive,
+  onRestore,
 }) => {
   if (!isOpen || !habit) return null;
 
@@ -208,25 +214,61 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
         </div>
 
         {/* أزرار الإجراءات السفلية */}
-        <div className="flex items-center justify-between gap-3 pt-6 border-t border-slate-100 dark:border-[#2A5C9E] mt-6">
+        <div className="flex items-center justify-between gap-2 pt-6 border-t border-slate-100 dark:border-[#2A5C9E] mt-6 flex-wrap">
           <button
             onClick={handleDelete}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
             حذف العادة
           </button>
 
-          <button
-            onClick={() => {
-              onEdit(habit);
-              onClose();
-            }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#02C39A] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
-          >
-            <Edit3 className="w-4 h-4" />
-            تعديل النظام
-          </button>
+          <div className="flex items-center gap-2">
+            {Boolean(habit.is_archived ?? habit.archived) ? (
+              onRestore && (
+                <button
+                  onClick={() => {
+                    onRestore(habit.id);
+                    onClose();
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <ArchiveRestore className="w-4 h-4" />
+                  استعادة للقائمة النشطة
+                </button>
+              )
+            ) : (
+              onArchive && (
+                <button
+                  onClick={() => {
+                    if (
+                      confirm(
+                        `هل ترغب في أرشفة عادة "${habit.name}"؟ سيتم نقلها للأرشيف مع الحفاظ على كافة السجلات والإحصائيات.`
+                      )
+                    ) {
+                      onArchive(habit.id);
+                      onClose();
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <Archive className="w-4 h-4" />
+                  أرشفة العادة
+                </button>
+              )
+            )}
+
+            <button
+              onClick={() => {
+                onEdit(habit);
+                onClose();
+              }}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#02C39A] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            >
+              <Edit3 className="w-4 h-4" />
+              تعديل النظام
+            </button>
+          </div>
         </div>
       </div>
     </div>

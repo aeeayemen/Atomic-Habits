@@ -38,6 +38,9 @@ export interface Habit {
   targetDaysPerWeek: number;
   createdAt: string;
   archived?: boolean;
+  is_archived?: boolean;
+  archivedAt?: string;
+  archived_at?: string;
 }
 
 export interface StreakStats {

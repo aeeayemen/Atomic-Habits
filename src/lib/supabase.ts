@@ -204,7 +204,10 @@ export async function fetchHabitsFromSupabase(userId: string): Promise<Habit[] |
       frequency: row.frequency || 'daily',
       timeOfDay: row.time_of_day || 'anytime',
       targetDaysPerWeek: row.target_days_per_week || 7,
-      archived: row.archived,
+      archived: row.archived ?? row.is_archived ?? false,
+      is_archived: row.is_archived ?? row.archived ?? false,
+      archivedAt: row.archived_at || undefined,
+      archived_at: row.archived_at || undefined,
       createdAt: row.created_at,
     }));
   } catch (err) {
@@ -219,6 +222,7 @@ export async function fetchHabitsFromSupabase(userId: string): Promise<Habit[] |
 export async function upsertHabitToSupabase(habit: Habit, userId: string): Promise<boolean> {
   if (!supabase || !userId) return false;
   try {
+    const isArchived = Boolean(habit.is_archived ?? habit.archived);
     const { error } = await supabase.from('habits').upsert({
       id: habit.id,
       user_id: userId,
@@ -235,7 +239,8 @@ export async function upsertHabitToSupabase(habit: Habit, userId: string): Promi
       frequency: habit.frequency,
       time_of_day: habit.timeOfDay,
       target_days_per_week: habit.targetDaysPerWeek,
-      archived: habit.archived || false,
+      archived: isArchived,
+      archived_at: isArchived ? (habit.archivedAt || habit.archived_at || new Date().toISOString()) : null,
       updated_at: new Date().toISOString(),
     });
 
