@@ -14,6 +14,8 @@ import {
   Trash2,
   TrendingUp,
   HeartHandshake,
+  Send,
+  ExternalLink,
 } from 'lucide-react';
 import type { Habit, HabitLog } from '../types/habit';
 import type { AccountabilityCheckIn } from '../types/accountability';
@@ -21,10 +23,13 @@ import {
   computeAccountabilitySummary,
   generateShareableSummaryText,
   shareOrCopySummary,
+  shareToWhatsApp,
+  shareToTelegram,
   saveLocalAccountabilityCheckIn,
   loadLocalAccountabilityCheckIns,
   deleteLocalAccountabilityCheckIn,
   saveAccountabilityCheckInToSupabase,
+  fetchAccountabilityCheckInsFromSupabase,
 } from '../lib/accountability';
 import { MascotCharacter } from './MascotCharacter';
 import { soundManager } from '../lib/sound';
@@ -56,6 +61,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
   const [includeQuote, setIncludeQuote] = useState(true);
 
   const [copied, setCopied] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [history, setHistory] = useState<AccountabilityCheckIn[]>([]);
@@ -71,6 +77,26 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
     if (isOpen) {
       const localList = loadLocalAccountabilityCheckIns(currentUserId);
       setHistory(localList);
+
+      const todayStr = formatISODate(new Date());
+      const hasToday = localList.some((c) => c.dateStr === todayStr);
+      setIsSaved(hasToday);
+
+      // محاولة دمج السجلات السحابية بهدوء إن وجد حساب
+      if (currentUserId) {
+        fetchAccountabilityCheckInsFromSupabase(currentUserId).then((cloudItems) => {
+          if (cloudItems && cloudItems.length > 0) {
+            const map = new Map<string, AccountabilityCheckIn>();
+            cloudItems.forEach((c) => map.set(c.id, c));
+            localList.forEach((c) => map.set(c.id, c));
+            const merged = Array.from(map.values()).sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            setHistory(merged);
+            setIsSaved(merged.some((c) => c.dateStr === todayStr));
+          }
+        }).catch(() => {});
+      }
     }
   }, [isOpen, currentUserId]);
 
@@ -97,37 +123,59 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
       soundManager.playSuccess();
-      showToast('تم نسخ ملخص المساءلة بنجاح! جاهز للصق في واتساب أو أي تطبيق 📋✨');
+      showToast('تم نسخ ملخص المساءلة بنجاح! جاهز للصق في أي تطبيق 📋✨');
       setTimeout(() => setCopied(false), 2500);
     } catch {
       showToast('تعذر النسخ التلقائي، يمكنك تحديد النص ونسخه يدوياً.');
     }
   };
 
-  // مشاركة أصلية عبر تطبيقات الهاتف أو المتصفح
+  // مشاركة عبر واتساب مباشرة
+  const handleWhatsAppShare = () => {
+    const ok = shareToWhatsApp(shareText);
+    if (ok) {
+      soundManager.playCelebration();
+      try {
+        confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+      } catch {}
+      showToast('تم فتح واتساب لمشاركة بطاقة الإنجاز! 💬✨');
+    } else {
+      handleCopyText();
+    }
+  };
+
+  // مشاركة عبر تيليجرام مباشرة
+  const handleTelegramShare = () => {
+    const ok = shareToTelegram(shareText);
+    if (ok) {
+      soundManager.playCelebration();
+      showToast('تم فتح تيليجرام لمشاركة بطاقة الإنجاز! ✈️✨');
+    } else {
+      handleCopyText();
+    }
+  };
+
+  // مشاركة أصلية عبر المتصفح / الهاتف
   const handleShareNative = async () => {
     const res = await shareOrCopySummary(
       'ملخص إنجازاتي في العادات الذرية (istomic)',
       shareText
     );
 
-    if (res === 'shared' || res === 'copied') {
+    if (res === 'shared') {
       soundManager.playCelebration();
       try {
-        confetti({
-          particleCount: 40,
-          spread: 60,
-          origin: { y: 0.6 },
-        });
+        confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
       } catch {}
-
-      if (res === 'shared') {
-        showToast('تم فتح قائمة المشاركة بنجاح! 🚀');
-      } else {
-        setCopied(true);
-        showToast('تم نسخ الملخص بنجاح إلى الحافظة! 📋✨');
-        setTimeout(() => setCopied(false), 2500);
-      }
+      showToast('تم فتح قائمة المشاركة بنجاح! 🚀');
+    } else if (res === 'copied') {
+      soundManager.playCelebration();
+      setCopied(true);
+      showToast('تم نسخ الملخص بنجاح إلى الحافظة! 📋✨');
+      setTimeout(() => setCopied(false), 2500);
+    } else {
+      // بديل مضمون عبر واتساب
+      handleWhatsAppShare();
     }
   };
 
@@ -153,7 +201,9 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
 
       // 1. حفظ محلي فوري
       saveLocalAccountabilityCheckIn(newCheckIn, currentUserId);
-      setHistory(loadLocalAccountabilityCheckIns(currentUserId));
+      const updatedList = loadLocalAccountabilityCheckIns(currentUserId);
+      setHistory(updatedList);
+      setIsSaved(true);
 
       // 2. مزامنة سحابية هادئة إذا كان المستخدم مسجلاً
       if (currentUserId) {
@@ -161,7 +211,13 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
       }
 
       soundManager.playCelebration();
-      showToast('تم حفظ بطاقة المساءلة في سجل إنجازاتك بنجاح! 📌');
+      try {
+        confetti({ particleCount: 45, spread: 70, origin: { y: 0.6 } });
+      } catch {}
+      showToast('تم توثيق بطاقة اليوم في سجل إنجازاتك بنجاح! 📌');
+    } catch (err) {
+      console.error('Failed to save accountability checkin:', err);
+      showToast('حدث خطأ أثناء حفظ البطاقة.');
     } finally {
       setIsSaving(false);
     }
@@ -179,10 +235,10 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
       dir="rtl"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200"
     >
-      {/* التنبيه العائم الفوري (Toast) */}
+      {/* التنبيه العائم الفوري في المنتصف بدقة (Centered Toast) */}
       {toastMessage && (
-        <div className="fixed top-5 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#00A896] to-[#02C39A] text-white font-bold text-xs shadow-xl animate-in slide-in-from-top-4 duration-300">
-          <Sparkles className="w-4 h-4 text-[#F39C12]" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[99999] flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#00A896] to-[#02C39A] text-white font-bold text-xs shadow-2xl animate-in slide-in-from-top-4 duration-300 pointer-events-none">
+          <Sparkles className="w-4 h-4 text-[#F39C12] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -200,7 +256,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   مشاركة الإنجاز ومساءلة الأصدقاء 🤝🔥
                 </h3>
               </div>
-              <p className="text-xs text-[#94A3B8] mt-0.5">
+              <p className="text-xs text-slate-300 mt-0.5">
                 شارك تقدمك وسلاسلك بإيجابية مع صديقك أو شريك المساءلة دون أي ضغوط
               </p>
             </div>
@@ -208,7 +264,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
             title="إغلاق النافذة"
           >
             <X className="w-5 h-5" />
@@ -216,32 +272,44 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
         </div>
 
         {/* 2. تبويبات النافذة (توليد الملخص / السجل السابق) */}
-        <div className="flex items-center px-6 pt-3 border-b border-[#2A5C9E]/60 bg-[#1C4D8D]/40 shrink-0">
-          <button
-            type="button"
-            onClick={() => setActiveTab('generate')}
-            className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-bold text-xs transition-colors cursor-pointer ${
-              activeTab === 'generate'
-                ? 'border-[#00A896] text-[#02C39A]'
-                : 'border-transparent text-[#94A3B8] hover:text-white'
-            }`}
-          >
-            <Share2 className="w-4 h-4" />
-            <span>بطاقة الإنجاز والمشاركة</span>
-          </button>
+        <div className="flex items-center justify-between px-6 pt-3 border-b border-[#2A5C9E]/60 bg-[#1C4D8D]/40 shrink-0">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('generate')}
+              className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-bold text-xs transition-colors cursor-pointer ${
+                activeTab === 'generate'
+                  ? 'border-[#00A896] text-[#02C39A]'
+                  : 'border-transparent text-slate-300 hover:text-white'
+              }`}
+            >
+              <Share2 className="w-4 h-4" />
+              <span>بطاقة الإنجاز والمشاركة</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-bold text-xs transition-colors cursor-pointer ${
-              activeTab === 'history'
-                ? 'border-[#00A896] text-[#02C39A]'
-                : 'border-transparent text-[#94A3B8] hover:text-white'
-            }`}
-          >
-            <Bookmark className="w-4 h-4" />
-            <span>سجل بطاقاتي ({history.length})</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center gap-2 px-4 py-2.5 border-b-2 font-bold text-xs transition-colors cursor-pointer ${
+                activeTab === 'history'
+                  ? 'border-[#00A896] text-[#02C39A]'
+                  : 'border-transparent text-slate-300 hover:text-white'
+              }`}
+            >
+              <Bookmark className="w-4 h-4" />
+              <span>سجل بطاقاتي ({history.length})</span>
+            </button>
+          </div>
+
+          {isSaved && activeTab === 'generate' && (
+            <button
+              onClick={() => setActiveTab('history')}
+              className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-[#02C39A] hover:underline cursor-pointer"
+            >
+              <span>تم حفظ بطاقة اليوم (عرض السجل)</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          )}
         </div>
 
         {/* 3. جسم النافذة القابل للتمرير */}
@@ -291,7 +359,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   {/* نسبة الالتزام */}
                   {includeConsistency && (
                     <div className="p-3 rounded-2xl bg-[#0F2854]/80 border border-[#2A5C9E]/70">
-                      <div className="flex items-center justify-between text-[11px] text-[#94A3B8] font-bold mb-1">
+                      <div className="flex items-center justify-between text-[11px] text-slate-300 font-bold mb-1">
                         <span>نسبة الالتزام</span>
                         <TrendingUp className="w-3.5 h-3.5 text-[#00A896]" />
                       </div>
@@ -304,13 +372,13 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   {/* إنجاز اليوم */}
                   {includeConsistency && (
                     <div className="p-3 rounded-2xl bg-[#0F2854]/80 border border-[#2A5C9E]/70">
-                      <div className="flex items-center justify-between text-[11px] text-[#94A3B8] font-bold mb-1">
+                      <div className="flex items-center justify-between text-[11px] text-slate-300 font-bold mb-1">
                         <span>إنجاز اليوم</span>
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896]" />
                       </div>
                       <div className="text-xl font-black text-white">
                         {summary.todayDone}{' '}
-                        <span className="text-xs text-[#94A3B8] font-bold">
+                        <span className="text-xs text-slate-300 font-bold">
                           / {summary.todayTotal}
                         </span>
                       </div>
@@ -319,7 +387,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
 
                   {/* أطول سلسلة نشطة */}
                   <div className="p-3 rounded-2xl bg-[#0F2854]/80 border border-[#2A5C9E]/70 col-span-2 sm:col-span-1">
-                    <div className="flex items-center justify-between text-[11px] text-[#94A3B8] font-bold mb-1">
+                    <div className="flex items-center justify-between text-[11px] text-slate-300 font-bold mb-1">
                       <span>أطول سلسلة</span>
                       <Flame className="w-3.5 h-3.5 text-[#F39C12]" />
                     </div>
@@ -345,7 +413,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                             className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#0F2854] border border-[#2A5C9E] text-xs font-bold text-[#E2E8F0]"
                           >
                             <span>{h.name}</span>
-                            <span className="px-1.5 py-0.2 rounded-md bg-[#F39C12]/20 text-[#F39C12] text-[10px]">
+                            <span className="px-1.5 py-0.5 rounded-md bg-[#F39C12]/20 text-[#F39C12] text-[10px]">
                               {h.streak} يوماً 🔥
                             </span>
                           </div>
@@ -367,7 +435,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                             className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#0F2854] border border-amber-500/30 text-xs font-bold text-amber-200"
                           >
                             <span>{h.name}</span>
-                            <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-400 text-[10px]">
+                            <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-400 text-[10px]">
                               {h.streak} يوماً نقياً 🛡️
                             </span>
                           </div>
@@ -387,10 +455,62 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
 
                 {/* اقتباس جيمس كلير */}
                 {includeQuote && (
-                  <div className="text-[11px] text-[#94A3B8] pt-2 border-t border-[#2A5C9E]/50 italic relative z-10">
+                  <div className="text-[11px] text-slate-300 pt-2 border-t border-[#2A5C9E]/50 italic relative z-10">
                     {summary.encouragingQuote}
                   </div>
                 )}
+              </div>
+
+              {/* قنوات المشاركة الفورية المباشرة (Direct Channels Bar) */}
+              <div className="space-y-2">
+                <label className="text-xs font-black text-[#F8FAFC]">
+                  قنوات المشاركة الفورية المباشرة:
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {/* مشاركة واتساب مباشرة */}
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppShare}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-md shadow-[#25D366]/20 transition-all hover:scale-102 cursor-pointer"
+                    title="مشاركة الملخص فوراً في محادثة واتساب"
+                  >
+                    <MessageSquare className="w-4 h-4 fill-white" />
+                    <span>واتساب 💬</span>
+                  </button>
+
+                  {/* مشاركة تيليجرام مباشرة */}
+                  <button
+                    type="button"
+                    onClick={handleTelegramShare}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#229ED9] hover:bg-[#1e8bc0] text-white font-bold text-xs shadow-md shadow-[#229ED9]/20 transition-all hover:scale-102 cursor-pointer"
+                    title="مشاركة الملخص في تيليجرام"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>تيليجرام ✈️</span>
+                  </button>
+
+                  {/* مشاركة عبر تطبيقات الهاتف / النظام */}
+                  <button
+                    type="button"
+                    onClick={handleShareNative}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-[#00A896]/20 transition-all hover:scale-102 cursor-pointer"
+                    title="فتح قائمة المشاركة الأصلية في المتصفح أو الهاتف"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>مشاركة النظام 🚀</span>
+                  </button>
+
+                  {/* نسخ النص إلى الحافظة */}
+                  <button
+                    type="button"
+                    onClick={handleCopyText}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-[#00A896]/50 bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#02C39A] font-bold text-xs transition-all hover:scale-102 cursor-pointer"
+                    title="نسخ نص الملخص بالكامل"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-[#02C39A]" /> : <Copy className="w-4 h-4" />}
+                    <span>{copied ? 'تم النسخ! ✓' : 'نسخ النص 📋'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* 4. خيارات التخصيص */}
@@ -451,7 +571,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     value={customMessage}
                     onChange={(e) => setCustomMessage(e.target.value)}
                     placeholder="مثال: مستمر في القراءة اليومية وجلسة العمل العميق، موعدنا الأحد القادم!"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#1C4D8D] border border-[#2A5C9E] text-white text-xs placeholder:text-[#94A3B8] focus:outline-hidden focus:border-[#00A896] transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#1C4D8D] border border-[#2A5C9E] text-white text-xs placeholder:text-slate-400 focus:outline-hidden focus:border-[#00A896] transition-colors"
                   />
                 </div>
               </div>
@@ -466,7 +586,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     className="p-4 rounded-2xl bg-[#1C4D8D]/60 border border-[#2A5C9E] flex items-center justify-between gap-3 hover:bg-[#1C4D8D] transition-colors"
                   >
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-black text-white">
                           بطاقة {item.formattedDate || item.dateStr}
                         </span>
@@ -485,6 +605,20 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      {/* مشاركة واتساب للبطاقة القديمة */}
+                      <button
+                        onClick={() => {
+                          const text = `🔥 بطاقة مساءلة العادات الذرية\n📅 ${item.formattedDate}\n⚡ نسبة الالتزام: ${item.completionRate}%\n🔥 السلسلة: ${item.activeStreak} أيام\n${item.message ? `💬 "${item.message}"\n` : ''}#istomic #عادات_ذرية`;
+                          shareToWhatsApp(text);
+                          showToast('تم فتح واتساب لمشاركة البطاقة! 💬');
+                        }}
+                        className="p-2 rounded-xl text-slate-300 hover:text-[#25D366] hover:bg-[#0F2854] transition-colors cursor-pointer"
+                        title="مشاركة في واتساب"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </button>
+
+                      {/* نسخ النص */}
                       <button
                         onClick={async () => {
                           const text = `🔥 بطاقة مساءلة العادات الذرية\n📅 ${item.formattedDate}\n⚡ نسبة الالتزام: ${item.completionRate}%\n🔥 السلسلة: ${item.activeStreak} أيام\n${item.message ? `💬 "${item.message}"\n` : ''}#istomic #عادات_ذرية`;
@@ -492,15 +626,16 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                           soundManager.playSuccess();
                           showToast('تم نسخ البطاقة القديمة بنجاح! 📋');
                         }}
-                        className="p-2 rounded-xl text-[#94A3B8] hover:text-[#02C39A] hover:bg-[#0F2854] transition-colors cursor-pointer"
+                        className="p-2 rounded-xl text-slate-300 hover:text-[#02C39A] hover:bg-[#0F2854] transition-colors cursor-pointer"
                         title="نسخ نص هذه البطاقة"
                       >
                         <Copy className="w-4 h-4" />
                       </button>
 
+                      {/* حذف */}
                       <button
                         onClick={() => handleDeleteCheckIn(item.id)}
-                        className="p-2 rounded-xl text-[#94A3B8] hover:text-rose-400 hover:bg-[#0F2854] transition-colors cursor-pointer"
+                        className="p-2 rounded-xl text-slate-300 hover:text-rose-400 hover:bg-[#0F2854] transition-colors cursor-pointer"
                         title="حذف البطاقة من السجل"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -514,7 +649,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   <h4 className="text-sm font-bold text-white mb-1">
                     لا توجد بطاقات مساءلة محفوظة بعد
                   </h4>
-                  <p className="text-xs text-[#94A3B8]">
+                  <p className="text-xs text-slate-300">
                     يمكنك توليد بطاقتك الأولى والضغط على "حفظ في السجل" لتوثيق محطات التزامك.
                   </p>
                 </div>
@@ -526,17 +661,40 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
         {/* 5. شريط الأزرار والإجراءات السريعة */}
         <div className="p-4 sm:p-5 bg-[#0F2854] border-t border-[#2A5C9E] flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2">
-            {/* زر حفظ اللقطة */}
+            {/* زر حفظ اللقطة في السجل */}
             {activeTab === 'generate' && (
               <button
                 type="button"
                 onClick={handleSaveCheckIn}
                 disabled={isSaving}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#2A5C9E] bg-[#1C4D8D] hover:bg-[#2A5C9E] text-[#F8FAFC] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
-                title="حفظ بطاقة اليوم في سجلك الشخصي للمساءلة"
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border font-bold text-xs transition-all cursor-pointer shadow-md ${
+                  isSaved
+                    ? 'border-[#00A896] bg-[#00A896]/20 text-[#02C39A]'
+                    : 'border-[#2A5C9E] bg-[#1C4D8D] hover:bg-[#2A5C9E] text-[#F8FAFC]'
+                }`}
+                title="توثيق وحفظ بطاقة اليوم في سجلك الشخصي للمساءلة"
               >
-                <Bookmark className="w-3.5 h-3.5 text-[#00A896]" />
-                <span>حفظ في السجل</span>
+                {isSaved ? (
+                  <>
+                    <Check className="w-4 h-4 text-[#02C39A]" />
+                    <span>تم الحفظ في السجل! ✓</span>
+                  </>
+                ) : (
+                  <>
+                    <Bookmark className="w-4 h-4 text-[#00A896]" />
+                    <span>حفظ في السجل 📌</span>
+                  </>
+                )}
+              </button>
+            )}
+
+            {isSaved && activeTab === 'generate' && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('history')}
+                className="px-3 py-2 text-xs font-bold text-[#00A896] hover:text-[#02C39A] underline cursor-pointer"
+              >
+                عرض في السجل ({history.length})
               </button>
             )}
           </div>
@@ -556,19 +714,20 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  <span>نسخ الملخص للنشر</span>
+                  <span>نسخ الملخص 📋</span>
                 </>
               )}
             </button>
 
-            {/* زر المشاركة المباشرة عبر تطبيقات الهاتف / المتصفح */}
+            {/* زر المشاركة المباشرة عبر واتساب */}
             <button
               type="button"
-              onClick={handleShareNative}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-black text-xs shadow-lg shadow-[#00A896]/30 transition-all hover:scale-102 cursor-pointer"
+              onClick={handleWhatsAppShare}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-black text-xs shadow-lg shadow-[#25D366]/30 transition-all hover:scale-102 cursor-pointer"
+              title="مشاركة مباشرة عبر واتساب"
             >
-              <Share2 className="w-4 h-4" />
-              <span>مشاركة مباشرة 🚀</span>
+              <MessageSquare className="w-4 h-4 fill-white" />
+              <span>مشاركة واتساب 💬</span>
             </button>
           </div>
         </div>

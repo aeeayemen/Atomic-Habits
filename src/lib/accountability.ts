@@ -194,7 +194,7 @@ export async function shareOrCopySummary(
   text: string
 ): Promise<'shared' | 'copied' | 'failed'> {
   // محاولة استخدام واجهة المشاركة الأصلية في المتصفح إذا كانت مدعومة
-  if (typeof navigator !== 'undefined' && navigator.share) {
+  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
     try {
       await navigator.share({
         title,
@@ -202,40 +202,66 @@ export async function shareOrCopySummary(
       });
       return 'shared';
     } catch (err: any) {
-      // إذا قام المستخدم بالإلغاء عمداً نكتفي بالإلغاء
-      if (err?.name === 'AbortError') {
-        return 'failed';
-      }
-      // إذا تعثرت المشاركة لأي سبب آخر، ننتقل تلقائياً للنسخ إلى الحافظة
+      // إذا ألغى المستخدم يدورياً نافذة المشاركة أو لم تكن مجهزة
+      console.warn('Native share dismissed or not permitted, falling back to clipboard:', err?.message);
     }
   }
 
-  // النسخ إلى الحافظة كبديل فوري وآمن
+  // النسخ إلى الحافظة كبديل فوري ومضمون على كافة الأجهزة والمتصفحات
   if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
     try {
       await navigator.clipboard.writeText(text);
       return 'copied';
     } catch {
-      // طريقة بديلة في حال قيود أذونات الحافظة
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
+      // طريقة بديلة في حال قيود أذونات الحافظة في بعض المتصفحات
       try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
         const successful = document.execCommand('copy');
         document.body.removeChild(textarea);
         return successful ? 'copied' : 'failed';
       } catch {
-        document.body.removeChild(textarea);
         return 'failed';
       }
     }
   }
 
   return 'failed';
+}
+
+/**
+ * مشاركة مباشرة عبر تطبيق واتساب (WhatsApp Web أو تطبيق الهاتف)
+ */
+export function shareToWhatsApp(text: string): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return true;
+  } catch (err) {
+    console.error('Failed to open WhatsApp share:', err);
+    return false;
+  }
+}
+
+/**
+ * مشاركة مباشرة عبر تطبيق تيليجرام (Telegram Web أو تطبيق الهاتف)
+ */
+export function shareToTelegram(text: string): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const url = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return true;
+  } catch (err) {
+    console.error('Failed to open Telegram share:', err);
+    return false;
+  }
 }
 
 const STORAGE_PREFIX = 'istomic_accountability_checkins_';
@@ -251,8 +277,10 @@ export function saveLocalAccountabilityCheckIn(
   const key = `${STORAGE_PREFIX}${userId || 'guest'}`;
   try {
     const existing = loadLocalAccountabilityCheckIns(userId);
-    const updated = [checkin, ...existing.filter((c) => c.id !== checkin.id)].slice(0, 25);
+    const updated = [checkin, ...existing.filter((c) => c.id !== checkin.id)].slice(0, 30);
     localStorage.setItem(key, JSON.stringify(updated));
+    // حفظ نسخة احتياطية عامة أيضاً لضمان عدم الفقدان
+    localStorage.setItem(`${STORAGE_PREFIX}latest`, JSON.stringify(checkin));
   } catch (err) {
     console.warn('Could not save accountability checkin locally:', err);
   }
@@ -266,8 +294,20 @@ export function loadLocalAccountabilityCheckIns(userId?: string): Accountability
   const key = `${STORAGE_PREFIX}${userId || 'guest'}`;
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return [];
-    return JSON.parse(raw);
+    let items: AccountabilityCheckIn[] = raw ? JSON.parse(raw) : [];
+
+    // في حال كان المستخدم مسجلاً ولم يعثر على بطاقات، استعادة البطاقات المحفوظة كزائر تلقائياً
+    if (userId && items.length === 0) {
+      const guestRaw = localStorage.getItem(`${STORAGE_PREFIX}guest`);
+      if (guestRaw) {
+        const guestItems: AccountabilityCheckIn[] = JSON.parse(guestRaw);
+        if (guestItems.length > 0) {
+          items = guestItems;
+          localStorage.setItem(key, JSON.stringify(items));
+        }
+      }
+    }
+    return items;
   } catch {
     return [];
   }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   X,
   Flame,
@@ -15,10 +15,13 @@ import {
   Frown,
   Archive,
   ArchiveRestore,
+  Share2,
+  Check,
 } from 'lucide-react';
 import type { Habit, HabitLog } from '../types/habit';
 import { calculateStreakStats } from '../lib/streak';
 import { CATEGORIES_META, formatISODate } from '../lib/utils';
+import { shareToWhatsApp } from '../lib/accountability';
 
 interface HabitDetailDrawerProps {
   habit: Habit | null;
@@ -64,10 +67,35 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
     });
   }
 
+  const [copied, setCopied] = useState(false);
+
   const handleDelete = () => {
     if (confirm(`هل أنت متأكد من رغبتك في حذف عادة "${habit.name}"؟ لا يمكن التراجع عن هذا الإجراء.`)) {
       onDelete(habit.id);
       onClose();
+    }
+  };
+
+  const handleShareHabit = async () => {
+    const streakUnit = isBreak ? 'يوماً نقياً بلا زلات 🛡️' : 'أيام متتالية 🔥';
+    const text = `🎯 عادتي في منظومة العادات الذرية (istomic):
+📌 العادة: ${habit.name}
+⚡ السلسلة الحالية: ${stats.currentStreak} ${streakUnit}
+🏆 أطول سلسلة مسجلة: ${stats.longestStreak} يوماً
+📊 نسبة الالتزام والاتساق: ${stats.completionRate}%
+${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : ''}${habit.twoMinuteRule ? `⏱️ قاعدة الدقيقتين: "${habit.twoMinuteRule}"\n` : ''}#عادات_ذرية #انضباط_يومي #istomic`;
+
+    // محاولة المشاركة الفورية عبر واتساب، أو النسخ إلى الحافظة
+    const ok = shareToWhatsApp(text);
+    if (!ok && typeof navigator !== 'undefined') {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      } catch {}
+    } else {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
     }
   };
 
@@ -96,12 +124,24 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
                 {habit.name}
               </h2>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-[#F8FAFC] rounded-lg hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleShareHabit}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer"
+                title="مشاركة إنجاز وسلسلة هذه العادة عبر واتساب أو الحافظة"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
+                <span>{copied ? 'تم النسخ!' : 'مشاركة العادة'}</span>
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-[#F8FAFC] rounded-lg hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 cursor-pointer"
+                title="إغلاق النافذة"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* بيان الهوية */}
