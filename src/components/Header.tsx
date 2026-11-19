@@ -21,6 +21,7 @@ import {
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
 import type { User } from '@supabase/supabase-js';
+import { SyncStatusBadge } from './SyncStatusBadge';
 
 interface HeaderProps {
   theme: 'dark' | 'light';
@@ -135,13 +136,14 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </div>
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-[#F8FAFC]">
               العادات الذرية
             </h1>
             <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-[#00A896]/15 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30">
               نسخة احترافية
             </span>
+            <SyncStatusBadge userId={currentUser?.id} />
           </div>
           <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
             محرك الاتساق اليومي، تتبع السلاسل وبناء الهوية الإيجابية

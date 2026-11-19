@@ -23,7 +23,6 @@ import {
   fetchHabitsFromSupabase,
   fetchLogsFromSupabase,
   upsertHabitToSupabase,
-  deleteHabitFromSupabase,
   upsertLogToSupabase,
   seedInitialHabitsForUser,
 } from './lib/supabase';
@@ -44,6 +43,10 @@ import { OnboardingTour } from './components/OnboardingTour';
 import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
 import { BehavioralAnalyticsCard } from './components/BehavioralAnalyticsCard';
 import { BackupModal } from './components/BackupModal';
+import {
+  executeOrQueueMutation,
+  initializeOfflineQueueSync,
+} from './lib/offlineQueue';
 import {
   isLocalNotificationEnabled,
   checkAndSendHabitReminder,
@@ -245,6 +248,12 @@ export function App() {
     saveHabits(newHabits, currentUser?.id);
   };
 
+  // تهيئة طابور العمليات غير المتصلة والمزامنة التلقائية فور عودة الشبكة
+  useEffect(() => {
+    const cleanup = initializeOfflineQueueSync(() => currentUser?.id);
+    return cleanup;
+  }, [currentUser]);
+
   // حفظ السجلات محلياً وسحابياً للمستخدم الحالي
   const handleUpdateLogs = (newLogs: Record<string, HabitLog>) => {
     setAllLogs(newLogs);
@@ -332,9 +341,9 @@ export function App() {
 
     handleUpdateLogs(nextLogs);
 
-    // مزامنة سحابية خلفية معزولة للمستخدم
-    if (isSupabaseConfigured && currentUser) {
-      upsertLogToSupabase(updatedLog, currentUser.id).catch(() => {});
+    // مزامنة سحابية مرنة مع طابور العمليات غير المتصلة التلقائي
+    if (currentUser?.id) {
+      executeOrQueueMutation(currentUser.id, 'UPSERT_LOG', updatedLog);
     }
 
     // احتفال بالمفرقعات عند بلوغ أرقام قياسية في السلسلة
@@ -369,8 +378,8 @@ export function App() {
       };
       nextLogs[logId] = logEntry;
 
-      if (isSupabaseConfigured && currentUser) {
-        upsertLogToSupabase(logEntry, currentUser.id).catch(() => {});
+      if (currentUser?.id) {
+        executeOrQueueMutation(currentUser.id, 'UPSERT_LOG', logEntry);
       }
     });
 
@@ -416,8 +425,8 @@ export function App() {
       handleUpdateHabits(updated);
       setEditingHabit(null);
 
-      if (isSupabaseConfigured && currentUser) {
-        upsertHabitToSupabase(updatedHabit, currentUser.id).catch(() => {});
+      if (currentUser?.id) {
+        executeOrQueueMutation(currentUser.id, 'UPSERT_HABIT', updatedHabit);
       }
     } else {
       const newHabit: Habit = {
@@ -442,8 +451,8 @@ export function App() {
       handleUpdateHabits([...habits, newHabit]);
       soundManager.playCelebration();
 
-      if (isSupabaseConfigured && currentUser) {
-        upsertHabitToSupabase(newHabit, currentUser.id).catch(() => {});
+      if (currentUser?.id) {
+        executeOrQueueMutation(currentUser.id, 'UPSERT_HABIT', newHabit);
       }
     }
   };
@@ -471,8 +480,8 @@ export function App() {
 
     handleUpdateLogs(nextLogs);
 
-    if (isSupabaseConfigured && currentUser) {
-      upsertLogToSupabase(updatedLog, currentUser.id).catch(() => {});
+    if (currentUser?.id) {
+      executeOrQueueMutation(currentUser.id, 'UPSERT_LOG', updatedLog);
     }
   };
 
@@ -480,8 +489,8 @@ export function App() {
     const remaining = habits.filter((h) => h.id !== habitId);
     handleUpdateHabits(remaining);
 
-    if (isSupabaseConfigured && currentUser) {
-      deleteHabitFromSupabase(habitId, currentUser.id).catch(() => {});
+    if (currentUser?.id) {
+      executeOrQueueMutation(currentUser.id, 'DELETE_HABIT', { habitId });
     }
   };
 
@@ -531,12 +540,14 @@ export function App() {
     handleUpdateHabits(nextHabits);
     handleUpdateLogs(nextLogs);
 
-    // 3. مزامنة سحابية كاملة مع Supabase إن كان المستخدم مسجلاً
-    if (isSupabaseConfigured && currentUser) {
-      await Promise.allSettled([
-        ...scopedHabits.map((h) => upsertHabitToSupabase(h, currentUser.id)),
-        ...scopedLogs.map((l) => upsertLogToSupabase(l, currentUser.id)),
-      ]);
+    // 3. مزامنة سحابية مرنة مع طابور العمليات غير المتصلة
+    if (currentUser?.id) {
+      for (const h of scopedHabits) {
+        executeOrQueueMutation(currentUser.id, 'UPSERT_HABIT', h);
+      }
+      for (const l of scopedLogs) {
+        executeOrQueueMutation(currentUser.id, 'UPSERT_LOG', l);
+      }
     }
   };
 

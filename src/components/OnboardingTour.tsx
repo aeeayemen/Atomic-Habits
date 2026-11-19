@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ChevronRight,
   ChevronLeft,
@@ -47,7 +47,7 @@ const TOUR_STEPS: TourStep[] = [
     content:
       'اكتشف أضعف أيام التزامك خلال الأسبوع، راقب الفترات الحساسة للزلات، وتعرف على أهم المحفزات التي تؤثر على استمرارك لتضع حواجز استباقية تحميك.',
     mood: 'idea',
-    position: 'bottom',
+    position: 'top',
   },
   {
     target: '[data-tour="tour-first-habit"], [data-tour="tour-grid"]',
@@ -55,7 +55,7 @@ const TOUR_STEPS: TourStep[] = [
     content:
       'قلب المنظومة النابض! بنقرة واحدة سريعة (استجابة 0 ثانية)، وثّق إنجازك اليومي، راقب تدرج ألوان السلسلة، واحتفل بالمفرقعات عند كسر الأرقام القياسية.',
     mood: 'proud',
-    position: 'top',
+    position: 'bottom',
   },
   {
     target: '[data-tour="tour-new-habit"]',
@@ -83,10 +83,10 @@ interface OnboardingTourProps {
 }
 
 // دالة مساعدة للبحث عن أول عنصر يطابق المحددات حسب الأولوية
-const findTargetElement = (selector: string): Element | null => {
+const findTargetElement = (selector: string): HTMLElement | null => {
   const parts = selector.split(',').map((s) => s.trim());
   for (const part of parts) {
-    const el = document.querySelector(part);
+    const el = document.querySelector<HTMLElement>(part);
     if (el) return el;
   }
   return null;
@@ -99,8 +99,8 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const tooltipRef = React.useRef<HTMLDivElement>(null);
-  const [measuredTooltipHeight, setMeasuredTooltipHeight] = useState(250);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [measuredTooltipHeight, setMeasuredTooltipHeight] = useState(260);
 
   // التحقق مما إذا كان المستخدم يزور التطبيق لأول مرة
   useEffect(() => {
@@ -122,6 +122,68 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     }
   }, [forceOpen]);
 
+  // تمرير العنصر بسلاسة إلى مركز الشاشة عند تغيير الخطوة فقط (دون تكرار أثناء التمرير)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const currentStep = TOUR_STEPS[currentStepIndex];
+    if (!currentStep) return;
+
+    const element = findTargetElement(currentStep.target);
+    if (element) {
+      // تمرير العنصر إلى المنتصف العمودي لضمان إبرازه ورؤيته براحة
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // تحديث أولي للموقع
+      setTargetRect(element.getBoundingClientRect());
+
+      // مزامنة الإحداثيات بعد استقرار أنيميشن التمرير السلس
+      const t1 = setTimeout(() => {
+        if (element) setTargetRect(element.getBoundingClientRect());
+      }, 100);
+      const t2 = setTimeout(() => {
+        if (element) setTargetRect(element.getBoundingClientRect());
+      }, 300);
+      const t3 = setTimeout(() => {
+        if (element) setTargetRect(element.getBoundingClientRect());
+      }, 500);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
+    } else {
+      setTargetRect(null);
+    }
+  }, [isOpen, currentStepIndex]);
+
+  // تحديث إحداثيات العنصر فقط عند إعادة التحجيم أو التمرير (دون إعادة استدعاء scrollIntoView)
+  const syncTargetRect = useCallback(() => {
+    if (!isOpen) return;
+    const currentStep = TOUR_STEPS[currentStepIndex];
+    if (!currentStep) return;
+
+    const element = findTargetElement(currentStep.target);
+    if (element) {
+      setTargetRect(element.getBoundingClientRect());
+    } else {
+      setTargetRect(null);
+    }
+  }, [isOpen, currentStepIndex]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.addEventListener('resize', syncTargetRect);
+    window.addEventListener('scroll', syncTargetRect, true);
+
+    return () => {
+      window.removeEventListener('resize', syncTargetRect);
+      window.removeEventListener('scroll', syncTargetRect, true);
+    };
+  }, [isOpen, syncTargetRect]);
+
   // قياس الارتفاع الفعلي لصندوق التلميح فور تغييره
   useEffect(() => {
     if (tooltipRef.current) {
@@ -131,48 +193,6 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
       }
     }
   }, [currentStepIndex, isOpen]);
-
-  // تحديث أبعاد وموقع العنصر المستهدف مع معالجة التمرير السلس
-  const updateTargetRect = useCallback(() => {
-    if (!isOpen) return;
-
-    const currentStep = TOUR_STEPS[currentStepIndex];
-    if (!currentStep) return;
-
-    const element = findTargetElement(currentStep.target);
-    if (element) {
-      // تمرير العنصر إلى نطاق الرؤية بسلاسة
-      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      setTargetRect(element.getBoundingClientRect());
-
-      // تحديث إضافي بعد اكتمال أنيميشن التمرير للتأكد التام من دقة الإحداثيات
-      const timer1 = setTimeout(() => {
-        if (element) setTargetRect(element.getBoundingClientRect());
-      }, 150);
-      const timer2 = setTimeout(() => {
-        if (element) setTargetRect(element.getBoundingClientRect());
-      }, 350);
-
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
-    } else {
-      setTargetRect(null);
-    }
-  }, [isOpen, currentStepIndex]);
-
-  useEffect(() => {
-    updateTargetRect();
-    const handleResize = () => updateTargetRect();
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleResize, true);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleResize, true);
-    };
-  }, [updateTargetRect]);
 
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
@@ -220,62 +240,74 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === TOUR_STEPS.length - 1;
 
-  // احتساب أبعاد الشاشة وموقع صندوق التلميح مع قياس الارتفاع الحقيقي وصمام أمان صارم
+  // أبعاد الشاشة الحقيقية
   const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
   const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-  const tooltipWidth = Math.min(viewportWidth - 32, 400);
+  const tooltipWidth = Math.min(viewportWidth - 32, 420);
   const actualTooltipHeight = Math.max(measuredTooltipHeight, 260);
   const padding = 8;
 
-  let tooltipTop = 0;
-  let tooltipLeft = 0;
+  // مساحة الأمان العلوية لشخصية شرارة (Mascot headroom)
+  const mascotHeadroom = 70;
+  const minTop = mascotHeadroom;
+  const maxTop = Math.max(minTop, viewportHeight - actualTooltipHeight - 20);
+
+  let tooltipTop = minTop;
+  let tooltipLeft = Math.max(16, (viewportWidth - tooltipWidth) / 2);
 
   if (targetRect) {
-    const spaceAbove = targetRect.top - padding;
-    const spaceBelow = viewportHeight - (targetRect.bottom + padding);
+    const spaceAbove = targetRect.top;
+    const spaceBelow = viewportHeight - targetRect.bottom;
+    const preferTop = currentStep.position === 'top';
 
-    // اختيار الموضع الأنسب (أعلى أو أسفل العنصر) مع التحقق من كفاية المساحة
-    if (currentStep.position === 'top') {
-      if (spaceAbove >= actualTooltipHeight + 20) {
-        tooltipTop = targetRect.top - padding - actualTooltipHeight - 16;
-      } else if (spaceBelow >= actualTooltipHeight + 20) {
-        tooltipTop = targetRect.bottom + padding + 16;
+    if (preferTop) {
+      if (spaceAbove >= actualTooltipHeight + mascotHeadroom + 16) {
+        // مساحة كافية بالأعلى
+        tooltipTop = targetRect.top - actualTooltipHeight - 16;
+      } else if (spaceBelow >= actualTooltipHeight + 24) {
+        // مساحة كافية بالأسفل
+        tooltipTop = targetRect.bottom + 16;
       } else {
-        // إذا لم تكفِ المساحة، نختار الجانب الذي يحتوي على مساحة أكبر
-        tooltipTop = spaceAbove >= spaceBelow
-          ? targetRect.top - padding - actualTooltipHeight - 16
-          : targetRect.bottom + padding + 16;
+        // العنصر ضخم أو يشغل منتصف الشاشة: نثبت الصندوق بالأعلى أو الأسفل حسب موقع العنصر
+        const elementCenter = (targetRect.top + targetRect.bottom) / 2;
+        tooltipTop = elementCenter > viewportHeight / 2 ? minTop : maxTop;
       }
     } else {
-      // الوضع السفلي الافتراضي
-      if (spaceBelow >= actualTooltipHeight + 20) {
-        tooltipTop = targetRect.bottom + padding + 16;
-      } else if (spaceAbove >= actualTooltipHeight + 20) {
-        tooltipTop = targetRect.top - padding - actualTooltipHeight - 16;
+      // تفضيل الوضع السفلي الافتراضي
+      if (spaceBelow >= actualTooltipHeight + 24) {
+        // مساحة كافية بالأسفل
+        tooltipTop = targetRect.bottom + 16;
+      } else if (spaceAbove >= actualTooltipHeight + mascotHeadroom + 16) {
+        // مساحة كافية بالأعلى
+        tooltipTop = targetRect.top - actualTooltipHeight - 16;
       } else {
-        // نختار الجانب الأوسع تلقائياً
-        tooltipTop = spaceBelow >= spaceAbove
-          ? targetRect.bottom + padding + 16
-          : targetRect.top - padding - actualTooltipHeight - 16;
+        // العنصر ضخم أو يشغل معظم الشاشة: نثبت بالأعلى أو الأسفل حسب موقع العنصر
+        const elementCenter = (targetRect.top + targetRect.bottom) / 2;
+        tooltipTop = elementCenter > viewportHeight / 2 ? minTop : maxTop;
       }
     }
 
     // توسط أفقي مع مراعاة حواف الشاشة
     const centerLeft = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
-    const maxLeft = viewportWidth - tooltipWidth - 16;
-    tooltipLeft = Math.max(16, Math.min(centerLeft, maxLeft));
-
-    // صمام أمان صارم رياضي: يضمن بقاء صندوق التلميح 100% داخل حدود الشاشة المرئية دائماً
-    const maxAllowedTop = Math.max(20, viewportHeight - actualTooltipHeight - 20);
-    tooltipTop = Math.max(20, Math.min(tooltipTop, maxAllowedTop));
-  } else {
-    // تمركز وسطي في الشاشة عند عدم وجود عنصر
-    tooltipTop = Math.max(20, (viewportHeight - actualTooltipHeight) / 2);
-    tooltipLeft = Math.max(16, (viewportWidth - tooltipWidth) / 2);
+    tooltipLeft = Math.max(16, Math.min(centerLeft, viewportWidth - tooltipWidth - 16));
   }
 
+  // صمام أمان رياضي صارم: يضمن بقاء صندوق التلميح 100% داخل حدود الشاشة المرئية دائماً
+  tooltipTop = Math.max(minTop, Math.min(tooltipTop, maxTop));
+
   return (
-    <div dir="rtl" className="fixed inset-0 z-[9999] overflow-hidden select-none animate-in fade-in duration-200">
+    <div dir="rtl" className="fixed inset-0 z-[9999] pointer-events-none select-none animate-in fade-in duration-200">
+      {/* زر إغلاق عائم مضمون الوصول في أي وقت (Esc) في أعلى يسار الشاشة */}
+      <button
+        type="button"
+        onClick={handleSkip}
+        className="fixed top-4 left-4 z-[10002] pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0F2854]/95 hover:bg-[#1C4D8D] border border-[#2A5C9E] text-white/90 hover:text-white text-xs font-bold shadow-xl transition-all cursor-pointer backdrop-blur-md hover:scale-105"
+        title="إغلاق الجولة الإرشادية"
+      >
+        <X className="w-3.5 h-3.5 text-rose-400" />
+        <span>إغلاق الجولة (Esc)</span>
+      </button>
+
       {/* 1. طبقة التعتيم مع فتحة الضوء السحرية (SVG Spotlight Cutout Mask) */}
       <svg
         className="fixed inset-0 w-full h-full pointer-events-auto cursor-default"
@@ -322,10 +354,10 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
         />
       )}
 
-      {/* 3. صندوق التلميح الأنيق المضمون الظهور 100% داخل الشاشة */}
+      {/* 3. صندوق التلميح الأنيق المضمون الظهور 100% داخل حدود الشاشة */}
       <div
         ref={tooltipRef}
-        className="fixed z-[10001] transition-all duration-300 ease-out"
+        className="fixed z-[10001] pointer-events-auto transition-all duration-300 ease-out"
         style={{
           top: tooltipTop,
           left: tooltipLeft,
@@ -333,17 +365,17 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           maxHeight: 'calc(100vh - 32px)',
         }}
       >
-        {/* شخصية "شرارة" تقف بأعلى الصندوق تلوح أو ترشد وتتكيف مع حافة الشاشة */}
+        {/* شخصية "شرارة" تقف بأعلى الصندوق وتتكيف مع حافة الشاشة */}
         <div
           className={`absolute z-10 animate-bounce duration-1000 pointer-events-none transition-all ${
-            tooltipTop < 65 ? '-top-8 -right-1 scale-80 origin-bottom' : '-top-16 -right-3'
+            tooltipTop < 80 ? '-top-8 -right-1 scale-80 origin-bottom' : '-top-14 -right-2'
           }`}
         >
-          <MascotCharacter mood={currentStep.mood} size={84} />
+          <MascotCharacter mood={currentStep.mood} size={78} />
         </div>
 
         {/* كارت التلميح المتناسق مع هوية التطبيق */}
-        <div className="bg-[#1C4D8D] border-2 border-[#2A5C9E] rounded-3xl p-5 sm:p-6 shadow-2xl shadow-black/70 text-[#F8FAFC] backdrop-blur-md relative overflow-hidden">
+        <div className="bg-[#1C4D8D] border-2 border-[#2A5C9E] rounded-3xl p-5 sm:p-6 shadow-2xl shadow-black/70 text-[#F8FAFC] backdrop-blur-md relative overflow-hidden max-h-[calc(100vh-100px)] overflow-y-auto">
           {/* زخرفة خلفية بلون التيل الخافت */}
           <div className="absolute -top-12 -left-12 w-32 h-32 bg-[#00A896]/15 rounded-full blur-2xl pointer-events-none" />
 
@@ -358,7 +390,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
 
             <button
               onClick={handleSkip}
-              className="p-1 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
               title="تخطي الجولة"
             >
               <X className="w-4 h-4" />
