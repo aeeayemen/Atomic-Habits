@@ -18,6 +18,7 @@ import {
   HelpCircle,
   HardDriveDownload,
   Share2,
+  MessageSquarePlus,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
@@ -40,6 +41,7 @@ interface HeaderProps {
   onRestartTour?: () => void;
   onOpenBackup?: () => void;
   onOpenAccountability?: () => void;
+  onOpenFeedback?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -58,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
   onRestartTour,
   onOpenBackup,
   onOpenAccountability,
+  onOpenFeedback,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -222,6 +225,18 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Share2 className="w-4 h-4 text-[#F39C12]" />
             <span className="hidden sm:inline">مشاركة الإنجاز</span>
+          </button>
+        )}
+
+        {/* زر ملاحظات وتجربة النسخة التجريبية (Beta Feedback) */}
+        {onOpenFeedback && (
+          <button
+            onClick={onOpenFeedback}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-sky-500/40 dark:border-sky-500/50 bg-sky-500/10 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 dark:hover:bg-sky-500/25 transition-colors shadow-2xs cursor-pointer text-xs font-bold"
+            title="إرسال ملاحظة أو عائق في التجربة (Beta Feedback 📝)"
+          >
+            <MessageSquarePlus className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+            <span className="hidden md:inline">ملاحظات التجربة</span>
           </button>
         )}
 

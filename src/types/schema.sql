@@ -253,3 +253,42 @@ CREATE POLICY "Users can manage their own accountability checkins"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+-- ==============================================================================
+-- 10. جدول ملاحظات التجربة ورصد العوائق (Friend Beta Feedback & Friction Log)
+-- يسمح لمختبري النسخة التجريبية بإرسال ملاحظاتهم وعوائق الاستخدام بسلاسة
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.feedback_notes (
+  id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_email TEXT,
+  category VARCHAR(32) NOT NULL DEFAULT 'ui', -- 'ui', 'flow', 'bug', 'idea'
+  message TEXT NOT NULL,
+  view_section VARCHAR(64) DEFAULT 'dashboard',
+  is_online BOOLEAN DEFAULT TRUE,
+  screen_resolution VARCHAR(32),
+  device_info TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_created ON public.feedback_notes(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feedback_user ON public.feedback_notes(user_id);
+
+ALTER TABLE public.feedback_notes ENABLE ROW LEVEL SECURITY;
+
+-- السماح للمستخدمين (المسجلين والزوار) بإرسال الملاحظات
+DROP POLICY IF EXISTS "Allow users and testers to submit feedback" ON public.feedback_notes;
+CREATE POLICY "Allow users and testers to submit feedback"
+  ON public.feedback_notes
+  FOR INSERT
+  TO authenticated, anon
+  WITH CHECK (true);
+
+-- السماح للمستخدم المسجل بمشاهدة ملاحظاته السابقة
+DROP POLICY IF EXISTS "Users can view their own feedback" ON public.feedback_notes;
+CREATE POLICY "Users can view their own feedback"
+  ON public.feedback_notes
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+

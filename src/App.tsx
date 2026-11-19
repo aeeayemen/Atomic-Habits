@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { MessageSquarePlus } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Habit, HabitCategory, HabitLog, HabitStatus, HabitType } from './types/habit';
 import {
@@ -44,6 +45,7 @@ import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
 import { BehavioralAnalyticsCard } from './components/BehavioralAnalyticsCard';
 import { BackupModal } from './components/BackupModal';
 import { AccountabilityModal } from './components/AccountabilityModal';
+import { FeedbackModal } from './components/FeedbackModal';
 import {
   executeOrQueueMutation,
   initializeOfflineQueueSync,
@@ -94,6 +96,7 @@ export function App() {
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isAccountabilityModalOpen, setIsAccountabilityModalOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isPushActive, setIsPushActive] = useState(false);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [reflectionModal, setReflectionModal] = useState<{
@@ -612,6 +615,7 @@ export function App() {
           onRestartTour={() => setIsTourOpen(true)}
           onOpenBackup={() => setIsBackupModalOpen(true)}
           onOpenAccountability={() => setIsAccountabilityModalOpen(true)}
+          onOpenFeedback={() => setIsFeedbackModalOpen(true)}
         />
 
         {/* بطاقات الإحصائيات الفورية */}
@@ -684,12 +688,22 @@ export function App() {
           />
         </div>
 
-        {/* حكمة العادات الذرية في التذييل */}
-        <footer className="pt-6 pb-4 border-t border-slate-200/60 dark:border-[#2A5C9E] text-center">
+        {/* حكمة العادات الذرية في التذييل مع زر ملاحظات التجربة */}
+        <footer className="pt-6 pb-4 border-t border-slate-200/60 dark:border-[#2A5C9E] text-center space-y-3">
           <p className="text-xs text-slate-500 dark:text-[#94A3B8] italic">
             "أنت لا ترتقي إلى مستوى أهدافك. أنت تهبط إلى مستوى أنظمتك."
             — جيمس كلير، <span className="font-bold text-slate-700 dark:text-[#F8FAFC]">كتاب العادات الذرية (Atomic Habits)</span>
           </p>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => setIsFeedbackModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-sky-500/40 dark:border-sky-500/50 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-bold transition-all hover:scale-105 cursor-pointer shadow-2xs"
+              title="إرسال ملاحظة أو عائق في التجربة لمطوري التطبيق (Beta Feedback)"
+            >
+              <MessageSquarePlus className="w-3.5 h-3.5" />
+              <span>إرسال ملاحظة / تجربة (Beta Feedback 📝)</span>
+            </button>
+          </div>
           <p className="text-[11px] text-slate-400 dark:text-[#94A3B8]/80 mt-1">
             مبني بمعمارية Local-First فائقة السرعة استجابة 0 ثانية · مصادقة ومزامنة آمنة Supabase Auth · نظام متعدد المستخدمين RLS · تصدير واستيراد Word (.docx)
           </p>
@@ -755,6 +769,14 @@ export function App() {
         allLogs={allLogs}
         currentUserId={currentUser?.id}
         userName={currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0]}
+      />
+
+      {/* نافذة ملاحظات وتجربة النسخة التجريبية (Beta Feedback) */}
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        userId={currentUser?.id}
+        userEmail={currentUser?.email}
       />
 
       {/* نافذة النسخ الاحتياطي واستعادة البيانات الشاملة (JSON, CSV, Word) */}
