@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  Bell,
-  BellRing,
-  BellOff,
-  CheckCircle2,
-  AlertCircle,
-  X,
-  Send,
-  Sparkles,
-  Clock,
-  Laptop,
-} from 'lucide-react';
+  faBell,
+  faBellSlash,
+  faCircleCheck,
+  faTriangleExclamation,
+  faXmark,
+  faPaperPlane,
+  faWandMagicSparkles,
+  faClock,
+  faLaptop,
+} from '../lib/icons';
 import {
   isBrowserNotificationSupported,
   getNotificationPermission,
@@ -116,17 +116,18 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
         <button
           onClick={onClose}
           className="absolute top-5 left-5 p-1.5 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
+          aria-label="إغلاق"
         >
-          <X className="w-5 h-5" />
+          <FontAwesomeIcon icon={faXmark} className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* رأس النافذة */}
         <div className="flex items-center gap-3 mb-5">
           <div className="p-3 rounded-2xl bg-gradient-to-br from-[#00A896] to-[#02C39A] text-white shadow-lg shadow-[#00A896]/20">
             {isEnabled ? (
-              <BellRing className="w-6 h-6 text-[#F39C12] animate-bounce" />
+              <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-[#F39C12] animate-bounce" aria-hidden="true" />
             ) : (
-              <Bell className="w-6 h-6" />
+              <FontAwesomeIcon icon={faBell} className="w-6 h-6" aria-hidden="true" />
             )}
           </div>
           <div>
@@ -147,9 +148,9 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             }`}
           >
             {statusMessage.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+              <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" aria-hidden="true" />
             ) : (
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+              <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" aria-hidden="true" />
             )}
             <span>{statusMessage.text}</span>
           </div>
@@ -197,7 +198,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             {permission === 'denied' && (
               <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs">
                 <div className="flex items-center gap-2 font-bold mb-1">
-                  <BellOff className="w-4 h-4 text-rose-400" />
+                  <FontAwesomeIcon icon={faBellSlash} className="w-4 h-4 text-rose-400" aria-hidden="true" />
                   <span>الإشعارات محظورة في إعدادات المتصفح</span>
                 </div>
                 <p className="text-[11px] text-rose-300/90 leading-relaxed">
@@ -210,7 +211,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             {isEnabled && (
               <div className="p-4 rounded-2xl bg-[#0F2854] border border-[#2A5C9E]/70 space-y-2.5">
                 <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <Clock className="w-4 h-4 text-[#02C39A]" />
+                  <FontAwesomeIcon icon={faClock} className="w-4 h-4 text-[#02C39A]" aria-hidden="true" />
                   <span>تكرار التذكير أثناء فتح المتصفح:</span>
                 </div>
 
@@ -244,14 +245,14 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                 onClick={handleTestNotification}
                 className="w-full py-2.5 px-4 rounded-xl bg-[#0F2854] hover:bg-[#0F2854]/80 border border-[#2A5C9E] text-xs font-bold text-[#E2E8F0] hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
               >
-                <Send className="w-4 h-4 text-[#00A896]" />
+                <FontAwesomeIcon icon={faPaperPlane} className="w-4 h-4 text-[#00A896]" aria-hidden="true" />
                 <span>إرسال إشعار تجريبي لمتصفحي الآن</span>
               </button>
             </div>
 
             {/* ميزة العمل المحلي المباشر */}
             <div className="p-3 rounded-xl bg-[#0F2854]/40 border border-[#2A5C9E]/40 flex items-center gap-2 text-[11px] text-[#94A3B8]">
-              <Laptop className="w-4 h-4 text-[#02C39A] shrink-0" />
+              <FontAwesomeIcon icon={faLaptop} className="w-4 h-4 text-[#02C39A] shrink-0" aria-hidden="true" />
               <span>
                 تنبيهات فورية تعمل مباشرة في متصفحك دون الحاجة لاتصال خوادم أو مهام Cron خارجية.
               </span>
@@ -260,7 +261,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
             {/* اقتباس تحفيزي */}
             <div className="pt-2 text-center border-t border-[#2A5C9E]/50">
               <p className="text-[11px] text-[#94A3B8] flex items-center justify-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#F39C12]" />
+                <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5 text-[#F39C12]" aria-hidden="true" />
                 <span>القانون الأول لتغيير السلوك: اجعل الإشارة واضحة ومباشرة.</span>
               </p>
             </div>

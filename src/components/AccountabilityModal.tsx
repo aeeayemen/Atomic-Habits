@@ -1,22 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  X,
-  Share2,
-  Copy,
-  Check,
-  Flame,
-  Shield,
-  Sparkles,
-  Calendar,
-  MessageSquare,
-  CheckCircle2,
-  Bookmark,
-  Trash2,
-  TrendingUp,
-  HeartHandshake,
-  Send,
-  ExternalLink,
-} from 'lucide-react';
+  faXmark,
+  faShareNodes,
+  faCopy,
+  faCheck,
+  faFire,
+  faShieldHalved,
+  faWandMagicSparkles,
+  faCalendarDays,
+  faComment,
+  faCircleCheck,
+  faBookmark,
+  faTrashCan,
+  faArrowTrendUp,
+  faHandshake,
+  faPaperPlane,
+  faArrowUpRightFromSquare,
+} from '../lib/icons';
 import type { Habit, HabitLog } from '../types/habit';
 import type { AccountabilityCheckIn } from '../types/accountability';
 import {
@@ -238,7 +239,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
       {/* التنبيه العائم الفوري في المنتصف بدقة (Centered Toast) */}
       {toastMessage && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[99999] flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#00A896] to-[#02C39A] text-white font-bold text-xs shadow-2xl animate-in slide-in-from-top-4 duration-300 pointer-events-none">
-          <Sparkles className="w-4 h-4 text-[#F39C12] shrink-0" />
+          <FontAwesomeIcon icon={faWandMagicSparkles} className="w-4 h-4 text-[#F39C12] shrink-0" aria-hidden="true" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -248,7 +249,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
         <div className="p-5 sm:p-6 bg-gradient-to-r from-[#1C4D8D] to-[#0F2854] border-b border-[#2A5C9E] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-[#00A896]/20 border border-[#00A896]/40 text-[#02C39A]">
-              <HeartHandshake className="w-6 h-6 text-[#00A896] dark:text-[#02C39A]" />
+              <FontAwesomeIcon icon={faHandshake} className="w-6 h-6 text-[#00A896] dark:text-[#02C39A]" aria-hidden="true" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -266,8 +267,9 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
             onClick={onClose}
             className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
             title="إغلاق النافذة"
+            aria-label="إغلاق النافذة"
           >
-            <X className="w-5 h-5" />
+            <FontAwesomeIcon icon={faXmark} className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -283,7 +285,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   : 'border-transparent text-slate-300 hover:text-white'
               }`}
             >
-              <Share2 className="w-4 h-4" />
+              <FontAwesomeIcon icon={faShareNodes} className="w-4 h-4" aria-hidden="true" />
               <span>بطاقة الإنجاز والمشاركة</span>
             </button>
 
@@ -296,7 +298,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   : 'border-transparent text-slate-300 hover:text-white'
               }`}
             >
-              <Bookmark className="w-4 h-4" />
+              <FontAwesomeIcon icon={faBookmark} className="w-4 h-4" aria-hidden="true" />
               <span>سجل بطاقاتي ({history.length})</span>
             </button>
           </div>
@@ -307,7 +309,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
               className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-[#02C39A] hover:underline cursor-pointer"
             >
               <span>تم حفظ بطاقة اليوم (عرض السجل)</span>
-              <ExternalLink className="w-3 h-3" />
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="w-3 h-3" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -318,7 +320,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
             <>
               {/* شريط المفهوم الإيجابي الصديق */}
               <div className="p-3.5 rounded-2xl bg-[#00A896]/10 border border-[#00A896]/30 text-xs text-[#E2E8F0] leading-relaxed flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-[#F39C12] shrink-0 mt-0.5" />
+                <FontAwesomeIcon icon={faWandMagicSparkles} className="w-4 h-4 text-[#F39C12] shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
                   <strong>المساءلة الودية:</strong> شراكة دعم وتشجيع إيجابية بين الأصدقاء لتعزيز الاستمرارية،
                   دون كشف تفاصيل حساسة أو ملاحظات شخصية.
@@ -342,7 +344,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                         {userName ? `إنجازات ${userName}` : 'منظومة العادات الذرية'}
                       </h4>
                       <div className="flex items-center gap-1.5 text-[11px] text-[#02C39A] font-bold">
-                        <Calendar className="w-3 h-3" />
+                        <FontAwesomeIcon icon={faCalendarDays} className="w-3 h-3" aria-hidden="true" />
                         <span>{summary.formattedDate}</span>
                       </div>
                     </div>
@@ -361,7 +363,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     <div className="p-3 rounded-2xl bg-[#0F2854]/80 border border-[#2A5C9E]/70">
                       <div className="flex items-center justify-between text-[11px] text-slate-300 font-bold mb-1">
                         <span>نسبة الالتزام</span>
-                        <TrendingUp className="w-3.5 h-3.5 text-[#00A896]" />
+                        <FontAwesomeIcon icon={faArrowTrendUp} className="w-3.5 h-3.5 text-[#00A896]" aria-hidden="true" />
                       </div>
                       <div className="text-xl font-black text-[#02C39A]">
                         {summary.overallConsistencyRate}%
@@ -374,7 +376,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     <div className="p-3 rounded-2xl bg-[#0F2854]/80 border border-[#2A5C9E]/70">
                       <div className="flex items-center justify-between text-[11px] text-slate-300 font-bold mb-1">
                         <span>إنجاز اليوم</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896]" />
+                        <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5 text-[#00A896]" aria-hidden="true" />
                       </div>
                       <div className="text-xl font-black text-white">
                         {summary.todayDone}{' '}
@@ -389,7 +391,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   <div className="p-3 rounded-2xl bg-[#0F2854]/80 border border-[#2A5C9E]/70 col-span-2 sm:col-span-1">
                     <div className="flex items-center justify-between text-[11px] text-slate-300 font-bold mb-1">
                       <span>أطول سلسلة</span>
-                      <Flame className="w-3.5 h-3.5 text-[#F39C12]" />
+                      <FontAwesomeIcon icon={faFire} className="w-3.5 h-3.5 text-[#F39C12]" aria-hidden="true" />
                     </div>
                     <div className="text-xl font-black text-[#F39C12] flex items-baseline gap-1">
                       <span>{summary.maxActiveStreak}</span>
@@ -403,7 +405,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   {includeBuild && summary.topBuildHabits.length > 0 && (
                     <div className="space-y-1.5">
                       <div className="text-[11px] font-black text-[#02C39A] flex items-center gap-1.5">
-                        <Flame className="w-3.5 h-3.5 text-[#F39C12]" />
+                        <FontAwesomeIcon icon={faFire} className="w-3.5 h-3.5 text-[#F39C12]" aria-hidden="true" />
                         <span>أبرز سلاسل عادات البناء الإيجابية:</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
@@ -425,7 +427,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                   {includeBreak && summary.topBreakHabits.length > 0 && (
                     <div className="space-y-1.5 pt-1">
                       <div className="text-[11px] font-black text-amber-400 flex items-center gap-1.5">
-                        <Shield className="w-3.5 h-3.5 text-amber-400" />
+                        <FontAwesomeIcon icon={faShieldHalved} className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
                         <span>عادات الإقلاع (أيام نقية بلا زلات):</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
@@ -448,7 +450,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                 {/* رسالة العهد المخصصة إن وجدت */}
                 {customMessage.trim() && (
                   <div className="p-3 rounded-xl bg-[#0F2854]/90 border border-[#2A5C9E] text-xs text-[#E2E8F0] italic mb-3 relative z-10 flex items-start gap-2">
-                    <MessageSquare className="w-3.5 h-3.5 text-[#00A896] shrink-0 mt-0.5" />
+                    <FontAwesomeIcon icon={faComment} className="w-3.5 h-3.5 text-[#00A896] shrink-0 mt-0.5" aria-hidden="true" />
                     <span>"{customMessage.trim()}"</span>
                   </div>
                 )}
@@ -474,7 +476,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-md shadow-[#25D366]/20 transition-all hover:scale-102 cursor-pointer"
                     title="مشاركة الملخص فوراً في محادثة واتساب"
                   >
-                    <MessageSquare className="w-4 h-4 fill-white" />
+                    <FontAwesomeIcon icon={faComment} className="w-4 h-4" aria-hidden="true" />
                     <span>واتساب 💬</span>
                   </button>
 
@@ -485,7 +487,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#229ED9] hover:bg-[#1e8bc0] text-white font-bold text-xs shadow-md shadow-[#229ED9]/20 transition-all hover:scale-102 cursor-pointer"
                     title="مشاركة الملخص في تيليجرام"
                   >
-                    <Send className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faPaperPlane} className="w-4 h-4" aria-hidden="true" />
                     <span>تيليجرام ✈️</span>
                   </button>
 
@@ -496,7 +498,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-[#00A896]/20 transition-all hover:scale-102 cursor-pointer"
                     title="فتح قائمة المشاركة الأصلية في المتصفح أو الهاتف"
                   >
-                    <Share2 className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faShareNodes} className="w-4 h-4" aria-hidden="true" />
                     <span>مشاركة النظام 🚀</span>
                   </button>
 
@@ -507,7 +509,11 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-[#00A896]/50 bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#02C39A] font-bold text-xs transition-all hover:scale-102 cursor-pointer"
                     title="نسخ نص الملخص بالكامل"
                   >
-                    {copied ? <Check className="w-4 h-4 text-[#02C39A]" /> : <Copy className="w-4 h-4" />}
+                    {copied ? (
+                      <FontAwesomeIcon icon={faCheck} className="w-4 h-4 text-[#02C39A]" aria-hidden="true" />
+                    ) : (
+                      <FontAwesomeIcon icon={faCopy} className="w-4 h-4" aria-hidden="true" />
+                    )}
                     <span>{copied ? 'تم النسخ! ✓' : 'نسخ النص 📋'}</span>
                   </button>
                 </div>
@@ -563,7 +569,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                 {/* كتابة رسالة تحفيزية شخصية */}
                 <div className="space-y-1.5 pt-2">
                   <label className="text-xs font-bold text-[#CBD5E1] flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5 text-[#00A896]" />
+                    <FontAwesomeIcon icon={faComment} className="w-3.5 h-3.5 text-[#00A896]" aria-hidden="true" />
                     <span>عهد التزام أو رسالة لشريك المساءلة (اختياري):</span>
                   </label>
                   <input
@@ -614,8 +620,9 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                         }}
                         className="p-2 rounded-xl text-slate-300 hover:text-[#25D366] hover:bg-[#0F2854] transition-colors cursor-pointer"
                         title="مشاركة في واتساب"
+                        aria-label="مشاركة في واتساب"
                       >
-                        <MessageSquare className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faComment} className="w-4 h-4" aria-hidden="true" />
                       </button>
 
                       {/* نسخ النص */}
@@ -628,8 +635,9 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                         }}
                         className="p-2 rounded-xl text-slate-300 hover:text-[#02C39A] hover:bg-[#0F2854] transition-colors cursor-pointer"
                         title="نسخ نص هذه البطاقة"
+                        aria-label="نسخ نص هذه البطاقة"
                       >
-                        <Copy className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faCopy} className="w-4 h-4" aria-hidden="true" />
                       </button>
 
                       {/* حذف */}
@@ -637,15 +645,16 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                         onClick={() => handleDeleteCheckIn(item.id)}
                         className="p-2 rounded-xl text-slate-300 hover:text-rose-400 hover:bg-[#0F2854] transition-colors cursor-pointer"
                         title="حذف البطاقة من السجل"
+                        aria-label="حذف البطاقة من السجل"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faTrashCan} className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-[#2A5C9E] bg-[#1C4D8D]/20">
-                  <Bookmark className="w-10 h-10 text-[#00A896] mx-auto mb-2 opacity-60" />
+                  <FontAwesomeIcon icon={faBookmark} className="w-10 h-10 text-[#00A896] mx-auto mb-2 opacity-60" aria-hidden="true" />
                   <h4 className="text-sm font-bold text-white mb-1">
                     لا توجد بطاقات مساءلة محفوظة بعد
                   </h4>
@@ -676,12 +685,12 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
               >
                 {isSaved ? (
                   <>
-                    <Check className="w-4 h-4 text-[#02C39A]" />
+                    <FontAwesomeIcon icon={faCheck} className="w-4 h-4 text-[#02C39A]" aria-hidden="true" />
                     <span>تم الحفظ في السجل! ✓</span>
                   </>
                 ) : (
                   <>
-                    <Bookmark className="w-4 h-4 text-[#00A896]" />
+                    <FontAwesomeIcon icon={faBookmark} className="w-4 h-4 text-[#00A896]" aria-hidden="true" />
                     <span>حفظ في السجل 📌</span>
                   </>
                 )}
@@ -708,12 +717,12 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
             >
               {copied ? (
                 <>
-                  <Check className="w-4 h-4 text-[#02C39A]" />
+                  <FontAwesomeIcon icon={faCheck} className="w-4 h-4 text-[#02C39A]" aria-hidden="true" />
                   <span>تم النسخ! 📋</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faCopy} className="w-4 h-4" aria-hidden="true" />
                   <span>نسخ الملخص 📋</span>
                 </>
               )}
@@ -726,7 +735,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-black text-xs shadow-lg shadow-[#25D366]/30 transition-all hover:scale-102 cursor-pointer"
               title="مشاركة مباشرة عبر واتساب"
             >
-              <MessageSquare className="w-4 h-4 fill-white" />
+              <FontAwesomeIcon icon={faComment} className="w-4 h-4" aria-hidden="true" />
               <span>مشاركة واتساب 💬</span>
             </button>
           </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Flame } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFire } from '../lib/icons';
 
 interface LoadingScreenProps {
   onLoaded?: () => void;
@@ -75,7 +76,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-[#00A896] to-[#02C39A] opacity-25 blur-md" />
 
         <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-[#00A896] to-[#02C39A] shadow-xl shadow-[#00A896]/30">
-          <Flame className="w-10 h-10 text-[#F39C12] fill-[#F39C12]" />
+          <FontAwesomeIcon icon={faFire} className="w-10 h-10 text-[#F39C12]" aria-hidden="true" />
           <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#02C39A] opacity-80" />
             <span className="relative inline-flex rounded-full h-4 w-4 bg-[#00A896] ring-2 ring-[#0F2854]" />

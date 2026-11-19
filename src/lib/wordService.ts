@@ -237,11 +237,11 @@ export async function importDataFromWordDocx(file: File): Promise<{
     let currentHabit: Partial<Habit> | null = null;
 
     for (const line of lines) {
-      if (line.includes('عادة:') || line.match(/^\d+[\.\-]/)) {
+      if (line.includes('عادة:') || line.match(/^\d+[.-]/)) {
         if (currentHabit && currentHabit.name) {
           extractedHabits.push(createDefaultHabit(currentHabit));
         }
-        const namePart = line.replace(/^\d+[\.\-]/, '').replace(/عادة:/, '').trim();
+        const namePart = line.replace(/^\d+[.-]/, '').replace(/عادة:/, '').trim();
         currentHabit = { name: namePart };
       } else if (currentHabit) {
         if (line.includes('الهوية')) {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  ChevronRight,
-  ChevronLeft,
-  X,
-  Sparkles,
-  CheckCircle2,
-} from 'lucide-react';
+  faChevronRight,
+  faChevronLeft,
+  faXmark,
+  faWandMagicSparkles,
+  faCircleCheck,
+} from '../lib/icons';
 import { MascotCharacter, type MascotMood } from './MascotCharacter';
 
 export interface TourStep {
@@ -303,8 +304,9 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
         onClick={handleSkip}
         className="fixed top-4 left-4 z-[10002] pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0F2854]/95 hover:bg-[#1C4D8D] border border-[#2A5C9E] text-white/90 hover:text-white text-xs font-bold shadow-xl transition-all cursor-pointer backdrop-blur-md hover:scale-105"
         title="إغلاق الجولة الإرشادية"
+        aria-label="إغلاق الجولة الإرشادية"
       >
-        <X className="w-3.5 h-3.5 text-rose-400" />
+        <FontAwesomeIcon icon={faXmark} className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
         <span>إغلاق الجولة (Esc)</span>
       </button>
 
@@ -382,7 +384,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
           {/* رأس الكارت: شارة الخطوة وزر الإغلاق */}
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F2854] border border-[#2A5C9E] text-[11px] font-black text-[#02C39A]">
-              <Sparkles className="w-3.5 h-3.5 text-[#F39C12]" />
+              <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5 text-[#F39C12]" aria-hidden="true" />
               <span>
                 خطوة {currentStepIndex + 1} من {TOUR_STEPS.length}
               </span>
@@ -392,8 +394,9 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
               onClick={handleSkip}
               className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
               title="تخطي الجولة"
+              aria-label="تخطي الجولة"
             >
-              <X className="w-4 h-4" />
+              <FontAwesomeIcon icon={faXmark} className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
 
@@ -422,7 +425,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
                   onClick={handlePrev}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#2A5C9E] bg-[#0F2854] text-xs font-bold text-[#E2E8F0] hover:text-white hover:bg-[#0F2854]/80 transition-colors cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" aria-hidden="true" />
                   <span>السابق</span>
                 </button>
               )}
@@ -434,13 +437,13 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
               >
                 {isLastStep ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-white" />
+                    <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 text-white" aria-hidden="true" />
                     <span>ابدأ رحلتك! 🚀</span>
                   </>
                 ) : (
                   <>
                     <span>التالي</span>
-                    <ChevronLeft className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" aria-hidden="true" />
                   </>
                 )}
               </button>

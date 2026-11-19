@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  X,
-  MessageSquarePlus,
-  Send,
-  Loader2,
-  Check,
-  AlertTriangle,
-  Palette,
-  Compass,
-  Sparkles,
-  Bookmark,
-  Trash2,
-  Monitor,
-} from 'lucide-react';
+  faXmark,
+  faCommentMedical,
+  faPaperPlane,
+  faSpinner,
+  faCheck,
+  faTriangleExclamation,
+  faPalette,
+  faCompass,
+  faWandMagicSparkles,
+  faBookmark,
+  faTrashCan,
+  faDesktop,
+} from '../lib/icons';
 import type { FeedbackCategory } from '../types/feedback';
 import {
   FEEDBACK_CATEGORIES,
@@ -104,13 +105,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const getCategoryIcon = (catId: FeedbackCategory) => {
     switch (catId) {
       case 'ui':
-        return <Palette className="w-3.5 h-3.5" />;
+        return <FontAwesomeIcon icon={faPalette} className="w-3.5 h-3.5" aria-hidden="true" />;
       case 'flow':
-        return <Compass className="w-3.5 h-3.5" />;
+        return <FontAwesomeIcon icon={faCompass} className="w-3.5 h-3.5" aria-hidden="true" />;
       case 'bug':
-        return <AlertTriangle className="w-3.5 h-3.5" />;
+        return <FontAwesomeIcon icon={faTriangleExclamation} className="w-3.5 h-3.5" aria-hidden="true" />;
       case 'idea':
-        return <Sparkles className="w-3.5 h-3.5" />;
+        return <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5" aria-hidden="true" />;
     }
   };
 
@@ -122,7 +123,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       {/* التنبيه العائم الفوري */}
       {toastMessage && (
         <div className="fixed top-5 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#00A896] to-[#02C39A] text-white font-bold text-xs shadow-xl animate-in slide-in-from-top-4 duration-300">
-          <Sparkles className="w-4 h-4 text-[#F39C12]" />
+          <FontAwesomeIcon icon={faWandMagicSparkles} className="w-4 h-4 text-[#F39C12]" aria-hidden="true" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -132,7 +133,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         <div className="p-5 sm:p-6 bg-gradient-to-r from-[#1C4D8D] to-[#0F2854] border-b border-[#2A5C9E] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-[#00A896]/20 border border-[#00A896]/40 text-[#02C39A]">
-              <MessageSquarePlus className="w-6 h-6 text-[#00A896] dark:text-[#02C39A]" />
+              <FontAwesomeIcon icon={faCommentMedical} className="w-6 h-6 text-[#00A896] dark:text-[#02C39A]" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-white">
@@ -148,8 +149,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             onClick={onClose}
             className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#0F2854] transition-colors cursor-pointer"
             title="إغلاق النافذة"
+            aria-label="إغلاق النافذة"
           >
-            <X className="w-5 h-5" />
+            <FontAwesomeIcon icon={faXmark} className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -164,7 +166,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 : 'border-transparent text-[#94A3B8] hover:text-white'
             }`}
           >
-            <MessageSquarePlus className="w-3.5 h-3.5" />
+            <FontAwesomeIcon icon={faCommentMedical} className="w-3.5 h-3.5" aria-hidden="true" />
             <span>إرسال ملاحظة</span>
           </button>
 
@@ -177,7 +179,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 : 'border-transparent text-[#94A3B8] hover:text-white'
             }`}
           >
-            <Bookmark className="w-3.5 h-3.5" />
+            <FontAwesomeIcon icon={faBookmark} className="w-3.5 h-3.5" aria-hidden="true" />
             <span>ملاحظاتي السابقة ({history.length})</span>
           </button>
         </div>
@@ -189,7 +191,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               /* حالة نجاح الإرسال */
               <div className="py-10 text-center space-y-3 animate-in zoom-in-95 duration-300">
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-[#00A896]/20 border-2 border-[#00A896] flex items-center justify-center text-[#02C39A]">
-                  <Check className="w-7 h-7 stroke-[3]" />
+                  <FontAwesomeIcon icon={faCheck} className="w-7 h-7" aria-hidden="true" />
                 </div>
                 <h4 className="text-base font-black text-white">
                   شكراً جزيلاً لملاحظتك القيمة! 🎉
@@ -257,7 +259,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 <div className="p-3 rounded-2xl bg-[#1C4D8D]/40 border border-[#2A5C9E]/60 text-[11px] text-[#94A3B8] space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-[#E2E8F0] flex items-center gap-1.5">
-                      <Monitor className="w-3.5 h-3.5 text-[#00A896]" />
+                      <FontAwesomeIcon icon={faDesktop} className="w-3.5 h-3.5 text-[#00A896]" aria-hidden="true" />
                       <span>السياق التقني المرفق تلقائياً:</span>
                     </span>
                     <span className="flex items-center gap-1 text-[10px]">
@@ -301,12 +303,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4" aria-hidden="true" />
                         <span>جاري الإرسال...</span>
                       </>
                     ) : (
                       <>
-                        <Send className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faPaperPlane} className="w-4 h-4" aria-hidden="true" />
                         <span>إرسال الملاحظة</span>
                       </>
                     )}
@@ -347,8 +349,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                           onClick={() => handleDelete(item.id)}
                           className="p-1 text-[#94A3B8] hover:text-rose-400 transition-colors cursor-pointer"
                           title="حذف من السجل المحلي"
+                          aria-label="حذف من السجل المحلي"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <FontAwesomeIcon icon={faTrashCan} className="w-3.5 h-3.5" aria-hidden="true" />
                         </button>
                       </div>
                     </div>
@@ -360,7 +363,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 ))
               ) : (
                 <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-[#2A5C9E] bg-[#1C4D8D]/20">
-                  <Bookmark className="w-10 h-10 text-[#00A896] mx-auto mb-2 opacity-60" />
+                  <FontAwesomeIcon icon={faBookmark} className="w-10 h-10 text-[#00A896] mx-auto mb-2 opacity-60" aria-hidden="true" />
                   <h4 className="text-sm font-bold text-white mb-1">
                     لم تقم بإرسال أي ملاحظات بعد
                   </h4>

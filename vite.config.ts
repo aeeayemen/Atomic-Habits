@@ -17,7 +17,7 @@ export default defineConfig({
             if (id.includes('docx') || id.includes('mammoth')) return 'vendor-docx';
             if (id.includes('@supabase')) return 'vendor-supabase';
             if (id.includes('canvas-confetti')) return 'vendor-confetti';
-            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('@fortawesome')) return 'vendor-icons';
             if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
             return 'vendor-utils';
           }

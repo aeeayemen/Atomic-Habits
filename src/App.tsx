@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { MessageSquarePlus } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCommentMedical } from './lib/icons';
 import type { Habit, HabitCategory, HabitLog, HabitStatus, HabitType } from './types/habit';
 import {
   loadStoredHabits,
@@ -778,11 +779,13 @@ export function App() {
           </p>
           <div className="flex items-center justify-center gap-3">
             <button
+              type="button"
               onClick={() => setIsFeedbackModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-sky-500/40 dark:border-sky-500/50 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-bold transition-all hover:scale-105 cursor-pointer shadow-2xs"
+              aria-label="إرسال ملاحظة أو عائق في التجربة"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#065f8a]/40 dark:border-sky-500/50 bg-[#065f8a]/10 hover:bg-[#065f8a]/20 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-[#065f8a] dark:text-sky-400 text-xs font-bold transition-all hover:scale-105 cursor-pointer shadow-2xs"
               title="إرسال ملاحظة أو عائق في التجربة لمطوري التطبيق (Beta Feedback)"
             >
-              <MessageSquarePlus className="w-3.5 h-3.5" />
+              <FontAwesomeIcon icon={faCommentMedical} className="w-3.5 h-3.5" aria-hidden="true" />
               <span>إرسال ملاحظة / تجربة (Beta Feedback 📝)</span>
             </button>
           </div>

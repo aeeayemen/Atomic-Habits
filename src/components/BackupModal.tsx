@@ -1,18 +1,19 @@
 import React, { useState, useRef } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  X,
-  Download,
-  Upload,
-  FileCode,
-  FileSpreadsheet,
-  FileText,
-  CheckCircle2,
-  AlertTriangle,
-  Loader2,
-  HardDriveDownload,
-  Sparkles,
-  ShieldAlert,
-} from 'lucide-react';
+  faXmark,
+  faDownload,
+  faUpload,
+  faFileCode,
+  faFileExcel,
+  faFileWord,
+  faCircleCheck,
+  faTriangleExclamation,
+  faSpinner,
+  faHardDrive,
+  faWandMagicSparkles,
+  faShieldHalved,
+} from '../lib/icons';
 import type { Habit, HabitLog } from '../types/habit';
 import {
   exportBackupAsJSON,
@@ -21,7 +22,6 @@ import {
   parseCSVBackup,
   type ParsedImportResult,
 } from '../lib/backupService';
-import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
 import { soundManager } from '../lib/sound';
 
 interface BackupModalProps {
@@ -83,6 +83,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   const handleExportWord = async () => {
     try {
       setIsExporting('word');
+      const { exportDataAsWordDocx } = await import('../lib/wordService');
       await exportDataAsWordDocx();
       soundManager.playCelebration();
     } finally {
@@ -120,6 +121,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
         }
       } else if (fileName.endsWith('.docx')) {
         // Fallback for Word docx import
+        const { importDataFromWordDocx } = await import('../lib/wordService');
         const res = await importDataFromWordDocx(file);
         if (res.success && res.habits) {
           setParseResult({
@@ -178,7 +180,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#2A5C9E]">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-[#00A896]/15 text-[#00A896] dark:text-[#02C39A]">
-              <HardDriveDownload className="w-6 h-6" />
+              <FontAwesomeIcon icon={faHardDrive} className="w-6 h-6" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-lg font-black text-slate-900 dark:text-[#F8FAFC]">
@@ -192,8 +194,9 @@ export const BackupModal: React.FC<BackupModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-[#F8FAFC] rounded-lg hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 transition-colors cursor-pointer"
+            aria-label="إغلاق"
           >
-            <X className="w-5 h-5" />
+            <FontAwesomeIcon icon={faXmark} className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -208,7 +211,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Download className="w-4 h-4" />
+            <FontAwesomeIcon icon={faDownload} className="w-4 h-4" aria-hidden="true" />
             <span>تصدير نسخة احتياطية (Export)</span>
           </button>
 
@@ -221,7 +224,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Upload className="w-4 h-4" />
+            <FontAwesomeIcon icon={faUpload} className="w-4 h-4" aria-hidden="true" />
             <span>استعادة نسخة احتياطية (Import & Restore)</span>
           </button>
         </div>
@@ -238,7 +241,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200/80 dark:border-[#2A5C9E] flex flex-col justify-between hover:border-[#00A896] transition-all group">
                 <div>
                   <div className="flex items-center gap-2 mb-2 text-[#00A896] dark:text-[#02C39A]">
-                    <FileCode className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faFileCode} className="w-5 h-5" aria-hidden="true" />
                     <span className="font-bold text-xs text-slate-900 dark:text-[#F8FAFC]">
                       نسخة احتياطية JSON
                     </span>
@@ -255,9 +258,9 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                   className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#00A896] hover:bg-[#02C39A] text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
                 >
                   {isExporting === 'json' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4" aria-hidden="true" />
                   ) : (
-                    <Download className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faDownload} className="w-4 h-4" aria-hidden="true" />
                   )}
                   <span>تنزيل JSON</span>
                 </button>
@@ -267,7 +270,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200/80 dark:border-[#2A5C9E] flex flex-col justify-between hover:border-emerald-500 transition-all group">
                 <div>
                   <div className="flex items-center gap-2 mb-2 text-emerald-500">
-                    <FileSpreadsheet className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faFileExcel} className="w-5 h-5" aria-hidden="true" />
                     <span className="font-bold text-xs text-slate-900 dark:text-[#F8FAFC]">
                       جدول بيانات CSV
                     </span>
@@ -284,9 +287,9 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                   className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
                 >
                   {isExporting === 'csv' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4" aria-hidden="true" />
                   ) : (
-                    <Download className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faDownload} className="w-4 h-4" aria-hidden="true" />
                   )}
                   <span>تنزيل CSV (إكسل)</span>
                 </button>
@@ -296,7 +299,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200/80 dark:border-[#2A5C9E] flex flex-col justify-between hover:border-blue-500 transition-all group">
                 <div>
                   <div className="flex items-center gap-2 mb-2 text-blue-500">
-                    <FileText className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faFileWord} className="w-5 h-5" aria-hidden="true" />
                     <span className="font-bold text-xs text-slate-900 dark:text-[#F8FAFC]">
                       تقرير مستند Word
                     </span>
@@ -313,9 +316,9 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                   className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
                 >
                   {isExporting === 'word' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4" aria-hidden="true" />
                   ) : (
-                    <Download className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faDownload} className="w-4 h-4" aria-hidden="true" />
                   )}
                   <span>تصدير Word</span>
                 </button>
@@ -323,7 +326,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             </div>
 
             <div className="p-3 rounded-xl bg-slate-100/60 dark:bg-[#0F2854]/40 border border-slate-200 dark:border-[#2A5C9E] text-[11px] text-slate-500 dark:text-[#94A3B8] flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#00A896] shrink-0" />
+              <FontAwesomeIcon icon={faWandMagicSparkles} className="w-4 h-4 text-[#00A896] shrink-0" aria-hidden="true" />
               <span>
                 النسخ الاحتياطي يُنصح به أسبوعياً لضمان الاحتفاظ بسجلاتك حتى عند مسح ذاكرة المتصفح.
               </span>
@@ -347,7 +350,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               onClick={() => fileInputRef.current?.click()}
               className="p-6 border-2 border-dashed border-slate-300 dark:border-[#2A5C9E] hover:border-[#00A896] dark:hover:border-[#02C39A] rounded-2xl bg-slate-50/60 dark:bg-[#0F2854]/60 text-center cursor-pointer transition-all hover:bg-slate-100/60 dark:hover:bg-[#0F2854]"
             >
-              <Upload className="w-8 h-8 text-[#00A896] mx-auto mb-2" />
+              <FontAwesomeIcon icon={faUpload} className="w-8 h-8 text-[#00A896] mx-auto mb-2" aria-hidden="true" />
               <p className="text-xs font-bold text-slate-800 dark:text-[#F8FAFC]">
                 {selectedFile ? selectedFile.name : 'انقر لاختيار ملف النسخة الاحتياطية'}
               </p>
@@ -359,14 +362,14 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             {/* رسائل التنبيه والخطأ */}
             {errorMessage && (
               <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {successMessage && (
               <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>{successMessage}</span>
               </div>
             )}
@@ -376,7 +379,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
               <div className="p-4 rounded-2xl bg-[#00A896]/10 dark:bg-[#00A896]/15 border border-[#00A896]/30 space-y-3">
                 <div className="flex items-center justify-between text-xs font-black text-[#00A896] dark:text-[#02C39A]">
                   <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4" aria-hidden="true" />
                     تم التحقق من بنية الملف بنجاح!
                   </span>
                   <span>
@@ -416,7 +419,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                       }`}
                     >
                       <div className="font-black mb-0.5 flex items-center gap-1">
-                        <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+                        <FontAwesomeIcon icon={faShieldHalved} className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
                         استبدال كامل (Replace All)
                       </div>
                       <div className="text-[10px] opacity-80">
@@ -436,12 +439,12 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                   >
                     {isProcessing ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4" aria-hidden="true" />
                         <span>جاري المزامنة والاستعادة...</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4" aria-hidden="true" />
                         <span>
                           {restoreMode === 'merge'
                             ? `تأكيد دمج ${parseResult.habits.length} عادة`

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShieldAlert, X, Sparkles, Save } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShieldHalved, faXmark, faWandMagicSparkles, faFloppyDisk } from '../lib/icons';
 
 interface SlipUpReflectionModalProps {
   isOpen: boolean;
@@ -52,7 +53,7 @@ export const SlipUpReflectionModal: React.FC<SlipUpReflectionModalProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#2A5C9E]">
           <div className="flex items-center gap-2.5">
             <div className="p-2.5 rounded-2xl bg-amber-500/15 text-amber-500 dark:text-amber-400">
-              <ShieldAlert className="w-5 h-5" />
+              <FontAwesomeIcon icon={faShieldHalved} className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-[#F8FAFC]">
@@ -66,8 +67,9 @@ export const SlipUpReflectionModal: React.FC<SlipUpReflectionModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-[#F8FAFC] rounded-lg hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 transition-colors cursor-pointer"
+            aria-label="إغلاق"
           >
-            <X className="w-5 h-5" />
+            <FontAwesomeIcon icon={faXmark} className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -104,7 +106,7 @@ export const SlipUpReflectionModal: React.FC<SlipUpReflectionModalProps> = ({
         {/* نصيحة القانون المعكوس المستهدفة */}
         {activeTrigger && (
           <div className="mt-3 p-3 rounded-xl bg-[#00A896]/10 border border-[#00A896]/30 text-[#00A896] dark:text-[#02C39A] text-xs flex items-center gap-2">
-            <Sparkles className="w-4 h-4 shrink-0" />
+            <FontAwesomeIcon icon={faWandMagicSparkles} className="w-4 h-4 shrink-0" aria-hidden="true" />
             <span>نصيحة القانون المعكوس: {activeTrigger.tip}</span>
           </div>
         )}
@@ -152,7 +154,7 @@ export const SlipUpReflectionModal: React.FC<SlipUpReflectionModalProps> = ({
               onClick={handleSave}
               className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:opacity-95 text-white font-black text-xs shadow-md shadow-amber-500/20 transition-all cursor-pointer"
             >
-              <Save className="w-4 h-4" />
+              <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4" aria-hidden="true" />
               <span>حفظ التدوين والزلة</span>
             </button>
           </div>

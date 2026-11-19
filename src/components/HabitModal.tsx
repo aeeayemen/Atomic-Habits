@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, BookOpen, Target, Zap, Gift, Shield, ShieldAlert, EyeOff, ThumbsDown, Lock, Frown } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faXmark,
+  faWandMagicSparkles,
+  faBookOpen,
+  faBullseye,
+  faBolt,
+  faGift,
+  faShieldHalved,
+  faTriangleExclamation,
+  faEyeSlash,
+  faThumbsDown,
+  faLock,
+  faFaceFrown,
+} from '../lib/icons';
 import type { Habit, HabitCategory, HabitType } from '../types/habit';
 import { CATEGORIES_META } from '../lib/utils';
 
@@ -85,7 +99,11 @@ export const HabitModal: React.FC<HabitModalProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#2A5C9E]">
           <div className="flex items-center gap-2.5">
             <div className={`p-2 rounded-xl ${isBreak ? 'bg-amber-500/15 text-amber-500' : 'bg-[#00A896]/15 text-[#00A896] dark:text-[#02C39A]'}`}>
-              {isBreak ? <ShieldAlert className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
+              {isBreak ? (
+                <FontAwesomeIcon icon={faTriangleExclamation} className="w-5 h-5" aria-hidden="true" />
+              ) : (
+                <FontAwesomeIcon icon={faWandMagicSparkles} className="w-5 h-5" aria-hidden="true" />
+              )}
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-[#F8FAFC]">
@@ -103,8 +121,9 @@ export const HabitModal: React.FC<HabitModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-[#F8FAFC] rounded-lg hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 transition-colors cursor-pointer"
+            aria-label="إغلاق"
           >
-            <X className="w-5 h-5" />
+            <FontAwesomeIcon icon={faXmark} className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -125,7 +144,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                     : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Zap className="w-4 h-4" />
+                <FontAwesomeIcon icon={faBolt} className="w-4 h-4" aria-hidden="true" />
                 <span>بناء عادة إيجابية (Build)</span>
               </button>
 
@@ -138,7 +157,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                     : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Shield className="w-4 h-4" />
+                <FontAwesomeIcon icon={faShieldHalved} className="w-4 h-4" aria-hidden="true" />
                 <span>الإقلاع عن عادة سيئة (Break)</span>
               </button>
             </div>
@@ -181,7 +200,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
           {/* 2. بيان الهوية (لماذا؟) */}
           <div className={`p-3.5 rounded-xl border ${isBreak ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/30' : 'bg-[#00A896]/10 dark:bg-[#00A896]/15 border-[#00A896]/30'}`}>
             <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider mb-1 ${isBreak ? 'text-amber-600 dark:text-amber-400' : 'text-[#00A896] dark:text-[#02C39A]'}`}>
-              <Shield className="w-3.5 h-3.5" />
+              <FontAwesomeIcon icon={faShieldHalved} className="w-3.5 h-3.5" aria-hidden="true" />
               {isBreak ? 'بيان الهوية الحرة والتحرر السلوكي' : 'بيان الهوية الذاتية (لماذا؟ ومن تريد أن تصبح؟)'}
             </div>
             <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mb-1.5">
@@ -208,7 +227,11 @@ export const HabitModal: React.FC<HabitModalProps> = ({
               {/* القانون 1: الإشارة (واضحة vs خفية) */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854]/80 border border-slate-200 dark:border-[#2A5C9E]">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-blue-500 dark:text-blue-400 mb-1">
-                  {isBreak ? <EyeOff className="w-3.5 h-3.5 text-amber-500" /> : <Target className="w-3.5 h-3.5" />}
+                  {isBreak ? (
+                    <FontAwesomeIcon icon={faEyeSlash} className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
+                  ) : (
+                    <FontAwesomeIcon icon={faBullseye} className="w-3.5 h-3.5" aria-hidden="true" />
+                  )}
                   {isBreak ? '1. اجعلها خفية (إزالة المحفزات)' : '1. اجعلها واضحة (الإشارة / تكديس العادات)'}
                 </div>
                 <input
@@ -223,7 +246,11 @@ export const HabitModal: React.FC<HabitModalProps> = ({
               {/* القانون 3: السهولة (سهلة vs صعبة) */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854]/80 border border-slate-200 dark:border-[#2A5C9E]">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[#F39C12] mb-1">
-                  {isBreak ? <Lock className="w-3.5 h-3.5 text-rose-500" /> : <Zap className="w-3.5 h-3.5" />}
+                  {isBreak ? (
+                    <FontAwesomeIcon icon={faLock} className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
+                  ) : (
+                    <FontAwesomeIcon icon={faBolt} className="w-3.5 h-3.5" aria-hidden="true" />
+                  )}
                   {isBreak ? '3. اجعلها صعبة (زيادة الاحتكاك والحواجز)' : '3. اجعلها سهلة (قاعدة الدقيقتين للبدء)'}
                 </div>
                 <input
@@ -238,7 +265,11 @@ export const HabitModal: React.FC<HabitModalProps> = ({
               {/* القانون 2: الجاذبية (جذابة vs غير جذابة) */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854]/80 border border-slate-200 dark:border-[#2A5C9E]">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-purple-500 dark:text-purple-400 mb-1">
-                  {isBreak ? <ThumbsDown className="w-3.5 h-3.5 text-rose-500" /> : <BookOpen className="w-3.5 h-3.5" />}
+                  {isBreak ? (
+                    <FontAwesomeIcon icon={faThumbsDown} className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
+                  ) : (
+                    <FontAwesomeIcon icon={faBookOpen} className="w-3.5 h-3.5" aria-hidden="true" />
+                  )}
                   {isBreak ? '2. اجعلها غير جذابة (إدراك الضرر والبديل)' : '2. اجعلها جذابة (الروتين المحدد)'}
                 </div>
                 <input
@@ -253,7 +284,11 @@ export const HabitModal: React.FC<HabitModalProps> = ({
               {/* القانون 4: الإشباع (مشبعة vs غير مشبعة) */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854]/80 border border-slate-200 dark:border-[#2A5C9E]">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[#00A896] dark:text-[#02C39A] mb-1">
-                  {isBreak ? <Frown className="w-3.5 h-3.5 text-amber-500" /> : <Gift className="w-3.5 h-3.5" />}
+                  {isBreak ? (
+                    <FontAwesomeIcon icon={faFaceFrown} className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
+                  ) : (
+                    <FontAwesomeIcon icon={faGift} className="w-3.5 h-3.5" aria-hidden="true" />
+                  )}
                   {isBreak ? '4. اجعلها غير مُرضية (عقد المساءلة أو التكلفة)' : '4. اجعلها مشبعة (المكافأة الفورية)'}
                 </div>
                 <input

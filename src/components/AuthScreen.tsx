@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  Flame,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  LogIn,
-  UserPlus,
-  AlertCircle,
-  CheckCircle2,
-  Loader2,
-  ShieldCheck,
-  Sparkles,
-} from 'lucide-react';
+  faFire,
+  faEnvelope,
+  faLock,
+  faEye,
+  faEyeSlash,
+  faRightToBracket,
+  faUserPlus,
+  faTriangleExclamation,
+  faCircleCheck,
+  faSpinner,
+  faShieldHalved,
+  faWandMagicSparkles,
+} from '../lib/icons';
 import { signInWithEmail, signUpWithEmail } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -103,7 +104,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         {/* شارة الهوية والشعار */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center p-3.5 rounded-3xl bg-gradient-to-br from-[#00A896] to-[#02C39A] shadow-xl shadow-[#00A896]/30 mb-4 ring-4 ring-[#00A896]/20">
-            <Flame className="w-10 h-10 text-[#F39C12] fill-[#F39C12] animate-pulse" />
+            <FontAwesomeIcon icon={faFire} className="w-10 h-10 text-[#F39C12] animate-pulse" aria-hidden="true" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2">
             منظومة العادات الذرية
@@ -130,7 +131,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   : 'text-[#94A3B8] hover:text-white'
               }`}
             >
-              <LogIn className="w-4 h-4" />
+              <FontAwesomeIcon icon={faRightToBracket} className="w-4 h-4" aria-hidden="true" />
               <span>تسجيل الدخول</span>
             </button>
             <button
@@ -146,7 +147,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   : 'text-[#94A3B8] hover:text-white'
               }`}
             >
-              <UserPlus className="w-4 h-4" />
+              <FontAwesomeIcon icon={faUserPlus} className="w-4 h-4" aria-hidden="true" />
               <span>حساب جديد</span>
             </button>
           </div>
@@ -154,7 +155,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {/* تنبيه الخطأ */}
           {errorMessage && (
             <div className="flex items-start gap-2.5 p-3.5 mb-5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs leading-relaxed animate-in fade-in duration-200">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+              <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" aria-hidden="true" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -162,7 +163,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {/* تنبيه النجاح */}
           {successMessage && (
             <div className="flex items-start gap-2.5 p-3.5 mb-5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-xs leading-relaxed animate-in fade-in duration-200">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+              <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" aria-hidden="true" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -183,7 +184,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   dir="ltr"
                   className="w-full px-4 py-2.5 pl-10 bg-[#0F2854] border border-[#2A5C9E] rounded-xl text-white text-sm placeholder-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#00A896] focus:border-transparent transition-all"
                 />
-                <Mail className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
               </div>
             </div>
 
@@ -201,14 +202,19 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   dir="ltr"
                   className="w-full px-4 py-2.5 pl-10 pr-10 bg-[#0F2854] border border-[#2A5C9E] rounded-xl text-white text-sm placeholder-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#00A896] focus:border-transparent transition-all"
                 />
-                <Lock className="w-4 h-4 text-[#94A3B8] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <FontAwesomeIcon icon={faLock} className="w-4 h-4 text-[#94A3B8] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="p-1 text-[#94A3B8] hover:text-white absolute left-2.5 top-1/2 -translate-y-1/2 cursor-pointer transition-colors"
                   title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                  aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <FontAwesomeIcon icon={faEyeSlash} className="w-4 h-4" aria-hidden="true" />
+                  ) : (
+                    <FontAwesomeIcon icon={faEye} className="w-4 h-4" aria-hidden="true" />
+                  )}
                 </button>
               </div>
             </div>
@@ -228,7 +234,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     dir="ltr"
                     className="w-full px-4 py-2.5 pl-10 pr-10 bg-[#0F2854] border border-[#2A5C9E] rounded-xl text-white text-sm placeholder-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#00A896] focus:border-transparent transition-all"
                   />
-                  <ShieldCheck className="w-4 h-4 text-[#94A3B8] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <FontAwesomeIcon icon={faShieldHalved} className="w-4 h-4 text-[#94A3B8] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
                 </div>
               </div>
             )}
@@ -240,17 +246,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <FontAwesomeIcon icon={faSpinner} spin className="w-4 h-4" aria-hidden="true" />
                   <span>جاري المعالجة...</span>
                 </>
               ) : mode === 'signin' ? (
                 <>
-                  <LogIn className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faRightToBracket} className="w-4 h-4" aria-hidden="true" />
                   <span>دخول إلى لوحة المتابعة</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-[#F39C12]" />
+                  <FontAwesomeIcon icon={faWandMagicSparkles} className="w-4 h-4 text-[#F39C12]" aria-hidden="true" />
                   <span>إنشاء الحساب وبدء الرحلة</span>
                 </>
               )}

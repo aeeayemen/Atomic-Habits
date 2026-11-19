@@ -1,5 +1,6 @@
 import React from 'react';
-import { ShieldAlert, Check } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTriangleExclamation, faCheck } from '../lib/icons';
 import type { Habit, HabitLog } from '../types/habit';
 import { calculateStreakStats } from '../lib/streak';
 import { soundManager } from '../lib/sound';
@@ -27,14 +28,14 @@ export const NeverMissTwiceBanner: React.FC<NeverMissTwiceBannerProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-rose-500/20 text-rose-500 shrink-0">
-            <ShieldAlert className="w-5 h-5 animate-pulse" />
+            <FontAwesomeIcon icon={faTriangleExclamation} className="w-5 h-5 animate-pulse" aria-hidden="true" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-bold text-rose-600 dark:text-rose-400 font-['Cairo']">
+              <h2 className="text-sm font-bold text-rose-600 dark:text-rose-400 font-['Cairo']">
                 قاعدة العادات الذرية: إياك أن تفوّت مرتين متتاليتين!
-              </h4>
+              </h2>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-300">
                 {atRiskHabits.length} معرضة لكسر السلسلة
               </span>
@@ -48,18 +49,22 @@ export const NeverMissTwiceBanner: React.FC<NeverMissTwiceBannerProps> = ({
               {atRiskHabits.map((habit) => (
                 <div
                   key={habit.id}
-                  className="flex items-center gap-2 px-3 py-1 rounded-md bg-white dark:bg-[#0F2854] border border-rose-200 dark:border-[#2A5C9E] text-xs text-slate-800 dark:text-[#F8FAFC] shadow-2xs"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-[#0F2854] border border-rose-200 dark:border-rose-900/50 shadow-2xs"
                 >
-                  <span className="font-bold">{habit.name}</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                    {habit.name}
+                  </span>
                   <button
+                    type="button"
                     onClick={() => {
-                      soundManager.playSuccess();
                       onMarkHabitDoneToday(habit.id);
+                      soundManager.playSuccess();
                     }}
-                    className="flex items-center gap-1 text-[11px] font-extrabold text-[#00A896] dark:text-[#02C39A] hover:underline cursor-pointer"
+                    aria-label={`تدارك عادة ${habit.name} وإنجازها اليوم`}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold transition-colors cursor-pointer"
                   >
-                    <Check className="w-3 h-3 stroke-[3]" />
-                    إنقاذ العادة الآن
+                    <FontAwesomeIcon icon={faCheck} className="w-3 h-3" aria-hidden="true" />
+                    <span>تدارك اليوم</span>
                   </button>
                 </div>
               ))}

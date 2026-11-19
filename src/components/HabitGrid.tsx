@@ -1,12 +1,13 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  ChevronRight,
-  ChevronLeft,
-  Calendar,
-  Sparkles,
-  PlusCircle,
-  Archive,
-} from 'lucide-react';
+  faChevronRight,
+  faChevronLeft,
+  faCalendarDays,
+  faWandMagicSparkles,
+  faCirclePlus,
+  faBoxArchive,
+} from '../lib/icons';
 import type { DayColumn, Habit, HabitLog, HabitStatus } from '../types/habit';
 import { HabitRow } from './HabitRow';
 import { cn } from '../lib/utils';
@@ -62,15 +63,16 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
             onClick={onPrevPeriod}
             className="p-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-slate-600 dark:text-[#F8FAFC] transition-colors cursor-pointer"
             title="الفترة السابقة"
+            aria-label="الفترة السابقة"
           >
-            <ChevronRight className="w-4 h-4" />
+            <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" aria-hidden="true" />
           </button>
 
           <button
             onClick={onResetToToday}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-xs font-bold text-slate-700 dark:text-[#F8FAFC] transition-colors cursor-pointer"
           >
-            <Calendar className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A]" />
+            <FontAwesomeIcon icon={faCalendarDays} className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A]" aria-hidden="true" />
             اليوم
           </button>
 
@@ -78,8 +80,9 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
             onClick={onNextPeriod}
             className="p-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-slate-600 dark:text-[#F8FAFC] transition-colors cursor-pointer"
             title="الفترة التالية"
+            aria-label="الفترة التالية"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" aria-hidden="true" />
           </button>
 
           <span className="text-xs font-bold text-slate-600 dark:text-[#94A3B8] mr-2 hidden sm:inline-block">
@@ -95,7 +98,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-colors cursor-pointer"
             title="تحديد كل عادات اليوم كمنجزة بنجاح"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5" aria-hidden="true" />
             <span>إنجاز كل مهام اليوم</span>
           </button>
 
@@ -178,7 +181,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
           ))
         ) : isArchivedView ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#2A5C9E] bg-white/50 dark:bg-[#1C4D8D]/40">
-            <Archive className="w-12 h-12 text-[#F39C12] mb-3 opacity-80" />
+            <FontAwesomeIcon icon={faBoxArchive} className="w-12 h-12 text-[#F39C12] mb-3 opacity-80" aria-hidden="true" />
             <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC]">
               لا توجد عادات مؤرشفة حالياً
             </h3>
@@ -188,7 +191,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#2A5C9E] bg-white/50 dark:bg-[#1C4D8D]/40">
-            <Sparkles className="w-10 h-10 text-[#00A896] mb-3 opacity-80" />
+            <FontAwesomeIcon icon={faWandMagicSparkles} className="w-10 h-10 text-[#00A896] mb-3 opacity-80" aria-hidden="true" />
             <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC]">
               لم يتم العثور على عادات مطابقة لهذا الفلتر
             </h3>
@@ -200,7 +203,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
               onClick={onAddNewHabit}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-[#00A896]/20 transition-all hover:scale-105 cursor-pointer"
             >
-              <PlusCircle className="w-4 h-4" />
+              <FontAwesomeIcon icon={faCirclePlus} className="w-4 h-4" aria-hidden="true" />
               ابدأ بناء عادتك الأولى الآن
             </button>
           </div>

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  TrendingUp,
-  AlertTriangle,
-  Shield,
-  ShieldAlert,
-  Clock,
-  Sparkles,
-  ChevronDown,
-  ChevronUp,
-  Brain,
-  Calendar,
-  Zap,
-  CheckCircle2,
-  Info,
-} from 'lucide-react';
+  faArrowTrendUp,
+  faTriangleExclamation,
+  faShieldHalved,
+  faClock,
+  faWandMagicSparkles,
+  faChevronDown,
+  faChevronUp,
+  faBrain,
+  faCalendarDays,
+  faBolt,
+  faCircleCheck,
+  faCircleInfo,
+} from '../lib/icons';
 import type { Habit, HabitLog } from '../types/habit';
 import { computeBehavioralAnalytics } from '../lib/analytics';
 
@@ -41,22 +41,22 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
       >
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#00A896]/20 to-[#F39C12]/20 border border-[#00A896]/30 text-[#00A896] dark:text-[#02C39A]">
-            <Brain className="w-5 h-5 text-[#00A896] dark:text-[#02C39A]" />
+            <FontAwesomeIcon icon={faBrain} className="w-5 h-5 text-[#00A896] dark:text-[#02C39A]" aria-hidden="true" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-base font-black text-slate-900 dark:text-[#F8FAFC]">
+              <h2 className="text-base font-black text-slate-900 dark:text-[#F8FAFC]">
                 تحليل الأداء والمحفزات السلوكية 📊
-              </h3>
+              </h2>
               {analytics.weakestDay && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
-                  <AlertTriangle className="w-3 h-3" />
+                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-3 h-3" aria-hidden="true" />
                   أضعف يوم: {analytics.weakestDay.dayName} ({analytics.weakestDay.failureRate}%)
                 </span>
               )}
               {analytics.totalSlipUps === 0 && hasBreakHabits && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#00A896]/15 border border-[#00A896]/30 text-[#00A896] dark:text-[#02C39A]">
-                  <Shield className="w-3 h-3" />
+                  <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3" aria-hidden="true" />
                   سجل صمود نقي 100%
                 </span>
               )}
@@ -68,7 +68,11 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
         </div>
 
         <div className="p-1.5 rounded-lg text-slate-400 dark:text-[#94A3B8] hover:text-slate-700 dark:hover:text-white transition-colors">
-          {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          {isExpanded ? (
+            <FontAwesomeIcon icon={faChevronUp} className="w-5 h-5" aria-hidden="true" />
+          ) : (
+            <FontAwesomeIcon icon={faChevronDown} className="w-5 h-5" aria-hidden="true" />
+          )}
         </div>
       </button>
 
@@ -82,7 +86,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-[#CBD5E1]">
-                    <Calendar className="w-4 h-4 text-amber-500" />
+                    <FontAwesomeIcon icon={faCalendarDays} className="w-4 h-4 text-amber-500" aria-hidden="true" />
                     <span>أضعف أيام الالتزام بالأسبوع</span>
                   </div>
                   {analytics.weakestDay && (
@@ -138,7 +142,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
               </div>
 
               <div className="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-[#2A5C9E]/60 flex items-center gap-1.5 text-[11px] text-[#00A896] dark:text-[#02C39A]">
-                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span className="truncate">نصيحة: قلّص عادات هذا اليوم عبر قاعدة الدقيقتين.</span>
               </div>
             </div>
@@ -148,7 +152,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-[#CBD5E1]">
-                    <ShieldAlert className="w-4 h-4 text-amber-500" />
+                    <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 text-amber-500" aria-hidden="true" />
                     <span>أبرز محفزات العادات السيئة 🛡️</span>
                   </div>
                   <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
@@ -180,7 +184,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
                   </div>
                 ) : (
                   <div className="py-6 px-3 text-center flex flex-col items-center justify-center">
-                    <Shield className="w-8 h-8 text-[#00A896] mb-2 opacity-80" />
+                    <FontAwesomeIcon icon={faShieldHalved} className="w-8 h-8 text-[#00A896] mb-2 opacity-80" aria-hidden="true" />
                     <p className="text-xs font-bold text-slate-800 dark:text-[#F8FAFC]">
                       لا توجد زلات مسجلة بحمد الله! 🛡️
                     </p>
@@ -193,7 +197,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
 
               {analytics.topTriggers.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-[#2A5C9E]/60 text-[11px] text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 shrink-0" />
+                  <FontAwesomeIcon icon={faBolt} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>اجعل العادة غير جذابة وصعبة فور رصد هذا المحفز.</span>
                 </div>
               )}
@@ -204,7 +208,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-[#CBD5E1]">
-                    <TrendingUp className="w-4 h-4 text-[#00A896]" />
+                    <FontAwesomeIcon icon={faArrowTrendUp} className="w-4 h-4 text-[#00A896]" aria-hidden="true" />
                     <span>معدل الالتزام وصحة الصمود</span>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 dark:text-[#94A3B8]">
@@ -218,7 +222,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
                   <div>
                     <div className="flex justify-between text-xs font-bold mb-1">
                       <span className="text-slate-600 dark:text-[#CBD5E1] flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896]" />
+                        <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5 text-[#00A896]" aria-hidden="true" />
                         اتساق عادات البناء الإيجابية:
                       </span>
                       <span className="text-[#00A896] dark:text-[#02C39A]">
@@ -238,7 +242,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
                     <div>
                       <div className="flex justify-between text-xs font-bold mb-1">
                         <span className="text-slate-600 dark:text-[#CBD5E1] flex items-center gap-1">
-                          <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                          <FontAwesomeIcon icon={faShieldHalved} className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
                           معدل النقاء والصمود (Break):
                         </span>
                         <span className="text-emerald-600 dark:text-emerald-400">
@@ -258,7 +262,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
                 {/* فترة ذروة الانتكاس (Peak Time Window) */}
                 <div className="p-2.5 rounded-lg bg-white dark:bg-[#1C4D8D]/60 border border-slate-200 dark:border-[#2A5C9E] text-xs">
                   <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-[#F8FAFC] mb-1">
-                    <Clock className="w-3.5 h-3.5 text-amber-500" />
+                    <FontAwesomeIcon icon={faClock} className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
                     <span>فترة الذروة الأكثر حساسية:</span>
                   </div>
                   {analytics.peakTimeWindow ? (
@@ -274,7 +278,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
               </div>
 
               <div className="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-[#2A5C9E]/60 text-[11px] text-slate-400 dark:text-[#94A3B8] flex items-center gap-1">
-                <Info className="w-3.5 h-3.5 shrink-0" />
+                <FontAwesomeIcon icon={faCircleInfo} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span>«أنت لا ترتقي لأهدافك بل تهبط لمستوى أنظمتك»</span>
               </div>
             </div>
