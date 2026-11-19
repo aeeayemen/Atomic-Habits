@@ -223,3 +223,33 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_starter_habits();
+
+-- ==============================================================================
+-- 9. جدول بطاقات المساءلة الإيجابية ومشاركة الإنجاز (Accountability Check-ins)
+-- اختيارية للمستخدم، معزولة برمجياً بـ RLS ومصممة لدعم شريك المساءلة بلا ضغوط
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.accountability_checkins (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  date_str TEXT NOT NULL,
+  active_streak INT NOT NULL DEFAULT 0,
+  clean_streak INT NOT NULL DEFAULT 0,
+  completion_rate INT NOT NULL DEFAULT 0,
+  message TEXT,
+  highlighted_habit TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_accountability_user_id ON public.accountability_checkins(user_id);
+CREATE INDEX IF NOT EXISTS idx_accountability_created ON public.accountability_checkins(created_at DESC);
+
+ALTER TABLE public.accountability_checkins ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage their own accountability checkins" ON public.accountability_checkins;
+CREATE POLICY "Users can manage their own accountability checkins"
+  ON public.accountability_checkins
+  FOR ALL
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+

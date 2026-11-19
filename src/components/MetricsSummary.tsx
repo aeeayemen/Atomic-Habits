@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Flame, Trophy, Activity } from 'lucide-react';
+import { CheckCircle2, Flame, Trophy, Activity, Share2 } from 'lucide-react';
 import type { Habit, HabitLog } from '../types/habit';
 import { formatISODate } from '../lib/utils';
 import { calculateStreakStats } from '../lib/streak';
@@ -7,9 +7,14 @@ import { calculateStreakStats } from '../lib/streak';
 interface MetricsSummaryProps {
   habits: Habit[];
   allLogs: Record<string, HabitLog>;
+  onOpenAccountability?: () => void;
 }
 
-export const MetricsSummary: React.FC<MetricsSummaryProps> = ({ habits, allLogs }) => {
+export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
+  habits,
+  allLogs,
+  onOpenAccountability,
+}) => {
   const todayStr = formatISODate(new Date());
 
   // 1. نسبة إنجاز اليوم
@@ -131,6 +136,34 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({ habits, allLogs 
           نسبة النجاح التراكمية
         </p>
       </div>
+
+      {/* 5. شريط مشاركة الإنجاز مع شريك المساءلة */}
+      {onOpenAccountability && (
+        <div className="col-span-2 lg:col-span-4 p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#00A896]/10 to-transparent border border-amber-500/30 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-amber-500/20 text-[#F39C12] shrink-0">
+              <Flame className="w-4 h-4 fill-[#F39C12]" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-slate-900 dark:text-white">
+                شريك المساءلة ومشاركة الإنجاز 🤝🔥
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
+                شارك بطاقة سلاسلك ونسبة التزامك بإيجابية مع صديقك أو شريك المساءلة دون أي ضغوط.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpenAccountability}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-[#00A896]/20 transition-all hover:scale-102 cursor-pointer"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>مشاركة بطاقة الإنجاز</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

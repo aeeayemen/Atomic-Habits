@@ -43,6 +43,7 @@ import { OnboardingTour } from './components/OnboardingTour';
 import { SlipUpReflectionModal } from './components/SlipUpReflectionModal';
 import { BehavioralAnalyticsCard } from './components/BehavioralAnalyticsCard';
 import { BackupModal } from './components/BackupModal';
+import { AccountabilityModal } from './components/AccountabilityModal';
 import {
   executeOrQueueMutation,
   initializeOfflineQueueSync,
@@ -92,6 +93,7 @@ export function App() {
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isAccountabilityModalOpen, setIsAccountabilityModalOpen] = useState(false);
   const [isPushActive, setIsPushActive] = useState(false);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [reflectionModal, setReflectionModal] = useState<{
@@ -609,11 +611,16 @@ export function App() {
           isPushActive={isPushActive}
           onRestartTour={() => setIsTourOpen(true)}
           onOpenBackup={() => setIsBackupModalOpen(true)}
+          onOpenAccountability={() => setIsAccountabilityModalOpen(true)}
         />
 
         {/* بطاقات الإحصائيات الفورية */}
         <div data-tour="tour-metrics">
-          <MetricsSummary habits={habits} allLogs={allLogs} />
+          <MetricsSummary
+            habits={habits}
+            allLogs={allLogs}
+            onOpenAccountability={() => setIsAccountabilityModalOpen(true)}
+          />
         </div>
 
         {/* شريط تنبيه: إياك أن تفوت مرتين */}
@@ -739,6 +746,16 @@ export function App() {
           }}
         />
       )}
+
+      {/* نافذة مشاركة الإنجاز ومساءلة الأصدقاء */}
+      <AccountabilityModal
+        isOpen={isAccountabilityModalOpen}
+        onClose={() => setIsAccountabilityModalOpen(false)}
+        habits={habits}
+        allLogs={allLogs}
+        currentUserId={currentUser?.id}
+        userName={currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0]}
+      />
 
       {/* نافذة النسخ الاحتياطي واستعادة البيانات الشاملة (JSON, CSV, Word) */}
       <BackupModal

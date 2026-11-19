@@ -17,6 +17,7 @@ import {
   Download,
   HelpCircle,
   HardDriveDownload,
+  Share2,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { exportDataAsWordDocx, importDataFromWordDocx } from '../lib/wordService';
@@ -38,6 +39,7 @@ interface HeaderProps {
   isPushActive?: boolean;
   onRestartTour?: () => void;
   onOpenBackup?: () => void;
+  onOpenAccountability?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -55,6 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
   isPushActive = false,
   onRestartTour,
   onOpenBackup,
+  onOpenAccountability,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -207,6 +210,18 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <HardDriveDownload className="w-4 h-4" />
             <span>النسخ والبيانات</span>
+          </button>
+        )}
+
+        {/* زر مشاركة الإنجاز ومساءلة الأصدقاء */}
+        {onOpenAccountability && (
+          <button
+            onClick={onOpenAccountability}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/40 dark:border-amber-500/50 bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 transition-colors shadow-2xs cursor-pointer text-xs font-bold"
+            title="مشاركة بطاقة الإنجاز ومساءلة الأصدقاء 🤝🔥"
+          >
+            <Share2 className="w-4 h-4 text-[#F39C12]" />
+            <span className="hidden sm:inline">مشاركة الإنجاز</span>
           </button>
         )}
 
