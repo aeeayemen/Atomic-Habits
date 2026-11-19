@@ -60,7 +60,7 @@ export const HabitRow: React.FC<HabitRowProps> = ({
       )}
     >
       {/* 1. عمود العادة وبيان الهوية */}
-      <div className="flex items-center gap-3 min-w-[280px] max-w-sm">
+      <div className="flex items-center gap-3 w-full md:w-auto md:min-w-[240px] lg:min-w-[280px] md:max-w-sm">
         {/* النقطة اللونية أو درع الحماية */}
         <div
           className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs flex items-center justify-center"
@@ -72,7 +72,7 @@ export const HabitRow: React.FC<HabitRowProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             <h3
               onClick={() => onOpenDetail(habit)}
-              className="text-sm font-black text-slate-900 dark:text-[#F8FAFC] hover:text-[#0b7a6e] dark:hover:text-[#02C39A] transition-colors cursor-pointer truncate"
+              className="text-sm font-black text-slate-900 dark:text-[#F8FAFC] hover:text-[#0b7a6e] dark:hover:text-[#02C39A] transition-colors cursor-pointer truncate max-w-[180px] sm:max-w-xs md:max-w-none"
               title={habit.name}
             >
               {habit.name}
@@ -81,7 +81,7 @@ export const HabitRow: React.FC<HabitRowProps> = ({
             {/* شارة التصنيف */}
             <span
               className={cn(
-                'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border',
+                'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0',
                 categoryMeta.badgeBg,
                 categoryMeta.badgeBorder,
                 categoryMeta.accentText
@@ -92,16 +92,16 @@ export const HabitRow: React.FC<HabitRowProps> = ({
 
             {/* شارة إقلاع عن عادة سيئة (Break Habit Shield) */}
             {isBreakHabit && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-[#9a5b00] dark:text-amber-400">
-                <FontAwesomeIcon icon={faShieldHalved} className="w-2.5 h-2.5" aria-hidden="true" />
-                <span>إقلاع 🛡️</span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-[#9a5b00] dark:text-amber-400 shrink-0">
+                <FontAwesomeIcon icon={faShieldHalved} className="w-2.5 h-2.5 shrink-0" aria-hidden="true" />
+                <span>إقلاع </span>
               </span>
             )}
 
             {/* شارة عادة مؤرشفة */}
             {isArchived && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300">
-                <FontAwesomeIcon icon={faBoxArchive} className="w-2.5 h-2.5" aria-hidden="true" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 shrink-0">
+                <FontAwesomeIcon icon={faBoxArchive} className="w-2.5 h-2.5 shrink-0" aria-hidden="true" />
                 <span>مؤرشفة</span>
               </span>
             )}
@@ -124,7 +124,7 @@ export const HabitRow: React.FC<HabitRowProps> = ({
           {/* تنبيه وشيك لكسر السلسلة (Never Miss Twice Warning) */}
           {stats.isAtRisk && (
             <div className="flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 mt-1">
-              <FontAwesomeIcon icon={faTriangleExclamation} className="w-3 h-3 text-rose-500" aria-hidden="true" />
+              <FontAwesomeIcon icon={faTriangleExclamation} className="w-3 h-3 text-rose-500 shrink-0" aria-hidden="true" />
               <span>معرضة للكسر! أنجزها اليوم</span>
             </div>
           )}
@@ -132,13 +132,13 @@ export const HabitRow: React.FC<HabitRowProps> = ({
       </div>
 
       {/* 2. شبكة المربعات اليومية (Day Cells) */}
-      <div className="flex items-center gap-2 justify-center flex-1 overflow-x-auto py-1">
+      <div className="w-full md:flex-1 min-w-0 flex items-center gap-1.5 sm:gap-2 justify-start md:justify-center overflow-x-auto py-1.5 px-0.5 no-scrollbar scroll-smooth">
         {days.map((day) => {
           const logId = `${habit.id}_${day.date}`;
           const log = allLogs[logId];
 
           return (
-            <div key={day.date} className="flex flex-col items-center">
+            <div key={day.date} className="flex flex-col items-center shrink-0">
               <DayCell
                 date={day.date}
                 isToday={day.isToday}
@@ -156,12 +156,12 @@ export const HabitRow: React.FC<HabitRowProps> = ({
       </div>
 
       {/* 3. عمود الإحصائيات والإجراءات */}
-      <div className="flex items-center justify-between md:justify-start gap-4 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-slate-100 dark:border-[#2A5C9E]">
+      <div className="w-full md:w-auto flex flex-wrap items-center justify-between md:justify-start gap-2.5 sm:gap-4 border-t md:border-t-0 pt-2.5 md:pt-0 border-slate-100 dark:border-[#2A5C9E]">
         {/* عداد السلسلة أو الصمود */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
           <div
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border',
+              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border shrink-0',
               isBreakHabit
                 ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/30'
                 : 'bg-slate-50 dark:bg-[#0F2854] border-slate-200/70 dark:border-[#2A5C9E]'
@@ -175,17 +175,13 @@ export const HabitRow: React.FC<HabitRowProps> = ({
             {isBreakHabit ? (
               <FontAwesomeIcon
                 icon={faShield}
-                className={cn(
-                  'w-4 h-4 text-emerald-500 dark:text-emerald-400'
-                )}
+                className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0"
                 aria-hidden="true"
               />
             ) : (
               <FontAwesomeIcon
                 icon={faFire}
-                className={cn(
-                  'w-4 h-4 text-[#9a5b00] dark:text-[#F39C12]'
-                )}
+                className="w-3.5 h-3.5 text-[#9a5b00] dark:text-[#F39C12] shrink-0"
                 aria-hidden="true"
               />
             )}
@@ -193,7 +189,7 @@ export const HabitRow: React.FC<HabitRowProps> = ({
               <div className="text-xs font-black leading-none text-slate-800 dark:text-[#F8FAFC]">
                 {stats.currentStreak}
                 <span className="text-[10px] font-normal text-[#475569] dark:text-[#94A3B8] mr-1">
-                  {isBreakHabit ? 'أيام صمود' : 'أيام سلسلة'}
+                  {isBreakHabit ? 'أيام صمود' : 'أيام'}
                 </span>
               </div>
               <div className={cn(
@@ -207,10 +203,10 @@ export const HabitRow: React.FC<HabitRowProps> = ({
 
           {/* نسبة الاتساق أو الصمود */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0F2854] border border-slate-200/70 dark:border-[#2A5C9E]"
+            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0F2854] border border-slate-200/70 dark:border-[#2A5C9E] shrink-0"
             title={isBreakHabit ? `نسبة النقاء خلال 30 يوماً: ${stats.completionRate}%` : `نسبة الاتساق خلال 30 يوماً: ${stats.completionRate}%`}
           >
-            <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5 text-[#0b7a6e] dark:text-[#02C39A]" aria-hidden="true" />
+            <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5 text-[#0b7a6e] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
             <span className="text-xs font-black text-slate-700 dark:text-[#F8FAFC]">
               {stats.completionRate}%
             </span>
@@ -219,34 +215,34 @@ export const HabitRow: React.FC<HabitRowProps> = ({
           {/* شارة الإنجاز القياسي (#F39C12) */}
           {stats.milestoneBadge && stats.milestoneBadge !== 'starter' && (
             <div
-              className="p-1.5 rounded-md bg-[#F39C12]/15 border border-[#F39C12]/30 text-[#9a5b00] dark:text-[#F39C12]"
+              className="p-1.5 rounded-md bg-[#F39C12]/15 border border-[#F39C12]/30 text-[#9a5b00] dark:text-[#F39C12] shrink-0"
               title={`إنجاز قياسي مفتوح: ${stats.milestoneBadge}`}
             >
-              <FontAwesomeIcon icon={faAward} className="w-3.5 h-3.5" aria-hidden="true" />
+              <FontAwesomeIcon icon={faAward} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             </div>
           )}
         </div>
 
         {/* أزرار الإجراءات */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0 mr-auto md:mr-0">
           <button
             type="button"
             onClick={() => onOpenDetail(habit)}
             aria-label={`عرض تفاصيل عادة ${habit.name}`}
-            className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-[#00A896] dark:hover:text-[#02C39A] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-[#00A896] dark:hover:text-[#02C39A] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 rounded-lg transition-colors cursor-pointer shrink-0"
             title="تفاصيل العادة والقوانين الأربعة"
           >
-            <FontAwesomeIcon icon={faChevronLeft} className="w-3.5 h-3.5" aria-hidden="true" />
+            <FontAwesomeIcon icon={faChevronLeft} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           </button>
 
           <button
             type="button"
             onClick={() => onEditHabit(habit)}
             aria-label={`تعديل عادة ${habit.name}`}
-            className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 rounded-lg transition-colors cursor-pointer shrink-0"
             title="تعديل العادة"
           >
-            <FontAwesomeIcon icon={faEllipsisVertical} className="w-3.5 h-3.5" aria-hidden="true" />
+            <FontAwesomeIcon icon={faEllipsisVertical} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           </button>
 
           {/* زر الأرشفة أو الاستعادة */}
@@ -256,10 +252,10 @@ export const HabitRow: React.FC<HabitRowProps> = ({
                 type="button"
                 onClick={() => onRestoreHabit(habit.id)}
                 aria-label={`استعادة عادة ${habit.name} إلى القائمة النشطة`}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#0b7a6e] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-all hover:scale-102 cursor-pointer shadow-2xs"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#0b7a6e] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-all hover:scale-102 cursor-pointer shadow-2xs shrink-0"
                 title="استعادة العادة إلى القائمة النشطة"
               >
-                <FontAwesomeIcon icon={faRotateLeft} className="w-3 h-3" aria-hidden="true" />
+                <FontAwesomeIcon icon={faRotateLeft} className="w-3 h-3 shrink-0" aria-hidden="true" />
                 <span>استعادة</span>
               </button>
             )
@@ -277,10 +273,10 @@ export const HabitRow: React.FC<HabitRowProps> = ({
                   }
                 }}
                 aria-label={`أرشفة عادة ${habit.name}`}
-                className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-[#9a5b00] dark:hover:text-[#F39C12] hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-[#9a5b00] dark:hover:text-[#F39C12] hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors cursor-pointer shrink-0"
                 title="أرشفة العادة وتنظيف القائمة النشطة"
               >
-                <FontAwesomeIcon icon={faBoxArchive} className="w-3.5 h-3.5" aria-hidden="true" />
+                <FontAwesomeIcon icon={faBoxArchive} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               </button>
             )
           )}
@@ -293,10 +289,10 @@ export const HabitRow: React.FC<HabitRowProps> = ({
               }
             }}
             aria-label={`حذف عادة ${habit.name}`}
-            className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-slate-500 dark:text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer shrink-0"
             title="حذف العادة"
           >
-            <FontAwesomeIcon icon={faTrashCan} className="w-3.5 h-3.5" aria-hidden="true" />
+            <FontAwesomeIcon icon={faTrashCan} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           </button>
         </div>
       </div>

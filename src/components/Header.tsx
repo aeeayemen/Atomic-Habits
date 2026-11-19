@@ -194,7 +194,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onOpenAccountability}
             aria-label="مشاركة بطاقة الإنجاز ومساءلة الأصدقاء"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/40 dark:border-amber-500/50 bg-amber-500/10 dark:bg-amber-500/15 text-[#9a5b00] dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 transition-colors shadow-2xs cursor-pointer text-xs font-bold shrink-0"
-            title="مشاركة بطاقة الإنجاز ومساءلة الأصدقاء 🤝🔥"
+            title="مشاركة بطاقة الإنجاز ومساءلة الأصدقاء 🤝"
           >
             <FontAwesomeIcon icon={faShareNodes} className="w-3.5 h-3.5 text-[#9a5b00] dark:text-[#F39C12]" aria-hidden="true" />
             <span className="hidden sm:inline">مشاركة الإنجاز</span>
@@ -307,7 +307,7 @@ export const Header: React.FC<HeaderProps> = ({
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#1C4D8D] transition-colors cursor-pointer"
                 >
                   <FontAwesomeIcon icon={faCircleQuestion} className="w-4 h-4 text-[#9a5b00] dark:text-[#F39C12]" aria-hidden="true" />
-                  <span>الجولة الإرشادية (شرارة 🔥)</span>
+                  <span>الجولة الإرشادية (شرارة )</span>
                 </button>
               )}
 

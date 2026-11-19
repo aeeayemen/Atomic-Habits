@@ -58,31 +58,31 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
       {/* شريط أدوات التنقل بين الفترات والخيارات */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white dark:bg-[#1C4D8D] rounded-xl border border-slate-200/80 dark:border-[#2A5C9E] shadow-2xs">
         {/* أزرار التنقل الزمني */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={onPrevPeriod}
-            className="p-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-slate-600 dark:text-[#F8FAFC] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-slate-600 dark:text-[#F8FAFC] transition-colors cursor-pointer shrink-0"
             title="الفترة السابقة"
             aria-label="الفترة السابقة"
           >
-            <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" aria-hidden="true" />
+            <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4 shrink-0" aria-hidden="true" />
           </button>
 
           <button
             onClick={onResetToToday}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-xs font-bold text-slate-700 dark:text-[#F8FAFC] transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-xs font-bold text-slate-700 dark:text-[#F8FAFC] transition-colors cursor-pointer shrink-0"
           >
-            <FontAwesomeIcon icon={faCalendarDays} className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A]" aria-hidden="true" />
+            <FontAwesomeIcon icon={faCalendarDays} className="w-3.5 h-3.5 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
             اليوم
           </button>
 
           <button
             onClick={onNextPeriod}
-            className="p-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-slate-600 dark:text-[#F8FAFC] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-[#2A5C9E] hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 text-slate-600 dark:text-[#F8FAFC] transition-colors cursor-pointer shrink-0"
             title="الفترة التالية"
             aria-label="الفترة التالية"
           >
-            <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" aria-hidden="true" />
+            <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4 shrink-0" aria-hidden="true" />
           </button>
 
           <span className="text-xs font-bold text-slate-600 dark:text-[#94A3B8] mr-2 hidden sm:inline-block">
@@ -91,19 +91,19 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
         </div>
 
         {/* خيارات العرض وإجراءات سريعة */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
           {/* إتمام جميع مهام اليوم */}
           <button
             onClick={onMarkAllTodayDone}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-colors cursor-pointer shrink-0"
             title="تحديد كل عادات اليوم كمنجزة بنجاح"
           >
-            <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5" aria-hidden="true" />
+            <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>إنجاز كل مهام اليوم</span>
           </button>
 
           {/* تبديل وضع العرض */}
-          <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E] text-xs">
+          <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#0F2854] border border-slate-200 dark:border-[#2A5C9E] text-xs shrink-0">
             <button
               onClick={() => onChangeViewMode('week')}
               className={cn(
@@ -138,7 +138,7 @@ export const HabitGrid: React.FC<HabitGridProps> = ({
             <div
               key={day.date}
               className={cn(
-                'flex flex-col items-center justify-center transition-colors',
+                'flex flex-col items-center justify-center transition-colors shrink-0',
                 viewMode === 'rolling' ? 'w-8' : 'w-10',
                 day.isToday && 'text-[#00A896] dark:text-[#02C39A] font-black'
               )}

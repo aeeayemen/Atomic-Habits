@@ -254,7 +254,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-black text-white">
-                  مشاركة الإنجاز ومساءلة الأصدقاء 🤝🔥
+                  مشاركة الإنجاز ومساءلة الأصدقاء 🤝
                 </h3>
               </div>
               <p className="text-xs text-slate-300 mt-0.5">
@@ -395,7 +395,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                     </div>
                     <div className="text-xl font-black text-[#F39C12] flex items-baseline gap-1">
                       <span>{summary.maxActiveStreak}</span>
-                      <span className="text-xs text-[#F39C12]/80 font-bold">أيام 🔥</span>
+                      <span className="text-xs text-[#F39C12]/80 font-bold">أيام </span>
                     </div>
                   </div>
                 </div>
@@ -416,7 +416,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                           >
                             <span>{h.name}</span>
                             <span className="px-1.5 py-0.5 rounded-md bg-[#F39C12]/20 text-[#F39C12] text-[10px]">
-                              {h.streak} يوماً 🔥
+                              {h.streak} يوماً 
                             </span>
                           </div>
                         ))}
@@ -438,7 +438,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                           >
                             <span>{h.name}</span>
                             <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-400 text-[10px]">
-                              {h.streak} يوماً نقياً 🛡️
+                              {h.streak} يوماً نقياً 
                             </span>
                           </div>
                         ))}
@@ -532,7 +532,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                       onChange={(e) => setIncludeBuild(e.target.checked)}
                       className="w-4 h-4 rounded text-[#00A896] focus:ring-[#00A896] cursor-pointer"
                     />
-                    <span>سلاسل عادات البناء الإيجابية 🔥</span>
+                    <span>سلاسل عادات البناء الإيجابية </span>
                   </label>
 
                   <label className="flex items-center gap-2 p-2.5 rounded-xl bg-[#1C4D8D]/60 border border-[#2A5C9E] cursor-pointer hover:bg-[#1C4D8D] transition-colors">
@@ -542,7 +542,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                       onChange={(e) => setIncludeBreak(e.target.checked)}
                       className="w-4 h-4 rounded text-[#00A896] focus:ring-[#00A896] cursor-pointer"
                     />
-                    <span>أيام النقاء لعادات الإقلاع 🛡️</span>
+                    <span>أيام النقاء لعادات الإقلاع </span>
                   </label>
 
                   <label className="flex items-center gap-2 p-2.5 rounded-xl bg-[#1C4D8D]/60 border border-[#2A5C9E] cursor-pointer hover:bg-[#1C4D8D] transition-colors">
@@ -552,7 +552,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                       onChange={(e) => setIncludeConsistency(e.target.checked)}
                       className="w-4 h-4 rounded text-[#00A896] focus:ring-[#00A896] cursor-pointer"
                     />
-                    <span>نسبة الالتزام وإنجاز اليوم 📊</span>
+                    <span>نسبة الالتزام وإنجاز اليوم </span>
                   </label>
 
                   <label className="flex items-center gap-2 p-2.5 rounded-xl bg-[#1C4D8D]/60 border border-[#2A5C9E] cursor-pointer hover:bg-[#1C4D8D] transition-colors">
@@ -601,7 +601,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                         </span>
                         {item.activeStreak > 0 && (
                           <span className="px-2 py-0.5 rounded-md bg-[#F39C12]/20 text-[#F39C12] text-[10px] font-bold">
-                            {item.activeStreak} أيام 🔥
+                            {item.activeStreak} أيام 
                           </span>
                         )}
                       </div>
@@ -614,7 +614,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                       {/* مشاركة واتساب للبطاقة القديمة */}
                       <button
                         onClick={() => {
-                          const text = `🔥 بطاقة مساءلة العادات الذرية\n📅 ${item.formattedDate}\n⚡ نسبة الالتزام: ${item.completionRate}%\n🔥 السلسلة: ${item.activeStreak} أيام\n${item.message ? `💬 "${item.message}"\n` : ''}#istomic #عادات_ذرية`;
+                          const text = ` بطاقة مساءلة العادات الذرية\n📅 ${item.formattedDate}\n⚡ نسبة الالتزام: ${item.completionRate}%\n السلسلة: ${item.activeStreak} أيام\n${item.message ? `💬 "${item.message}"\n` : ''}#istomic #عادات_ذرية`;
                           shareToWhatsApp(text);
                           showToast('تم فتح واتساب لمشاركة البطاقة! 💬');
                         }}
@@ -628,7 +628,7 @@ export const AccountabilityModal: React.FC<AccountabilityModalProps> = ({
                       {/* نسخ النص */}
                       <button
                         onClick={async () => {
-                          const text = `🔥 بطاقة مساءلة العادات الذرية\n📅 ${item.formattedDate}\n⚡ نسبة الالتزام: ${item.completionRate}%\n🔥 السلسلة: ${item.activeStreak} أيام\n${item.message ? `💬 "${item.message}"\n` : ''}#istomic #عادات_ذرية`;
+                          const text = ` بطاقة مساءلة العادات الذرية\n📅 ${item.formattedDate}\n⚡ نسبة الالتزام: ${item.completionRate}%\n السلسلة: ${item.activeStreak} أيام\n${item.message ? `💬 "${item.message}"\n` : ''}#istomic #عادات_ذرية`;
                           await navigator.clipboard.writeText(text);
                           soundManager.playSuccess();
                           showToast('تم نسخ البطاقة القديمة بنجاح! 📋');

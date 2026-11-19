@@ -141,15 +141,15 @@ export function generateShareableSummaryText(options: {
 
   const lines: string[] = [];
 
-  lines.push('🔥 بطاقة إنجازاتي في العادات الذرية (istomic)');
+  lines.push(' بطاقة إنجازاتي في العادات الذرية (istomic)');
   lines.push(`📅 ${summary.formattedDate}`);
   lines.push('');
 
   if (includeConsistency) {
     lines.push(`⚡ نسبة الالتزام الإجمالية: ${summary.overallConsistencyRate}%`);
-    lines.push(`🎯 تركيز اليوم: أُنجزت ${summary.todayDone} من أصل ${summary.todayTotal} عادات (${summary.todayPercentage}%)`);
+    lines.push(` تركيز اليوم: أُنجزت ${summary.todayDone} من أصل ${summary.todayTotal} عادات (${summary.todayPercentage}%)`);
     if (summary.maxActiveStreak > 0) {
-      lines.push(`🔥 أطول سلسلة نشطة مستمرة: ${summary.maxActiveStreak} أيام متتالية`);
+      lines.push(` أطول سلسلة نشطة مستمرة: ${summary.maxActiveStreak} أيام متتالية`);
     }
     lines.push('');
   }
@@ -157,16 +157,16 @@ export function generateShareableSummaryText(options: {
   if (includeBuild && summary.topBuildHabits.length > 0) {
     lines.push('🏆 أبرز سلاسل عادات البناء الإيجابية:');
     summary.topBuildHabits.forEach((h) => {
-      const fireBadge = h.streak >= 7 ? '🔥' : '⚡';
+      const fireBadge = h.streak >= 7 ? '' : '⚡';
       lines.push(`• ${h.name}: سلسلة ${h.streak} أيام ${fireBadge}`);
     });
     lines.push('');
   }
 
   if (includeBreak && summary.topBreakHabits.length > 0) {
-    lines.push('🛡️ عادات الإقلاع والتحصين (أيام نقية بلا زلات):');
+    lines.push(' عادات الإقلاع والتحصين (أيام نقية بلا زلات):');
     summary.topBreakHabits.forEach((h) => {
-      lines.push(`• ${h.name}: ${h.streak} يوماً نقياً ومستمر 🛡️`);
+      lines.push(`• ${h.name}: ${h.streak} يوماً نقياً ومستمر `);
     });
     lines.push('');
   }

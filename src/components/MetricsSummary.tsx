@@ -87,7 +87,7 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
       <div className="p-4 rounded-xl bg-white dark:bg-[#1C4D8D] border border-slate-200/80 dark:border-[#2A5C9E] shadow-2xs relative overflow-hidden group">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-            أعلى سلسلة مستمرة 🔥
+            أعلى سلسلة مستمرة 
           </span>
           <div className="p-2 rounded-lg bg-[#F39C12]/15 text-[#9a5b00] dark:text-[#F39C12]">
             <FontAwesomeIcon icon={faFire} className="w-4 h-4" aria-hidden="true" />
@@ -155,7 +155,7 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({
             </div>
             <div>
               <h2 className="text-xs font-black text-slate-900 dark:text-white">
-                شريك المساءلة ومشاركة الإنجاز 🤝🔥
+                شريك المساءلة ومشاركة الإنجاز 🤝
               </h2>
               <p className="text-[11px] text-slate-700 dark:text-slate-300">
                 شارك بطاقة سلاسلك ونسبة التزامك بإيجابية مع صديقك أو شريك المساءلة دون أي ضغوط.

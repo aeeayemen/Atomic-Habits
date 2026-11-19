@@ -78,12 +78,12 @@ export const HabitDetailDrawer: React.FC<HabitDetailDrawerProps> = ({
   };
 
   const handleShareHabit = async () => {
-    const streakUnit = isBreak ? 'يوماً نقياً بلا زلات 🛡️' : 'أيام متتالية 🔥';
-    const text = `🎯 عادتي في منظومة العادات الذرية (istomic):
+    const streakUnit = isBreak ? 'يوماً نقياً بلا زلات ' : 'أيام متتالية ';
+    const text = ` عادتي في منظومة العادات الذرية (istomic):
 📌 العادة: ${habit.name}
 ⚡ السلسلة الحالية: ${stats.currentStreak} ${streakUnit}
 🏆 أطول سلسلة مسجلة: ${stats.longestStreak} يوماً
-📊 نسبة الالتزام والاتساق: ${stats.completionRate}%
+ نسبة الالتزام والاتساق: ${stats.completionRate}%
 ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : ''}${habit.twoMinuteRule ? `⏱️ قاعدة الدقيقتين: "${habit.twoMinuteRule}"\n` : ''}#عادات_ذرية #انضباط_يومي #istomic`;
 
     // محاولة المشاركة الفورية عبر واتساب، أو النسخ إلى الحافظة
@@ -115,8 +115,8 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
                 </span>
 
                 {isBreak && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-600 dark:text-amber-400">
-                    <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3" aria-hidden="true" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-600 dark:text-amber-400 shrink-0">
+                    <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3 shrink-0" aria-hidden="true" />
                     خطة إقلاع عن عادة سيئة
                   </span>
                 )}
@@ -125,27 +125,27 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
                 {habit.name}
               </h2>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={handleShareHabit}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer shrink-0"
                 title="مشاركة إنجاز وسلسلة هذه العادة عبر واتساب أو الحافظة"
               >
                 {copied ? (
-                  <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-hidden="true" />
                 ) : (
-                  <FontAwesomeIcon icon={faShareNodes} className="w-3.5 h-3.5" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faShareNodes} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 )}
                 <span>{copied ? 'تم النسخ!' : 'مشاركة العادة'}</span>
               </button>
               <button
                 onClick={onClose}
-                className="p-2 text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-[#F8FAFC] rounded-lg hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 cursor-pointer"
+                className="p-2 text-slate-400 dark:text-[#94A3B8] hover:text-slate-600 dark:hover:text-[#F8FAFC] rounded-lg hover:bg-slate-100 dark:hover:bg-[#2A5C9E]/50 cursor-pointer shrink-0"
                 title="إغلاق النافذة"
                 aria-label="إغلاق النافذة"
               >
-                <FontAwesomeIcon icon={faXmark} className="w-5 h-5" aria-hidden="true" />
+                <FontAwesomeIcon icon={faXmark} className="w-5 h-5 shrink-0" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -153,7 +153,7 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
           {/* بيان الهوية */}
           <div className={`my-4 p-3.5 rounded-xl border ${isBreak ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/30' : 'bg-[#00A896]/10 dark:bg-[#00A896]/15 border-[#00A896]/30'}`}>
             <div className={`flex items-center gap-1.5 text-xs font-bold mb-1 ${isBreak ? 'text-amber-600 dark:text-amber-400' : 'text-[#00A896] dark:text-[#02C39A]'}`}>
-              <FontAwesomeIcon icon={faShieldHalved} className="w-4 h-4" aria-hidden="true" />
+              <FontAwesomeIcon icon={faShieldHalved} className="w-4 h-4 shrink-0" aria-hidden="true" />
               {isBreak ? 'الهوية التحررية المنشودة ("لماذا؟")' : 'الهوية الجوهرية ("لماذا؟")'}
             </div>
             <p className="text-xs text-slate-700 dark:text-[#F8FAFC] italic font-medium leading-relaxed">
@@ -166,9 +166,9 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200/80 dark:border-[#2A5C9E]">
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
                 {isBreak ? (
-                  <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 text-emerald-500 shrink-0" aria-hidden="true" />
                 ) : (
-                  <FontAwesomeIcon icon={faFire} className="w-4 h-4 text-[#F39C12]" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faFire} className="w-4 h-4 text-[#F39C12] shrink-0" aria-hidden="true" />
                 )}
                 {isBreak ? 'سلسلة الصمود النقي' : 'السلسلة الحالية'}
               </div>
@@ -185,7 +185,7 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0F2854] border border-slate-200/80 dark:border-[#2A5C9E]">
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
-                <FontAwesomeIcon icon={faAward} className="w-4 h-4 text-[#00A896] dark:text-[#02C39A]" aria-hidden="true" />
+                <FontAwesomeIcon icon={faAward} className="w-4 h-4 text-[#00A896] dark:text-[#02C39A] shrink-0" aria-hidden="true" />
                 {isBreak ? 'معدل الصمود والنقاء' : 'معدل الالتزام'}
               </div>
               <div className="text-2xl font-black text-slate-900 dark:text-[#F8FAFC]">
@@ -275,13 +275,13 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
         <div className="flex items-center justify-between gap-2 pt-6 border-t border-slate-100 dark:border-[#2A5C9E] mt-6 flex-wrap">
           <button
             onClick={handleDelete}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer shrink-0"
           >
-            <FontAwesomeIcon icon={faTrashCan} className="w-4 h-4" aria-hidden="true" />
+            <FontAwesomeIcon icon={faTrashCan} className="w-4 h-4 shrink-0" aria-hidden="true" />
             حذف العادة
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {Boolean(habit.is_archived ?? habit.archived) ? (
               onRestore && (
                 <button
@@ -289,9 +289,9 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
                     onRestore(habit.id);
                     onClose();
                   }}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00A896]/15 hover:bg-[#00A896]/25 text-[#00A896] dark:text-[#02C39A] border border-[#00A896]/30 text-xs font-bold transition-colors cursor-pointer shrink-0"
                 >
-                  <FontAwesomeIcon icon={faRotateLeft} className="w-4 h-4" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faRotateLeft} className="w-4 h-4 shrink-0" aria-hidden="true" />
                   استعادة للقائمة النشطة
                 </button>
               )
@@ -308,9 +308,9 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
                       onClose();
                     }
                   }}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition-colors cursor-pointer shrink-0"
                 >
-                  <FontAwesomeIcon icon={faBoxArchive} className="w-4 h-4" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faBoxArchive} className="w-4 h-4 shrink-0" aria-hidden="true" />
                   أرشفة العادة
                 </button>
               )
@@ -321,9 +321,9 @@ ${habit.identity ? `💪 الهوية الذاتية: "${habit.identity}"\n` : '
                 onEdit(habit);
                 onClose();
               }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#02C39A] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00A896] hover:bg-[#02C39A] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer shrink-0"
             >
-              <FontAwesomeIcon icon={faPenToSquare} className="w-4 h-4" aria-hidden="true" />
+              <FontAwesomeIcon icon={faPenToSquare} className="w-4 h-4 shrink-0" aria-hidden="true" />
               تعديل النظام
             </button>
           </div>

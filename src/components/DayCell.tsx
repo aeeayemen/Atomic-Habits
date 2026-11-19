@@ -118,14 +118,14 @@ export const DayCell: React.FC<DayCellProps> = ({
     }
   };
 
-  const cellDimensions = compact ? 'w-8 h-8 rounded-lg' : 'w-10 h-10 rounded-xl';
+  const cellDimensions = compact ? 'w-8 h-8 rounded-lg shrink-0' : 'w-10 h-10 rounded-xl shrink-0';
 
   const statusLabel = isBreakHabit
     ? currentStatus === 'missed'
       ? 'انتكاسة / زلة مسجلة ⚠️'
       : isFuture
       ? 'يوم قادم'
-      : 'يوم نقي بلا زلات 🛡️'
+      : 'يوم نقي بلا زلات '
     : currentStatus === 'done'
     ? 'منجز بنجاح ✅'
     : currentStatus === 'missed'
@@ -147,7 +147,7 @@ export const DayCell: React.FC<DayCellProps> = ({
       title={tooltipTitle}
       aria-label={`${habitName} بتاريخ ${date}: ${statusLabel}`}
       className={cn(
-        'relative group flex items-center justify-center border transition-all duration-150 select-none cursor-pointer',
+        'relative group flex items-center justify-center border transition-all duration-150 select-none cursor-pointer shrink-0 overflow-hidden',
         cellDimensions,
         getStatusStyles(),
         isToday && (isBreakHabit ? 'ring-2 ring-emerald-500/50' : 'ring-2 ring-[#00A896]/40 dark:ring-[#00A896]/50'),
@@ -160,8 +160,8 @@ export const DayCell: React.FC<DayCellProps> = ({
           <FontAwesomeIcon
             icon={faTriangleExclamation}
             className={cn(
-              'text-amber-500 dark:text-amber-400 transition-transform duration-200',
-              compact ? 'w-3.5 h-3.5' : 'w-4 h-4',
+              'text-amber-500 dark:text-amber-400 transition-transform duration-200 shrink-0',
+              compact ? 'w-3 h-3 text-[12px]' : 'w-3.5 h-3.5 text-[14px]',
               isAnimating && 'scale-110'
             )}
             aria-hidden="true"
@@ -170,8 +170,8 @@ export const DayCell: React.FC<DayCellProps> = ({
           <FontAwesomeIcon
             icon={faShieldHalved}
             className={cn(
-              'text-emerald-500/50 dark:text-emerald-400/50 group-hover:text-emerald-500 transition-transform duration-200',
-              compact ? 'w-3 h-3' : 'w-3.5 h-3.5'
+              'text-emerald-500/50 dark:text-emerald-400/50 group-hover:text-emerald-500 transition-transform duration-200 shrink-0',
+              compact ? 'w-2.5 h-2.5 text-[10px]' : 'w-3 h-3 text-[12px]'
             )}
             aria-hidden="true"
           />
@@ -183,8 +183,8 @@ export const DayCell: React.FC<DayCellProps> = ({
             <FontAwesomeIcon
               icon={faCheck}
               className={cn(
-                'text-[#0b7a6e] dark:text-[#02C39A] transition-transform duration-200',
-                compact ? 'w-3.5 h-3.5' : 'w-4 h-4',
+                'text-[#0b7a6e] dark:text-[#02C39A] transition-transform duration-200 shrink-0',
+                compact ? 'w-3 h-3 text-[12px]' : 'w-3.5 h-3.5 text-[14px]',
                 isAnimating && 'scale-110'
               )}
               aria-hidden="true"
@@ -195,8 +195,8 @@ export const DayCell: React.FC<DayCellProps> = ({
             <FontAwesomeIcon
               icon={faXmark}
               className={cn(
-                'text-rose-500 dark:text-rose-400 transition-transform duration-200',
-                compact ? 'w-3.5 h-3.5' : 'w-4 h-4'
+                'text-rose-500 dark:text-rose-400 transition-transform duration-200 shrink-0',
+                compact ? 'w-3 h-3 text-[12px]' : 'w-3.5 h-3.5 text-[14px]'
               )}
               aria-hidden="true"
             />
@@ -205,7 +205,7 @@ export const DayCell: React.FC<DayCellProps> = ({
           {currentStatus === 'neutral' && !isFuture && (
             <span
               className={cn(
-                'rounded-full transition-all duration-150 opacity-40 group-hover:opacity-100',
+                'rounded-full transition-all duration-150 opacity-40 group-hover:opacity-100 shrink-0',
                 compact ? 'w-1.5 h-1.5' : 'w-2 h-2',
                 isToday
                   ? 'bg-[#00A896] dark:bg-[#02C39A] animate-pulse'
@@ -220,7 +220,7 @@ export const DayCell: React.FC<DayCellProps> = ({
       {isFuture && (
         <FontAwesomeIcon
           icon={faClock}
-          className={cn('opacity-25', compact ? 'w-2.5 h-2.5' : 'w-3 h-3')}
+          className={cn('opacity-25 shrink-0', compact ? 'w-2.5 h-2.5 text-[10px]' : 'w-3 h-3 text-[12px]')}
           aria-hidden="true"
         />
       )}

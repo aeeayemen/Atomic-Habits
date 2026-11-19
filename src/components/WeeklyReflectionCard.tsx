@@ -99,7 +99,7 @@ export const WeeklyReflectionCard: React.FC<WeeklyReflectionCardProps> = ({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm sm:text-base font-black text-slate-900 dark:text-[#F8FAFC]">
-                التأمل الأسبوعي ومراجعة الزخم 🎯
+                التأمل الأسبوعي ومراجعة الزخم 
               </h2>
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#00A896]/15 border border-[#00A896]/30 text-[#0b7a6e] dark:text-[#02C39A]">
                 <FontAwesomeIcon icon={faCalendarDays} className="w-3 h-3" aria-hidden="true" />
@@ -135,7 +135,7 @@ export const WeeklyReflectionCard: React.FC<WeeklyReflectionCardProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black text-[#0b7a6e] dark:text-[#02C39A] flex items-center gap-1.5">
                   <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 text-[#0b7a6e] dark:text-[#02C39A]" aria-hidden="true" />
-                  <span>الأكثر اتساقاً هذا الأسبوع 🌟</span>
+                  <span>الأكثر اتساقاً هذا الأسبوع </span>
                 </span>
                 {summary.mostConsistentHabit && (
                   <span className="px-2 py-0.5 rounded-md bg-[#00A896]/15 text-[#0b7a6e] dark:text-[#02C39A] text-[10px] font-black">
@@ -157,7 +157,7 @@ export const WeeklyReflectionCard: React.FC<WeeklyReflectionCardProps> = ({
                     </span>
                     {summary.mostConsistentHabit.currentStreak > 0 && (
                       <span className="text-[#9a5b00] dark:text-[#F39C12] font-bold">
-                        · سلسلة {summary.mostConsistentHabit.currentStreak} يوماً 🔥
+                        · سلسلة {summary.mostConsistentHabit.currentStreak} يوماً 
                       </span>
                     )}
                   </div>
@@ -174,7 +174,7 @@ export const WeeklyReflectionCard: React.FC<WeeklyReflectionCardProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black text-[#9a5b00] dark:text-[#F39C12] flex items-center gap-1.5">
                   <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 text-[#9a5b00] dark:text-[#F39C12]" aria-hidden="true" />
-                  <span>تحتاج تركيزاً إضافياً 🎯</span>
+                  <span>تحتاج تركيزاً إضافياً </span>
                 </span>
                 {summary.needsAttentionHabit && (
                   <span className="px-2 py-0.5 rounded-md bg-[#F39C12]/15 text-[#9a5b00] dark:text-[#F39C12] text-[10px] font-black">
@@ -212,7 +212,7 @@ export const WeeklyReflectionCard: React.FC<WeeklyReflectionCardProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black text-[#9a5b00] dark:text-[#F39C12] flex items-center gap-1.5">
                   <FontAwesomeIcon icon={faFire} className="w-4 h-4 text-[#9a5b00] dark:text-[#F39C12]" aria-hidden="true" />
-                  <span>أقوى سلسلة مستمرة 🔥</span>
+                  <span>أقوى سلسلة مستمرة </span>
                 </span>
                 {summary.bestStreakHabit && (
                   <span className="px-2 py-0.5 rounded-md bg-[#F39C12]/20 text-[#9a5b00] dark:text-[#F39C12] text-[10px] font-black">

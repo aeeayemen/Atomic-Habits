@@ -46,7 +46,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base font-black text-slate-900 dark:text-[#F8FAFC]">
-                تحليل الأداء والمحفزات السلوكية 📊
+                تحليل الأداء والمحفزات السلوكية 
               </h2>
               {analytics.weakestDay && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
@@ -153,7 +153,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-[#CBD5E1]">
                     <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 text-amber-500" aria-hidden="true" />
-                    <span>أبرز محفزات العادات السيئة 🛡️</span>
+                    <span>أبرز محفزات العادات السيئة </span>
                   </div>
                   <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
                     {analytics.totalSlipUps} زلة مسجلة
@@ -186,7 +186,7 @@ export const BehavioralAnalyticsCard: React.FC<BehavioralAnalyticsCardProps> = (
                   <div className="py-6 px-3 text-center flex flex-col items-center justify-center">
                     <FontAwesomeIcon icon={faShieldHalved} className="w-8 h-8 text-[#00A896] mb-2 opacity-80" aria-hidden="true" />
                     <p className="text-xs font-bold text-slate-800 dark:text-[#F8FAFC]">
-                      لا توجد زلات مسجلة بحمد الله! 🛡️
+                      لا توجد زلات مسجلة بحمد الله! 
                     </p>
                     <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-1">
                       عند تسجيل أي زلة عابرة ستظهر لك محفزاتها وقوانين كسرها هنا تلقائياً.

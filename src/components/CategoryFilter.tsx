@@ -76,13 +76,13 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 onClick={() => onToggleArchiveView('active')}
                 aria-label={`عرض العادات النشطة، عددها ${activeCount}`}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                  'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0',
                   archiveView === 'active'
                     ? 'bg-white dark:bg-[#0F2854] text-[#0b7a6e] dark:text-[#02C39A] shadow-2xs'
                     : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
                 )}
               >
-                <FontAwesomeIcon icon={faInbox} className="w-3.5 h-3.5" aria-hidden="true" />
+                <FontAwesomeIcon icon={faInbox} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span>النشطة ({activeCount})</span>
               </button>
 
@@ -91,19 +91,19 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 onClick={() => onToggleArchiveView('archived')}
                 aria-label={`عرض العادات المؤرشفة، عددها ${archivedCount}`}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                  'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0',
                   archiveView === 'archived'
                     ? 'bg-[#F39C12] text-white shadow-2xs'
                     : 'text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400'
                 )}
               >
-                <FontAwesomeIcon icon={faBoxArchive} className="w-3.5 h-3.5" aria-hidden="true" />
+                <FontAwesomeIcon icon={faBoxArchive} className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span>الأرشيف ({archivedCount})</span>
               </button>
             </div>
           )}
 
-          {/* أزرار تصفية النوع: كل الأهداف / بناء إيجابي ⚡ / إقلاع عن عادة 🛡️ */}
+          {/* أزرار تصفية النوع: كل الأهداف / بناء إيجابي ⚡ / إقلاع عن عادة  */}
           {onSelectType && (
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-[#1C4D8D]/60 border border-slate-200/80 dark:border-[#2A5C9E]">
               <button
@@ -111,7 +111,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 onClick={() => onSelectType('all')}
                 aria-label="تصفية جميع أنواع العادات"
                 className={cn(
-                  'px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                  'px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0',
                   selectedType === 'all'
                     ? 'bg-white dark:bg-[#0F2854] text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
@@ -125,13 +125,13 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 onClick={() => onSelectType('build')}
                 aria-label="تصفية عادات البناء الإيجابية فقط"
                 className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                  'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0',
                   selectedType === 'build'
                     ? 'bg-[#00A896] text-white shadow-2xs'
                     : 'text-slate-700 dark:text-slate-300 hover:text-[#0b7a6e] dark:hover:text-[#02C39A]'
                 )}
               >
-                <FontAwesomeIcon icon={faBolt} className="w-3 h-3" aria-hidden="true" />
+                <FontAwesomeIcon icon={faBolt} className="w-3 h-3 shrink-0" aria-hidden="true" />
                 <span>بناء ⚡</span>
               </button>
 
@@ -140,14 +140,14 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 onClick={() => onSelectType('break')}
                 aria-label="تصفية عادات الإقلاع والتحصين فقط"
                 className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                  'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0',
                   selectedType === 'break'
                     ? 'bg-amber-500 text-white shadow-2xs'
                     : 'text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400'
                 )}
               >
-                <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3" aria-hidden="true" />
-                <span>إقلاع 🛡️</span>
+                <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3 shrink-0" aria-hidden="true" />
+                <span>إقلاع </span>
               </button>
             </div>
           )}

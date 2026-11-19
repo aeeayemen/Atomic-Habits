@@ -47,6 +47,24 @@
     font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
+  /* Font Awesome SVG Strict Containment */
+  svg.svg-inline--fa {
+    display: inline-block;
+    height: 1em;
+    overflow: visible;
+    vertical-align: -0.125em;
+    max-width: 100%;
+    max-height: 100%;
+    flex-shrink: 0;
+    box-sizing: content-box;
+  }
+
+  button > svg.svg-inline--fa,
+  span > svg.svg-inline--fa,
+  div > svg.svg-inline--fa {
+    flex-shrink: 0;
+  }
+
   html {
     transition: background-color 0.2s ease, color 0.2s ease;
   }
