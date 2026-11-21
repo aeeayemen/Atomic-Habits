@@ -135,7 +135,14 @@ export const HabitRow: React.FC<HabitRowProps> = ({
       <div className="w-full md:flex-1 min-w-0 flex items-center gap-1.5 sm:gap-2 justify-start md:justify-center overflow-x-auto py-1.5 px-0.5 no-scrollbar scroll-smooth">
         {days.map((day) => {
           const logId = `${habit.id}_${day.date}`;
-          const log = allLogs[logId];
+          let log = allLogs[logId];
+          if (!log) {
+            // توافق احتياطي مع المعرفات النموذجية (مثل habit-1_YYYY-MM-DD)
+            const baseMatch = habit.id.match(/^(habit-\d+)/);
+            if (baseMatch) {
+              log = allLogs[`${baseMatch[1]}_${day.date}`];
+            }
+          }
 
           return (
             <div key={day.date} className="flex flex-col items-center shrink-0">

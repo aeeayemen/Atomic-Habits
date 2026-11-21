@@ -5,25 +5,46 @@ const HABITS_STORAGE_KEY = 'atomic_habits_data_ar_v2';
 const LOGS_STORAGE_KEY = 'atomic_habits_logs_ar_v2';
 const THEME_STORAGE_KEY = 'atomic_habits_theme_v1';
 const SOUND_STORAGE_KEY = 'atomic_habits_sound_v1';
+const GUEST_ACTIVE_KEY = 'atomic_habits_guest_active_v1';
 
 export interface StorageData {
   habits: Habit[];
   logs: Record<string, HabitLog>;
 }
 
+export function isGuestSessionActive(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(GUEST_ACTIVE_KEY) === 'true';
+}
+
+export function setGuestSessionActive(active: boolean): void {
+  if (typeof window === 'undefined') return;
+  if (active) {
+    localStorage.setItem(GUEST_ACTIVE_KEY, 'true');
+  } else {
+    localStorage.removeItem(GUEST_ACTIVE_KEY);
+  }
+}
+
 function getHabitsKey(userId?: string): string {
-  return userId ? `${HABITS_STORAGE_KEY}_${userId}` : HABITS_STORAGE_KEY;
+  if (!userId || userId === 'guest') return `${HABITS_STORAGE_KEY}_guest`;
+  return `${HABITS_STORAGE_KEY}_${userId}`;
 }
 
 function getLogsKey(userId?: string): string {
-  return userId ? `${LOGS_STORAGE_KEY}_${userId}` : LOGS_STORAGE_KEY;
+  if (!userId || userId === 'guest') return `${LOGS_STORAGE_KEY}_guest`;
+  return `${LOGS_STORAGE_KEY}_${userId}`;
 }
 
 export function loadStoredHabits(userId?: string): Habit[] {
   if (typeof window === 'undefined') return INITIAL_HABITS;
   try {
     const key = getHabitsKey(userId);
-    const raw = localStorage.getItem(key);
+    let raw = localStorage.getItem(key);
+    // مسار احتياطي للزائر في حال كانت البيانات مخزنة بالمفتاح القديم بدون _guest
+    if (!raw && (!userId || userId === 'guest')) {
+      raw = localStorage.getItem(HABITS_STORAGE_KEY);
+    }
     if (!raw) {
       return [];
     }
@@ -39,7 +60,12 @@ export function saveHabits(habits: Habit[], userId?: string): void {
   if (typeof window === 'undefined') return;
   try {
     const key = getHabitsKey(userId);
-    localStorage.setItem(key, JSON.stringify(habits));
+    const data = JSON.stringify(habits);
+    localStorage.setItem(key, data);
+    // التوافق مع المفتاح العام في وضع الزائر
+    if (!userId || userId === 'guest') {
+      localStorage.setItem(HABITS_STORAGE_KEY, data);
+    }
   } catch (err) {
     console.error('Failed to save habits to storage:', err);
   }
@@ -49,7 +75,11 @@ export function loadStoredLogs(userId?: string): Record<string, HabitLog> {
   if (typeof window === 'undefined') return {};
   try {
     const key = getLogsKey(userId);
-    const raw = localStorage.getItem(key);
+    let raw = localStorage.getItem(key);
+    // مسار احتياطي للزائر في حال كانت السجلات مخزنة بالمفتاح القديم
+    if (!raw && (!userId || userId === 'guest')) {
+      raw = localStorage.getItem(LOGS_STORAGE_KEY);
+    }
     if (!raw) {
       return {};
     }
@@ -65,7 +95,12 @@ export function saveLogs(logs: Record<string, HabitLog>, userId?: string): void 
   if (typeof window === 'undefined') return;
   try {
     const key = getLogsKey(userId);
-    localStorage.setItem(key, JSON.stringify(logs));
+    const data = JSON.stringify(logs);
+    localStorage.setItem(key, data);
+    // التوافق مع المفتاح العام في وضع الزائر
+    if (!userId || userId === 'guest') {
+      localStorage.setItem(LOGS_STORAGE_KEY, data);
+    }
   } catch (err) {
     console.error('Failed to save logs to storage:', err);
   }

@@ -1,6 +1,7 @@
 import { createClient, type User, type Session } from '@supabase/supabase-js';
 import type { Habit, HabitLog } from '../types/habit';
 import { INITIAL_HABITS } from './initialData';
+import { loadStoredHabits } from './storage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -291,15 +292,22 @@ export async function fetchLogsFromSupabase(userId: string): Promise<Record<stri
 
     const logsMap: Record<string, HabitLog> = {};
     (data || []).forEach((row) => {
-      logsMap[row.id] = {
-        id: row.id,
+      const canonicalKey = `${row.habit_id}_${row.date}`;
+      const logItem: HabitLog = {
+        id: row.id || canonicalKey,
         habitId: row.habit_id,
         userId: row.user_id,
         date: row.date,
-        status: row.status,
+        status: row.status as HabitLog['status'],
         notes: row.notes,
         updatedAt: row.updated_at || row.logged_at,
       };
+
+      // نضمن إتاحة السجل بالمعرف المعياري (habitId_date) وكذلك بمعرف الصف
+      logsMap[canonicalKey] = logItem;
+      if (row.id && row.id !== canonicalKey) {
+        logsMap[row.id] = logItem;
+      }
     });
     return logsMap;
   } catch (err) {
@@ -309,26 +317,80 @@ export async function fetchLogsFromSupabase(userId: string): Promise<Record<stri
 }
 
 /**
- * حفظ سجل إنجاز يومي لمستخدم محدد في Supabase
+ * حفظ سجل إنجاز يومي لمستخدم محدد في Supabase مع معالجة ذكية للتعارض والقيود
  */
 export async function upsertLogToSupabase(log: HabitLog, userId: string): Promise<boolean> {
   if (!supabase || !userId) return false;
   try {
-    const { error } = await supabase.from('habit_logs').upsert({
-      id: log.id,
+    const canonicalId = `${log.habitId}_${log.date}`;
+    const payload = {
+      id: log.id || canonicalId,
       habit_id: log.habitId,
       user_id: userId,
       date: log.date,
       status: log.status,
       notes: log.notes || null,
-      logged_at: log.updatedAt,
+      logged_at: log.updatedAt || new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    });
+    };
 
+    // 1. محاولة الإدراج / التحديث باستخدام تعارض الحقول المركبة
+    let { error } = await supabase
+      .from('habit_logs')
+      .upsert(payload, { onConflict: 'habit_id,date,user_id' });
+
+    // 2. إذا فشل، نجرب التعارض على المفتاح الأساسي id
     if (error) {
-      console.error('Error upserting log to Supabase:', error);
+      const fallbackResult = await supabase
+        .from('habit_logs')
+        .upsert(payload, { onConflict: 'id' });
+      error = fallbackResult.error;
+    }
+
+    // 3. في حال وجود خطأ مفتاح أجنبي (العادة غير موجودة بعد في جدول العادات السحابي)
+    if (error && (error.code === '23503' || error.message?.includes('foreign key'))) {
+      const localHabits = loadStoredHabits(userId);
+      const targetHabit = localHabits.find((h) => h.id === log.habitId);
+      if (targetHabit) {
+        await upsertHabitToSupabase(targetHabit, userId);
+        const retryResult = await supabase
+          .from('habit_logs')
+          .upsert(payload, { onConflict: 'habit_id,date,user_id' });
+        error = retryResult.error;
+      }
+    }
+
+    // 4. في حال استمرار الخطأ بسبب قيود تكرار غير متطابقة، نقوم بفحص وتحديث مباشر
+    if (error) {
+      const { data: existing } = await supabase
+        .from('habit_logs')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('habit_id', log.habitId)
+        .eq('date', log.date)
+        .maybeSingle();
+
+      if (existing) {
+        const { error: updateError } = await supabase
+          .from('habit_logs')
+          .update({
+            status: log.status,
+            notes: log.notes || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+        if (!updateError) return true;
+      } else {
+        const { error: insertError } = await supabase
+          .from('habit_logs')
+          .insert(payload);
+        if (!insertError) return true;
+      }
+
+      console.error('Error upserting log to Supabase after fallbacks:', error);
       return false;
     }
+
     return true;
   } catch (err) {
     console.error('Supabase upsert log exception:', err);

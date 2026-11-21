@@ -14,7 +14,13 @@ export function calculateStreakStats(
   habitType: HabitType = 'build',
   createdAt?: string
 ): StreakStats {
-  const habitLogs = Object.values(allLogs).filter((log) => log.habitId === habitId);
+  const habitLogs = Object.values(allLogs).filter((log) => {
+    if (log.habitId === habitId) return true;
+    if (habitId && log.habitId && (habitId.startsWith(`${log.habitId}-`) || log.habitId.startsWith(`${habitId}-`))) {
+      return true;
+    }
+    return false;
+  });
 
   // Map by YYYY-MM-DD
   const logByDate = new Map<string, HabitLog>();

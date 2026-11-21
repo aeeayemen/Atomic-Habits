@@ -12,6 +12,8 @@ import {
   saveTheme,
   loadSoundSetting,
   saveSoundSetting,
+  isGuestSessionActive,
+  setGuestSessionActive,
 } from './lib/storage';
 import { INITIAL_HABITS, generateInitialLogs } from './lib/initialData';
 import { formatISODate, getWeekColumns, getRollingDays } from './lib/utils';
@@ -65,7 +67,7 @@ export function App() {
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [, setSession] = useState<Session | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isGuestMode, setIsGuestMode] = useState(false);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(() => isGuestSessionActive());
 
   // 2. حالة الإعدادات والمظهر
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -114,50 +116,121 @@ export function App() {
     date: '',
   });
 
-  // دالة تحميل وتنسيق بيانات المستخدم (من السحابة أو التخزين المؤقت المحلي)
+  // دالة تحميل وتنسيق بيانات المستخدم (مزامنة ثنائية ذكية لمنع فقدان البيانات بين المتصفحات)
   const loadUserData = useCallback(async (userId: string) => {
-    // 1. تحميل سريع من الكاش المحلي للمستخدم أولاً
-    const cachedHabits = loadStoredHabits(userId);
-    const cachedLogs = loadStoredLogs(userId);
+    const isGuest = !userId || userId === 'guest';
+    const effectiveUserId = isGuest ? 'guest' : userId;
+
+    // 1. تحميل سريع وفوري من التخزين المؤقت المحلي (0 ثانية تأخير)
+    const cachedHabits = loadStoredHabits(effectiveUserId);
+    const cachedLogs = loadStoredLogs(effectiveUserId);
 
     if (cachedHabits.length > 0) {
       setHabits(cachedHabits);
       setAllLogs(cachedLogs);
     }
 
-    // 2. مزامنة كاملة من Supabase
-    if (isSupabaseConfigured) {
-      try {
-        const [cloudHabits, cloudLogs] = await Promise.all([
-          fetchHabitsFromSupabase(userId),
-          fetchLogsFromSupabase(userId),
-        ]);
-
-        if (cloudHabits && cloudHabits.length > 0) {
-          setHabits(cloudHabits);
-          saveHabits(cloudHabits, userId);
-        } else if (!cachedHabits || cachedHabits.length === 0) {
-          // حساب جديد بدون عادات: نزرع له العادات النموذجية
-          const starter = await seedInitialHabitsForUser(userId);
-          setHabits(starter);
-          saveHabits(starter, userId);
-        }
-
-        if (cloudLogs) {
-          setAllLogs(cloudLogs);
-          saveLogs(cloudLogs, userId);
-        }
-      } catch (err) {
-        console.error('Error synchronizing user data from Supabase:', err);
-      }
-    } else {
+    // إذا كان في وضع الزائر أو لم يتم ربط Supabase، نكتفي بالتخزين المحلي الآمن
+    if (isGuest || !isSupabaseConfigured) {
       if (cachedHabits.length === 0) {
         setHabits(INITIAL_HABITS);
-        saveHabits(INITIAL_HABITS, userId);
+        saveHabits(INITIAL_HABITS, 'guest');
         const initLogs = generateInitialLogs(INITIAL_HABITS);
         setAllLogs(initLogs);
-        saveLogs(initLogs, userId);
+        saveLogs(initLogs, 'guest');
       }
+      return;
+    }
+
+    // 2. مزامنة سحابية كاملة ثنائية الاتجاه مع Supabase (Two-Way Synchronization)
+    try {
+      const [cloudHabits, cloudLogs] = await Promise.all([
+        fetchHabitsFromSupabase(effectiveUserId),
+        fetchLogsFromSupabase(effectiveUserId),
+      ]);
+
+      // أ) مزامنة العادات:
+      let activeHabits: Habit[] = [];
+      if (cloudHabits && cloudHabits.length > 0) {
+        // فحص إذا كان هناك عادات محلية أُضيفت أثناء انقطاع الاتصال ولم تُرفع إلى السحابة
+        const cloudHabitIds = new Set(cloudHabits.map((h) => h.id));
+        const missingHabits = cachedHabits.filter((h) => !cloudHabitIds.has(h.id));
+
+        for (const localH of missingHabits) {
+          await upsertHabitToSupabase(localH, effectiveUserId);
+        }
+
+        activeHabits = [...cloudHabits, ...missingHabits];
+      } else if (cachedHabits && cachedHabits.length > 0) {
+        // السحابة فارغة ولكن لدينا عادات محلية: نرفعها فوراً إلى Supabase حتى لا تضيع
+        for (const localH of cachedHabits) {
+          await upsertHabitToSupabase(localH, effectiveUserId);
+        }
+        activeHabits = cachedHabits;
+      } else {
+        // حساب جديد تماماً: نزرع العادات النموذجية
+        const starter = await seedInitialHabitsForUser(effectiveUserId);
+        activeHabits = starter;
+      }
+
+      setHabits(activeHabits);
+      saveHabits(activeHabits, effectiveUserId);
+
+      // ب) مزامنة سجلات الإنجاز (Done / Missed):
+      // ندمج السجلات المحلية مع السجلات السحابية بذكاء دون مسح البيانات
+      const mergedLogs: Record<string, HabitLog> = { ...cachedLogs };
+
+      if (cloudLogs && Object.keys(cloudLogs).length > 0) {
+        for (const [key, cloudLog] of Object.entries(cloudLogs)) {
+          const localLog = mergedLogs[key];
+          if (!localLog) {
+            mergedLogs[key] = cloudLog;
+          } else {
+            // اعتماد السجل الأحدث بناءً على التاريخ والتحديث
+            const cloudTime = cloudLog.updatedAt ? new Date(cloudLog.updatedAt).getTime() : 0;
+            const localTime = localLog.updatedAt ? new Date(localLog.updatedAt).getTime() : 0;
+            mergedLogs[key] = cloudTime >= localTime ? cloudLog : localLog;
+          }
+        }
+      }
+
+      // إذا كانت هناك عادات سحابية بمعرفات متطورة (مثل habit-1-<user_id>)، نضمن ربط السجلات القديمة بها
+      activeHabits.forEach((habit) => {
+        const baseMatch = habit.id.match(/^(habit-\d+)/);
+        if (baseMatch && baseMatch[1] !== habit.id) {
+          const basePrefix = `${baseMatch[1]}_`;
+          Object.entries(mergedLogs).forEach(([k, log]) => {
+            if (k.startsWith(basePrefix)) {
+              const datePart = k.slice(basePrefix.length);
+              const targetKey = `${habit.id}_${datePart}`;
+              if (!mergedLogs[targetKey]) {
+                mergedLogs[targetKey] = {
+                  ...log,
+                  id: targetKey,
+                  habitId: habit.id,
+                };
+              }
+            }
+          });
+        }
+      });
+
+      // إذا كانت هناك سجلات محلية لم تُرفع للسحابة بعد، نرفعها لضمان وصولها للمتصفحات الأخرى
+      const cloudLogKeys = new Set(
+        cloudLogs ? Object.keys(cloudLogs) : []
+      );
+
+      for (const log of Object.values(mergedLogs)) {
+        const canonicalKey = `${log.habitId}_${log.date}`;
+        if (!cloudLogKeys.has(log.id) && !cloudLogKeys.has(canonicalKey)) {
+          executeOrQueueMutation(effectiveUserId, 'UPSERT_LOG', log);
+        }
+      }
+
+      setAllLogs(mergedLogs);
+      saveLogs(mergedLogs, effectiveUserId);
+    } catch (err) {
+      console.error('Error synchronizing user data from Supabase:', err);
     }
   }, []);
 
@@ -173,11 +246,17 @@ export function App() {
         if (initialSession && initialSession.user) {
           setSession(initialSession);
           setCurrentUser(initialSession.user);
+          setIsGuestMode(false);
+          setGuestSessionActive(false);
           await loadUserData(initialSession.user.id);
           setIsPushActive(isLocalNotificationEnabled());
         } else {
           setSession(null);
           setCurrentUser(null);
+          if (isGuestSessionActive()) {
+            setIsGuestMode(true);
+            await loadUserData('guest');
+          }
           setIsPushActive(isLocalNotificationEnabled());
         }
       } catch (err) {
@@ -200,12 +279,15 @@ export function App() {
 
       if (newUser) {
         setIsGuestMode(false);
+        setGuestSessionActive(false);
         await loadUserData(newUser.id);
         setIsPushActive(isLocalNotificationEnabled());
       } else {
         // تم تسجيل الخروج
-        setHabits([]);
-        setAllLogs({});
+        if (!isGuestSessionActive()) {
+          setHabits([]);
+          setAllLogs({});
+        }
         setIsPushActive(isLocalNotificationEnabled());
       }
     });
@@ -257,8 +339,9 @@ export function App() {
 
   // حفظ العادات محلياً وسحابياً للمستخدم الحالي
   const handleUpdateHabits = (newHabits: Habit[]) => {
+    const effectiveUserId = currentUser?.id || 'guest';
     setHabits(newHabits);
-    saveHabits(newHabits, currentUser?.id);
+    saveHabits(newHabits, effectiveUserId);
   };
 
   // تهيئة طابور العمليات غير المتصلة والمزامنة التلقائية فور عودة الشبكة
@@ -269,17 +352,19 @@ export function App() {
 
   // حفظ السجلات محلياً وسحابياً للمستخدم الحالي
   const handleUpdateLogs = (newLogs: Record<string, HabitLog>) => {
+    const effectiveUserId = currentUser?.id || 'guest';
     setAllLogs(newLogs);
-    saveLogs(newLogs, currentUser?.id);
+    saveLogs(newLogs, effectiveUserId);
   };
 
   // معالجة تسجيل الخروج السلس
   const handleSignOut = async () => {
     if (confirm('هل أنت متأكد من رغبتك في تسجيل الخروج؟')) {
+      setGuestSessionActive(false);
+      setIsGuestMode(false);
       await signOutUser();
       setSession(null);
       setCurrentUser(null);
-      setIsGuestMode(false);
       setHabits([]);
       setAllLogs({});
     }
@@ -288,21 +373,13 @@ export function App() {
   // بدء وضع الزائر للتجربة السريعة المحلية
   const handleContinueAsGuest = () => {
     setIsGuestMode(true);
-    const guestHabits = loadStoredHabits('guest');
-    if (guestHabits.length > 0) {
-      setHabits(guestHabits);
-      setAllLogs(loadStoredLogs('guest'));
-    } else {
-      setHabits(INITIAL_HABITS);
-      saveHabits(INITIAL_HABITS, 'guest');
-      const initLogs = generateInitialLogs(INITIAL_HABITS);
-      setAllLogs(initLogs);
-      saveLogs(initLogs, 'guest');
-    }
+    setGuestSessionActive(true);
+    loadUserData('guest');
   };
 
   // نجاح تسجيل الدخول من شاشة المصادقة
   const handleAuthSuccess = async (user: User, userSession: Session) => {
+    setGuestSessionActive(false);
     setCurrentUser(user);
     setSession(userSession);
     setIsGuestMode(false);
@@ -360,10 +437,20 @@ export function App() {
       updatedAt: new Date().toISOString(),
     };
 
-    const nextLogs = {
+    const nextLogs: Record<string, HabitLog> = {
       ...allLogs,
       [logId]: updatedLog,
     };
+
+    // دعم الربط مع المعرف النموذجي إذا كان المعرف يحتوي على لاحقة مستخدم
+    const baseMatch = habitId.match(/^(habit-\d+)/);
+    if (baseMatch && baseMatch[1] !== habitId) {
+      nextLogs[`${baseMatch[1]}_${date}`] = {
+        ...updatedLog,
+        id: `${baseMatch[1]}_${date}`,
+        habitId: baseMatch[1],
+      };
+    }
 
     handleUpdateLogs(nextLogs);
 
@@ -403,6 +490,15 @@ export function App() {
         updatedAt: new Date().toISOString(),
       };
       nextLogs[logId] = logEntry;
+
+      const baseMatch = h.id.match(/^(habit-\d+)/);
+      if (baseMatch && baseMatch[1] !== h.id) {
+        nextLogs[`${baseMatch[1]}_${todayStr}`] = {
+          ...logEntry,
+          id: `${baseMatch[1]}_${todayStr}`,
+          habitId: baseMatch[1],
+        };
+      }
 
       if (currentUser?.id) {
         executeOrQueueMutation(currentUser.id, 'UPSERT_LOG', logEntry);
@@ -665,12 +761,8 @@ export function App() {
           }}
           onResetData={handleResetData}
           onDataImported={() => {
-            if (currentUser) {
-              loadUserData(currentUser.id);
-            } else {
-              setHabits(loadStoredHabits('guest'));
-              setAllLogs(loadStoredLogs('guest'));
-            }
+            const effectiveUserId = currentUser?.id || 'guest';
+            loadUserData(effectiveUserId);
           }}
           currentUser={currentUser}
           onSignOut={handleSignOut}
